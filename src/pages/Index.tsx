@@ -1,12 +1,79 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect } from "react";
+import WeddingHeader from "@/components/WeddingHeader";
+import AddGuestForm from "@/components/AddGuestForm";
+import GuestTabs from "@/components/GuestTabs";
 
 const Index = () => {
+  useEffect(() => {
+    // Update document title for better SEO
+    document.title = "Gestione Invitati Matrimonio - Organizza il tuo giorno speciale";
+    
+    // Add meta description for SEO
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 
+        'App completa per la gestione degli invitati al matrimonio. Organizza, conferma e gestisci tutti gli invitati per il tuo giorno speciale con eleganza e facilità.'
+      );
+    }
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <WeddingHeader />
+      
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Hero section with add guest form */}
+        <section className="text-center space-y-6">
+          <div className="space-y-3 animate-fade-in-up">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              Crea la lista perfetta degli invitati
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Gestisci facilmente tutti gli invitati al tuo matrimonio. Aggiungi nomi, 
+              categorie, accompagnatori e note speciali per un evento indimenticabile.
+            </p>
+          </div>
+          
+          <div className="flex justify-center animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <AddGuestForm />
+          </div>
+        </section>
+
+        {/* Guest management section */}
+        <section className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+          <GuestTabs />
+        </section>
+
+        {/* Footer section with helpful tips */}
+        <footer className="text-center py-12 border-t border-primary/10 bg-elegant rounded-lg animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+          <div className="max-w-3xl mx-auto space-y-4">
+            <h3 className="text-xl font-semibold text-foreground mb-4">
+              Suggerimenti per organizzare il tuo matrimonio
+            </h3>
+            
+            <div className="grid md:grid-cols-3 gap-6 text-sm text-muted-foreground">
+              <div className="p-4 bg-white/60 rounded-lg shadow-soft">
+                <h4 className="font-semibold text-primary mb-2">📝 Pianifica in anticipo</h4>
+                <p>Inizia a creare la lista degli invitati almeno 3-4 mesi prima del matrimonio</p>
+              </div>
+              
+              <div className="p-4 bg-white/60 rounded-lg shadow-soft">
+                <h4 className="font-semibold text-primary mb-2">🍽️ Considera le allergie</h4>
+                <p>Raccogli informazioni su allergie e intolleranze per offrire un menù perfetto</p>
+              </div>
+              
+              <div className="p-4 bg-white/60 rounded-lg shadow-soft">
+                <h4 className="font-semibold text-primary mb-2">💌 Conferme tempestive</h4>
+                <p>Richiedi conferme di partecipazione almeno 2 settimane prima dell'evento</p>
+              </div>
+            </div>
+            
+            <p className="text-xs text-muted-foreground mt-8">
+              💝 Tutti i tuoi dati sono salvati localmente nel browser e rimangono privati
+            </p>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 };
