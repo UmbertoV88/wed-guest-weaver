@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companions: {
+        Row: {
+          allergies: string | null
+          created_at: string
+          guest_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          allergies?: string | null
+          created_at?: string
+          guest_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          allergies?: string | null
+          created_at?: string
+          guest_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companions_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          allergies: string | null
+          category: Database["public"]["Enums"]["guest_category"]
+          created_at: string
+          deleted_at: string | null
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["guest_status"]
+          updated_at: string
+        }
+        Insert: {
+          allergies?: string | null
+          category: Database["public"]["Enums"]["guest_category"]
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["guest_status"]
+          updated_at?: string
+        }
+        Update: {
+          allergies?: string | null
+          category?: Database["public"]["Enums"]["guest_category"]
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["guest_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +87,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      guest_category: "family-his" | "family-hers" | "friends" | "colleagues"
+      guest_status: "pending" | "confirmed" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +215,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      guest_category: ["family-his", "family-hers", "friends", "colleagues"],
+      guest_status: ["pending", "confirmed", "deleted"],
+    },
   },
 } as const
