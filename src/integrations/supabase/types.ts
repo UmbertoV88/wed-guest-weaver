@@ -10,72 +10,129 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      companions: {
+      invitati: {
         Row: {
-          allergies: string | null
-          created_at: string
-          guest_id: string
-          id: string
-          name: string
+          cognome: string | null
+          confermato: boolean | null
+          created_at: string | null
+          fascia_eta: Database["public"]["Enums"]["fascia_eta_enum"] | null
+          gruppo: string | null
+          id: number
+          is_principale: boolean
+          nome: string | null
+          nome_visualizzato: string
+          note: string | null
+          unita_invito_id: number
         }
         Insert: {
-          allergies?: string | null
-          created_at?: string
-          guest_id: string
-          id?: string
-          name: string
+          cognome?: string | null
+          confermato?: boolean | null
+          created_at?: string | null
+          fascia_eta?: Database["public"]["Enums"]["fascia_eta_enum"] | null
+          gruppo?: string | null
+          id?: number
+          is_principale?: boolean
+          nome?: string | null
+          nome_visualizzato: string
+          note?: string | null
+          unita_invito_id: number
         }
         Update: {
-          allergies?: string | null
-          created_at?: string
-          guest_id?: string
-          id?: string
-          name?: string
+          cognome?: string | null
+          confermato?: boolean | null
+          created_at?: string | null
+          fascia_eta?: Database["public"]["Enums"]["fascia_eta_enum"] | null
+          gruppo?: string | null
+          id?: number
+          is_principale?: boolean
+          nome?: string | null
+          nome_visualizzato?: string
+          note?: string | null
+          unita_invito_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "companions_guest_id_fkey"
-            columns: ["guest_id"]
+            foreignKeyName: "invitati_unita_invito_id_fkey"
+            columns: ["unita_invito_id"]
             isOneToOne: false
-            referencedRelation: "guests"
+            referencedRelation: "unita_invito"
             referencedColumns: ["id"]
           },
         ]
       }
-      guests: {
+      relazioni: {
         Row: {
-          allergies: string | null
-          category: Database["public"]["Enums"]["guest_category"]
-          created_at: string
-          deleted_at: string | null
-          id: string
-          name: string
-          status: Database["public"]["Enums"]["guest_status"]
-          updated_at: string
+          invitato_a_id: number
+          invitato_b_id: number
+          punteggio: number
+          tipo_relazione: string | null
         }
         Insert: {
-          allergies?: string | null
-          category: Database["public"]["Enums"]["guest_category"]
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          name: string
-          status?: Database["public"]["Enums"]["guest_status"]
-          updated_at?: string
+          invitato_a_id: number
+          invitato_b_id: number
+          punteggio: number
+          tipo_relazione?: string | null
         }
         Update: {
-          allergies?: string | null
-          category?: Database["public"]["Enums"]["guest_category"]
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          name?: string
-          status?: Database["public"]["Enums"]["guest_status"]
-          updated_at?: string
+          invitato_a_id?: number
+          invitato_b_id?: number
+          punteggio?: number
+          tipo_relazione?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relazioni_invitato_a_id_fkey"
+            columns: ["invitato_a_id"]
+            isOneToOne: false
+            referencedRelation: "invitati"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relazioni_invitato_b_id_fkey"
+            columns: ["invitato_b_id"]
+            isOneToOne: false
+            referencedRelation: "invitati"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tavoli: {
+        Row: {
+          capacita_max: number
+          created_at: string | null
+          id: number
+          nome_tavolo: string | null
+        }
+        Insert: {
+          capacita_max: number
+          created_at?: string | null
+          id?: number
+          nome_tavolo?: string | null
+        }
+        Update: {
+          capacita_max?: number
+          created_at?: string | null
+          id?: number
+          nome_tavolo?: string | null
+        }
+        Relationships: []
+      }
+      unita_invito: {
+        Row: {
+          created_at: string | null
+          id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
         }
         Relationships: []
       }
@@ -87,8 +144,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      guest_category: "family-his" | "family-hers" | "friends" | "colleagues"
-      guest_status: "pending" | "confirmed" | "deleted"
+      fascia_eta_enum: "Adulto" | "Ragazzo" | "Bambino"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -216,8 +272,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      guest_category: ["family-his", "family-hers", "friends", "colleagues"],
-      guest_status: ["pending", "confirmed", "deleted"],
+      fascia_eta_enum: ["Adulto", "Ragazzo", "Bambino"],
     },
   },
 } as const
