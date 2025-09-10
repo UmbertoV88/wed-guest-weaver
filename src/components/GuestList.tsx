@@ -38,39 +38,71 @@ const GuestList = ({ guests, type, emptyMessage }: GuestListProps) => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleConfirm = (guestId: string, guestName: string) => {
-    confirmGuest(guestId);
-    toast({
-      title: "Invitato confermato!",
-      description: `${guestName} è stato confermato per il matrimonio.`,
-    });
-  };
-
-  const handleRestore = (guestId: string, guestName: string) => {
-    restoreGuest(guestId);
-    toast({
-      title: "Invitato ripristinato!",
-      description: `${guestName} è stato ripristinato nell'elenco.`,
-    });
-  };
-
-  const handleDelete = (guestId: string, guestName: string) => {
-    deleteGuest(guestId);
-    toast({
-      title: "Invitato eliminato",
-      description: `${guestName} è stato spostato nel cestino.`,
-      variant: "destructive",
-    });
-  };
-
-  const handlePermanentDelete = (guestId: string, guestName: string) => {
-    if (window.confirm(`Sei sicuro di voler eliminare definitivamente ${guestName}? Questa azione non può essere annullata.`)) {
-      permanentlyDeleteGuest(guestId);
+  const handleConfirm = async (guestId: string, guestName: string) => {
+    try {
+      await confirmGuest(guestId);
       toast({
-        title: "Invitato eliminato definitivamente",
-        description: `${guestName} è stato rimosso permanentemente.`,
+        title: "Invitato confermato!",
+        description: `${guestName} è stato confermato per il matrimonio.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante la conferma.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleRestore = async (guestId: string, guestName: string) => {
+    try {
+      await restoreGuest(guestId);
+      toast({
+        title: "Invitato ripristinato!",
+        description: `${guestName} è stato ripristinato nell'elenco.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante il ripristino.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (guestId: string, guestName: string) => {
+    try {
+      await deleteGuest(guestId);
+      toast({
+        title: "Invitato eliminato",
+        description: `${guestName} è stato spostato nel cestino.`,
+        variant: "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'eliminazione.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePermanentDelete = async (guestId: string, guestName: string) => {
+    if (window.confirm(`Sei sicuro di voler eliminare definitivamente ${guestName}? Questa azione non può essere annullata.`)) {
+      try {
+        await permanentlyDeleteGuest(guestId);
+        toast({
+          title: "Invitato eliminato definitivamente",
+          description: `${guestName} è stato rimosso permanentemente.`,
+          variant: "destructive",
+        });
+      } catch (error) {
+        toast({
+          title: "Errore",
+          description: "Si è verificato un errore durante l'eliminazione permanente.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

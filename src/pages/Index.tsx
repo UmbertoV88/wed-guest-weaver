@@ -69,7 +69,7 @@ const Index = () => {
             </div>
             
             <p className="text-xs text-muted-foreground mt-8">
-              💝 Tutti i tuoi dati sono salvati localmente nel browser e rimangono privati
+              💝 Tutti i tuoi dati sono salvati in modo sicuro nel tuo database personale
             </p>
           </div>
         </footer>

@@ -112,10 +112,10 @@ const AddGuestForm = () => {
     setIsOpen(false);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateStep(4)) {
       try {
-        addGuest(formData);
+        await addGuest(formData);
         toast({
           title: "Invitato aggiunto!",
           description: `${formData.name} è stato aggiunto alla lista degli invitati.`,
