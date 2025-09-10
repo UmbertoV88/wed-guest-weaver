@@ -1,47 +1,97 @@
 import { useState, useEffect } from 'react';
-import { Guest, GuestFormData, GuestStats, GuestStatus } from '@/types/guest';
+import { Guest, GuestFormData, GuestStats, GuestStatus, GuestCategory } from '@/types/guest';
 import { supabase } from '@/integrations/supabase/client';
+
+// Utilities to map DB rows (invitati/unita_invito) to app Guest model
+const mapDbCategoryToGuestCategory = (value?: string | null): GuestCategory => {
+  const allowed: GuestCategory[] = ['family-his', 'family-hers', 'friends', 'colleagues'];
+  if (value && allowed.includes(value as GuestCategory)) return value as GuestCategory;
+  return 'friends';
+};
+
+const parseNote = (note?: string | null): { allergies?: string | null; deleted_at?: string | null } => {
+  if (!note) return {};
+  try {
+    const obj = JSON.parse(note);
+    if (obj && typeof obj === 'object') return obj;
+  } catch {}
+  // legacy simple format e.g. "deleted_at:2025-01-01T00:00:00Z"
+  if (note.includes('deleted_at:')) {
+    const ts = note.split('deleted_at:')[1]?.trim();
+    return { deleted_at: ts || undefined };
+  }
+  return { allergies: note };
+};
+
+const buildNote = (data: { allergies?: string | null; deleted_at?: string | null }) =>
+  JSON.stringify({ allergies: data.allergies ?? null, deleted_at: data.deleted_at ?? null });
 
 export const useGuests = () => {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load guests from Supabase and set up realtime subscription
+  // Load guests from Supabase (invitati grouped by unita_invito) and set up realtime subscription
   useEffect(() => {
     const loadGuests = async () => {
       try {
-        const { data: guestsData, error: guestsError } = await supabase
-          .from('guests')
-          .select(`
-            *,
-            companions:companions(*)
-          `)
+        // Fetch all invitati and group by unita_invito_id
+        const { data, error } = await supabase
+          .from('invitati')
+          .select('*')
           .order('created_at', { ascending: false });
 
-        if (guestsError) {
-          console.error('Error loading guests:', guestsError);
+        if (error) {
+          console.error('Error loading invitati:', error);
           return;
         }
 
-        const transformedGuests: Guest[] = (guestsData || []).map((guest: any) => ({
-          id: guest.id,
-          name: guest.name,
-          category: guest.category,
-          allergies: guest.allergies || undefined,
-          status: guest.status,
-          createdAt: new Date(guest.created_at),
-          updatedAt: new Date(guest.updated_at),
-          deletedAt: guest.deleted_at ? new Date(guest.deleted_at) : undefined,
-          companions: (guest.companions || []).map((comp: any) => ({
-            id: comp.id,
-            name: comp.name,
-            allergies: comp.allergies || undefined,
-          })),
-        }));
+        const byUnit = new Map<number, any[]>();
+        (data || []).forEach((row: any) => {
+          if (!row.unita_invito_id) return;
+          const arr = byUnit.get(row.unita_invito_id) || [];
+          arr.push(row);
+          byUnit.set(row.unita_invito_id, arr);
+        });
 
-        setGuests(transformedGuests);
-      } catch (error) {
-        console.error('Error loading guests:', error);
+        const transformed: Guest[] = Array.from(byUnit.entries()).map(([unitId, rows]) => {
+          const primary = (rows as any[]).find(r => r.is_principale) || (rows as any[])[0];
+          const primaryNote = parseNote(primary?.note);
+
+          const status: GuestStatus = primaryNote.deleted_at
+            ? 'deleted'
+            : primary?.confermato
+              ? 'confirmed'
+              : 'pending';
+
+          const companions = (rows as any[])
+            .filter(r => r.id !== primary.id)
+            .map(r => {
+              const n = parseNote(r.note);
+              return {
+                id: String(r.id),
+                name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
+                allergies: n.allergies || undefined,
+              };
+            });
+
+          const name = primary?.nome_visualizzato || [primary?.nome, primary?.cognome].filter(Boolean).join(' ') || 'Ospite';
+
+          return {
+            id: String(unitId), // use the unit id as Guest id in the app
+            name,
+            category: mapDbCategoryToGuestCategory(primary?.gruppo),
+            allergies: primaryNote.allergies || undefined,
+            status,
+            companions,
+            createdAt: new Date(primary?.created_at || Date.now()),
+            updatedAt: new Date(primary?.created_at || Date.now()),
+            deletedAt: primaryNote.deleted_at ? new Date(primaryNote.deleted_at) : undefined,
+          } as Guest;
+        });
+
+        setGuests(transformed);
+      } catch (err) {
+        console.error('Error loading guests (mapped from invitati):', err);
       } finally {
         setLoading(false);
       }
@@ -49,32 +99,13 @@ export const useGuests = () => {
 
     loadGuests();
 
-    // Set up realtime subscription
+    // Realtime: listen to invitati changes and reload
     const channel = supabase
-      .channel('guests_changes')
+      .channel('invitati_changes')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'guests'
-        },
-        () => {
-          // Reload guests when any change happens
-          loadGuests();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'companions'
-        },
-        () => {
-          // Reload guests when companions change
-          loadGuests();
-        }
+        { event: '*', schema: 'public', table: 'invitati' },
+        () => loadGuests()
       )
       .subscribe();
 
@@ -85,152 +116,179 @@ export const useGuests = () => {
 
   const addGuest = async (formData: GuestFormData): Promise<Guest> => {
     try {
-      // Insert guest
-      const { data: guestData, error: guestError } = await supabase
-        .from('guests')
-        .insert({
-          name: formData.name,
-          category: formData.category,
-          allergies: formData.allergies || null,
-        })
+      // 1) Create a new invitation unit
+      const { data: unit, error: unitError } = await supabase
+        .from('unita_invito')
+        .insert({})
         .select()
         .single();
 
-      if (guestError) throw guestError;
+      if (unitError) throw unitError;
 
-      // Insert companions if any
-      if (formData.companions.length > 0) {
-        const { error: companionsError } = await supabase
-          .from('companions')
-          .insert(
-            formData.companions.map(comp => ({
-              guest_id: guestData.id,
-              name: comp.name,
-              allergies: comp.allergies || null,
-            }))
-          );
+      // 2) Insert primary invitato + companions
+      const rows: any[] = [
+        {
+          unita_invito_id: unit.id,
+          is_principale: true,
+          nome_visualizzato: formData.name,
+          gruppo: formData.category,
+          confermato: false,
+          note: buildNote({ allergies: formData.allergies ?? null, deleted_at: null }),
+        },
+        ...formData.companions.map((c) => ({
+          unita_invito_id: unit.id,
+          is_principale: false,
+          nome_visualizzato: c.name,
+          gruppo: formData.category,
+          confermato: false,
+          note: buildNote({ allergies: c.allergies ?? null, deleted_at: null }),
+        })),
+      ];
 
-        if (companionsError) throw companionsError;
-      }
+      const { data: inserted, error: insertError } = await supabase
+        .from('invitati')
+        .insert(rows)
+        .select();
+
+      if (insertError) throw insertError;
+
+      const primary = (inserted || []).find((r: any) => r.is_principale) || (inserted || [])[0];
+      const companions = (inserted || [])
+        .filter((r: any) => !r.is_principale)
+        .map((r: any) => {
+          const n = parseNote(r.note);
+          return {
+            id: String(r.id),
+            name: r.nome_visualizzato,
+            allergies: n.allergies || undefined,
+          };
+        });
+
+      const note = parseNote(primary?.note);
 
       const newGuest: Guest = {
-        id: guestData.id,
-        name: guestData.name,
-        category: guestData.category,
-        allergies: guestData.allergies || undefined,
-        status: guestData.status,
-        createdAt: new Date(guestData.created_at),
-        updatedAt: new Date(guestData.updated_at),
-        deletedAt: guestData.deleted_at ? new Date(guestData.deleted_at) : undefined,
-        companions: formData.companions.map(comp => ({
-          id: `temp-${Date.now()}`, // Will be updated by realtime
-          name: comp.name,
-          allergies: comp.allergies || undefined,
-        })),
+        id: String(unit.id),
+        name: primary?.nome_visualizzato || formData.name,
+        category: mapDbCategoryToGuestCategory(primary?.gruppo || formData.category),
+        allergies: note.allergies || undefined,
+        status: 'pending',
+        companions,
+        createdAt: new Date(primary?.created_at || Date.now()),
+        updatedAt: new Date(primary?.created_at || Date.now()),
       };
 
-      // Update local state immediately
-      setGuests(prev => [newGuest, ...prev]);
+      // optimistic local update
+      setGuests((prev) => [newGuest, ...prev]);
       return newGuest;
     } catch (error) {
-      console.error('Error adding guest:', error);
+      console.error('Error adding guest (invitati):', error);
       throw error;
     }
   };
 
   const updateGuestStatus = async (guestId: string, status: GuestStatus) => {
     try {
-      const { error } = await supabase
-        .from('guests')
-        .update({ 
-          status,
-          deleted_at: status === 'deleted' ? new Date().toISOString() : null
-        })
-        .eq('id', guestId);
+      const unitId = parseInt(guestId, 10);
+      if (Number.isNaN(unitId)) throw new Error('Invalid guest id');
 
-      if (error) throw error;
+      if (status === 'confirmed' || status === 'pending') {
+        const { error } = await supabase
+          .from('invitati')
+          .update({ confermato: status === 'confirmed' })
+          .eq('unita_invito_id', unitId);
+        if (error) throw error;
 
-      // Update local state immediately
-      setGuests(prev => prev.map(guest => 
-        guest.id === guestId 
-          ? { 
-              ...guest, 
-              status, 
-              updatedAt: new Date(),
-              deletedAt: status === 'deleted' ? new Date() : undefined
-            }
-          : guest
-      ));
+        setGuests((prev) =>
+          prev.map((g) =>
+            g.id === guestId
+              ? { ...g, status, updatedAt: new Date(), deletedAt: undefined }
+              : g
+          )
+        );
+      } else if (status === 'deleted') {
+        const deletedAt = new Date().toISOString();
+        const { error } = await supabase
+          .from('invitati')
+          .update({ note: buildNote({ allergies: null, deleted_at: deletedAt }) })
+          .eq('unita_invito_id', unitId);
+        if (error) throw error;
+
+        setGuests((prev) =>
+          prev.map((g) =>
+            g.id === guestId
+              ? { ...g, status: 'deleted', updatedAt: new Date(), deletedAt: new Date() }
+              : g
+          )
+        );
+      }
     } catch (error) {
-      console.error('Error updating guest status:', error);
+      console.error('Error updating guest status (invitati):', error);
       throw error;
     }
   };
 
-  const deleteGuest = (guestId: string) => {
-    return updateGuestStatus(guestId, 'deleted');
+  const deleteGuest = (guestId: string) => updateGuestStatus(guestId, 'deleted');
+  const restoreGuest = async (guestId: string) => {
+    try {
+      const unitId = parseInt(guestId, 10);
+      const { error } = await supabase
+        .from('invitati')
+        .update({ note: buildNote({ allergies: null, deleted_at: null }) })
+        .eq('unita_invito_id', unitId);
+      if (error) throw error;
+      setGuests((prev) => prev.map((g) => (g.id === guestId ? { ...g, status: 'pending', deletedAt: undefined, updatedAt: new Date() } : g)));
+    } catch (error) {
+      console.error('Error restoring guest (invitati):', error);
+      throw error;
+    }
   };
-
-  const restoreGuest = (guestId: string) => {
-    return updateGuestStatus(guestId, 'pending');
-  };
-
-  const confirmGuest = (guestId: string) => {
-    return updateGuestStatus(guestId, 'confirmed');
-  };
+  const confirmGuest = (guestId: string) => updateGuestStatus(guestId, 'confirmed');
 
   const permanentlyDeleteGuest = async (guestId: string) => {
     try {
-      // Delete companions first
-      await supabase
-        .from('companions')
+      const unitId = parseInt(guestId, 10);
+      // Delete all invitati in the unit
+      const { error: invErr } = await supabase
+        .from('invitati')
         .delete()
-        .eq('guest_id', guestId);
+        .eq('unita_invito_id', unitId);
+      if (invErr) throw invErr;
+      // Optionally remove the unit itself
+      await supabase.from('unita_invito').delete().eq('id', unitId);
 
-      // Delete guest
-      const { error } = await supabase
-        .from('guests')
-        .delete()
-        .eq('id', guestId);
-
-      if (error) throw error;
-
-      // Update local state immediately
-      setGuests(prev => prev.filter(guest => guest.id !== guestId));
+      setGuests((prev) => prev.filter((g) => g.id !== guestId));
     } catch (error) {
-      console.error('Error permanently deleting guest:', error);
+      console.error('Error permanently deleting guest (invitati):', error);
       throw error;
     }
   };
 
-  const getGuestsByStatus = (status: GuestStatus) => {
-    return guests.filter(guest => guest.status === status);
-  };
+  const getGuestsByStatus = (status: GuestStatus) => guests.filter((g) => g.status === status);
 
   const getStats = (): GuestStats => {
     const total = guests.length;
-    const confirmed = guests.filter(g => g.status === 'confirmed').length;
-    const pending = guests.filter(g => g.status === 'pending').length;
-    const deleted = guests.filter(g => g.status === 'deleted').length;
+    const confirmed = guests.filter((g) => g.status === 'confirmed').length;
+    const pending = guests.filter((g) => g.status === 'pending').length;
+    const deleted = guests.filter((g) => g.status === 'deleted').length;
 
-    const byCategory = guests.reduce((acc, guest) => {
-      if (guest.status !== 'deleted') {
-        acc[guest.category] = (acc[guest.category] || 0) + 1;
+    const byCategory = guests.reduce((acc, g) => {
+      if (g.status !== 'deleted') {
+        acc[g.category] = (acc[g.category] || 0) + 1;
       }
       return acc;
     }, {} as Record<string, number>);
 
     const totalWithCompanions = guests
-      .filter(g => g.status !== 'deleted')
-      .reduce((sum, guest) => sum + 1 + guest.companions.length, 0);
+      .filter((g) => g.status !== 'deleted')
+      .reduce((sum, g) => sum + 1 + g.companions.length, 0);
 
     return {
       total,
       confirmed,
-      pending, 
+      pending,
       deleted,
       byCategory: byCategory as any,
-      totalWithCompanions
+      totalWithCompanions,
     };
   };
 
