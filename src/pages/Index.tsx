@@ -2,8 +2,17 @@ import { useEffect } from "react";
 import WeddingHeader from "@/components/WeddingHeader";
 import AddGuestForm from "@/components/AddGuestForm";
 import GuestTabs from "@/components/GuestTabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 const Index = () => {
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   useEffect(() => {
     // Update document title for better SEO
     document.title = "Gestione Invitati Matrimonio - Organizza il tuo giorno speciale";
@@ -19,7 +28,27 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <WeddingHeader />
+      <header className="bg-white/80 backdrop-blur-sm border-b border-rose-100 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <WeddingHeader />
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                Ciao, {user?.email}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Esci
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
       
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero section with add guest form */}

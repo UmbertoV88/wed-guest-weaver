@@ -64,6 +64,36 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          is_wedding_organizer: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_wedding_organizer?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_wedding_organizer?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       relazioni: {
         Row: {
           invitato_a_id: number
@@ -141,7 +171,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_wedding_organizer: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       fascia_eta_enum: "Adulto" | "Ragazzo" | "Bambino"
