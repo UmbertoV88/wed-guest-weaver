@@ -25,7 +25,7 @@ interface GuestListProps {
 const GuestList = ({ guests, type, emptyMessage }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const { confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest } = useGuests();
+  const { confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus } = useGuests();
   const { toast } = useToast();
 
   // Filter guests based on search and category
@@ -103,6 +103,22 @@ const GuestList = ({ guests, type, emptyMessage }: GuestListProps) => {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleConfirmedToending = async (guestId: string, guestName: string) => {
+    try {
+      await updateGuestStatus(guestId, 'pending');
+      toast({
+        title: "Invitato riportato a da confermare!",
+        description: `${guestName} è stato riportato nello stato da confermare.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'operazione.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -233,7 +249,7 @@ const GuestList = ({ guests, type, emptyMessage }: GuestListProps) => {
                   
                   {type === "confirmed" && (
                     <Button
-                      onClick={() => handleRestore(guest.id, guest.name)}
+                      onClick={() => handleConfirmedToending(guest.id, guest.name)}
                       size="sm"
                       variant="outline"
                     >
