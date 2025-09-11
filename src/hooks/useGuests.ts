@@ -67,10 +67,16 @@ export const useGuests = () => {
             .filter(r => r.id !== primary.id)
             .map(r => {
               const n = parseNote(r.note);
+              const companionStatus: GuestStatus = n.deleted_at
+                ? 'deleted'
+                : r.confermato
+                  ? 'confirmed'
+                  : 'pending';
               return {
                 id: String(r.id),
                 name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
                 allergies: n.allergies || undefined,
+                status: companionStatus,
               };
             });
 
@@ -153,16 +159,17 @@ export const useGuests = () => {
       if (insertError) throw insertError;
 
       const primary = (inserted || []).find((r: any) => r.is_principale) || (inserted || [])[0];
-      const companions = (inserted || [])
-        .filter((r: any) => !r.is_principale)
-        .map((r: any) => {
-          const n = parseNote(r.note);
-          return {
-            id: String(r.id),
-            name: r.nome_visualizzato,
-            allergies: n.allergies || undefined,
-          };
-        });
+        const companions = (inserted || [])
+          .filter((r: any) => !r.is_principale)
+          .map((r: any) => {
+            const n = parseNote(r.note);
+            return {
+              id: String(r.id),
+              name: r.nome_visualizzato,
+              allergies: n.allergies || undefined,
+              status: 'pending' as GuestStatus,
+            };
+          });
 
       const note = parseNote(primary?.note);
 
@@ -296,6 +303,132 @@ export const useGuests = () => {
     }
   };
 
+  // Individual companion management functions
+  const updateCompanionStatus = async (guestId: string, companionId: string, status: GuestStatus) => {
+    const companionDbId = parseInt(companionId, 10);
+    if (Number.isNaN(companionDbId)) throw new Error('Invalid companion id');
+
+    // Optimistic update
+    const previousState = guests.find(g => g.id === guestId);
+    setGuests((prev) =>
+      prev.map((g) =>
+        g.id === guestId
+          ? {
+              ...g,
+              companions: g.companions.map((c) =>
+                c.id === companionId
+                  ? { ...c, status, updatedAt: new Date() }
+                  : c
+              ),
+              updatedAt: new Date(),
+            }
+          : g
+      )
+    );
+
+    try {
+      if (status === 'confirmed' || status === 'pending') {
+        const { error } = await supabase
+          .from('invitati')
+          .update({ confermato: status === 'confirmed' })
+          .eq('id', companionDbId);
+        if (error) throw error;
+      } else if (status === 'deleted') {
+        const deletedAt = new Date().toISOString();
+        const { error } = await supabase
+          .from('invitati')
+          .update({ note: buildNote({ allergies: null, deleted_at: deletedAt }) })
+          .eq('id', companionDbId);
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error updating companion status:', error);
+      // Revert optimistic update on error
+      if (previousState) {
+        setGuests((prev) =>
+          prev.map((g) => g.id === guestId ? previousState : g)
+        );
+      }
+      throw error;
+    }
+  };
+
+  const confirmCompanion = (guestId: string, companionId: string) => 
+    updateCompanionStatus(guestId, companionId, 'confirmed');
+
+  const deleteCompanion = (guestId: string, companionId: string) => 
+    updateCompanionStatus(guestId, companionId, 'deleted');
+
+  const restoreCompanion = async (guestId: string, companionId: string) => {
+    const companionDbId = parseInt(companionId, 10);
+    const previousState = guests.find(g => g.id === guestId);
+    
+    // Optimistic update
+    setGuests((prev) =>
+      prev.map((g) =>
+        g.id === guestId
+          ? {
+              ...g,
+              companions: g.companions.map((c) =>
+                c.id === companionId
+                  ? { ...c, status: 'pending' as GuestStatus }
+                  : c
+              ),
+              updatedAt: new Date(),
+            }
+          : g
+      )
+    );
+
+    try {
+      const { error } = await supabase
+        .from('invitati')
+        .update({ note: buildNote({ allergies: null, deleted_at: null }) })
+        .eq('id', companionDbId);
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error restoring companion:', error);
+      // Revert optimistic update on error
+      if (previousState) {
+        setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
+      }
+      throw error;
+    }
+  };
+
+  const permanentlyDeleteCompanion = async (guestId: string, companionId: string) => {
+    const companionDbId = parseInt(companionId, 10);
+    const previousState = guests.find(g => g.id === guestId);
+    
+    // Optimistic update - remove companion from UI
+    setGuests((prev) =>
+      prev.map((g) =>
+        g.id === guestId
+          ? {
+              ...g,
+              companions: g.companions.filter((c) => c.id !== companionId),
+              updatedAt: new Date(),
+            }
+          : g
+      )
+    );
+
+    try {
+      const { error } = await supabase
+        .from('invitati')
+        .delete()
+        .eq('id', companionDbId);
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error permanently deleting companion:', error);
+      // Revert optimistic update on error
+      if (previousState) {
+        setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
+      }
+      throw error;
+    }
+  };
+
   const getGuestsByStatus = (status: GuestStatus) => guests.filter((g) => g.status === status);
 
   const getStats = (): GuestStats => {
@@ -306,16 +439,22 @@ export const useGuests = () => {
 
     const byCategory = guests.reduce((acc, g) => {
       if (g.status !== 'deleted') {
-        // Count main guest + companions
-        const totalInCategory = 1 + g.companions.length;
-        acc[g.category] = (acc[g.category] || 0) + totalInCategory;
+        // Count main guest only if not deleted
+        acc[g.category] = (acc[g.category] || 0) + 1;
+        
+        // Count companions only if not deleted
+        const activeCompanions = g.companions.filter(c => c.status !== 'deleted').length;
+        acc[g.category] = acc[g.category] + activeCompanions;
       }
       return acc;
     }, {} as Record<string, number>);
 
     const totalWithCompanions = guests
       .filter((g) => g.status !== 'deleted')
-      .reduce((sum, g) => sum + 1 + g.companions.length, 0);
+      .reduce((sum, g) => {
+        const activeCompanions = g.companions.filter(c => c.status !== 'deleted').length;
+        return sum + 1 + activeCompanions;
+      }, 0);
 
     return {
       total,
@@ -336,6 +475,11 @@ export const useGuests = () => {
     restoreGuest,
     confirmGuest,
     permanentlyDeleteGuest,
+    updateCompanionStatus,
+    confirmCompanion,
+    deleteCompanion,
+    restoreCompanion,
+    permanentlyDeleteCompanion,
     getGuestsByStatus,
     getStats,
   };

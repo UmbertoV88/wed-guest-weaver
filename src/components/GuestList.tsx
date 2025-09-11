@@ -24,9 +24,13 @@ interface GuestListProps {
   deleteGuest: (guestId: string) => Promise<any>;
   permanentlyDeleteGuest: (guestId: string) => Promise<any>;
   updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<any>;
+  confirmCompanion: (guestId: string, companionId: string) => Promise<any>;
+  deleteCompanion: (guestId: string, companionId: string) => Promise<any>;
+  restoreCompanion: (guestId: string, companionId: string) => Promise<any>;
+  permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
@@ -203,12 +207,88 @@ const GuestList = ({ guests, type, emptyMessage, confirmGuest, restoreGuest, del
                   
                   <div className="space-y-2 text-sm">
                     {guest.companions.length > 0 && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>
-                          {guest.companions.length} accompagnator{guest.companions.length === 1 ? 'e' : 'i'}: {' '}
-                          {guest.companions.map(comp => comp.name).join(', ')}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium">
+                          <Users className="w-3 h-3" />
+                          <span>Accompagnatori:</span>
+                        </div>
+                        <div className="pl-5 space-y-2">
+                          {guest.companions.map(companion => (
+                            <div key={companion.id} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm">{companion.name}</span>
+                                <Badge 
+                                  variant={
+                                    companion.status === 'confirmed' ? 'default' : 
+                                    companion.status === 'pending' ? 'secondary' : 
+                                    'destructive'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {companion.status === 'confirmed' ? 'Confermato' : 
+                                   companion.status === 'pending' ? 'Da confermare' : 
+                                   'Eliminato'}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {type === "pending" && companion.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      onClick={() => confirmCompanion(guest.id, companion.id)}
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
+                                    >
+                                      <UserCheck className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => deleteCompanion(guest.id, companion.id)}
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </>
+                                )}
+                                {type === "confirmed" && companion.status === 'confirmed' && (
+                                  <Button
+                                    onClick={() => deleteCompanion(guest.id, companion.id)}
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
+                                {type === "deleted" && companion.status === 'deleted' && (
+                                  <>
+                                    <Button
+                                      onClick={() => restoreCompanion(guest.id, companion.id)}
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                                    >
+                                      <RotateCcw className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => {
+                                        if (window.confirm(`Eliminare definitivamente ${companion.name}?`)) {
+                                          permanentlyDeleteCompanion(guest.id, companion.id);
+                                        }
+                                      }}
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                     

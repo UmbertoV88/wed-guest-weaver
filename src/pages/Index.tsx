@@ -9,7 +9,7 @@ import { LogOut } from "lucide-react";
 
 const Index = () => {
   const { signOut, user } = useAuth();
-  const { addGuest, getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus } = useGuests();
+  const { addGuest, getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion } = useGuests();
 
   const handleSignOut = async () => {
     await signOut();
@@ -72,15 +72,19 @@ const Index = () => {
 
         {/* Guest management section */}
         <section className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <GuestTabs 
-            getGuestsByStatus={getGuestsByStatus}
-            getStats={getStats}
-            confirmGuest={confirmGuest}
-            restoreGuest={restoreGuest}
-            deleteGuest={deleteGuest}
-            permanentlyDeleteGuest={permanentlyDeleteGuest}
-            updateGuestStatus={updateGuestStatus}
-          />
+            <GuestTabs 
+              getGuestsByStatus={getGuestsByStatus}
+              getStats={getStats}
+              confirmGuest={confirmGuest}
+              restoreGuest={restoreGuest}
+              deleteGuest={deleteGuest}
+              permanentlyDeleteGuest={permanentlyDeleteGuest}
+              updateGuestStatus={updateGuestStatus}
+              confirmCompanion={confirmCompanion}
+              deleteCompanion={deleteCompanion}
+              restoreCompanion={restoreCompanion}
+              permanentlyDeleteCompanion={permanentlyDeleteCompanion}
+            />
         </section>
 
         {/* Footer section with helpful tips */}

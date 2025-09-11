@@ -20,9 +20,13 @@ interface GuestTabsProps {
   deleteGuest: (guestId: string) => Promise<void>;
   permanentlyDeleteGuest: (guestId: string) => Promise<void>;
   updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<void>;
+  confirmCompanion: (guestId: string, companionId: string) => Promise<void>;
+  deleteCompanion: (guestId: string, companionId: string) => Promise<void>;
+  restoreCompanion: (guestId: string, companionId: string) => Promise<void>;
+  permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<void>;
 }
 
-const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus }: GuestTabsProps) => {
+const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
@@ -81,6 +85,10 @@ const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, de
             deleteGuest={deleteGuest}
             permanentlyDeleteGuest={permanentlyDeleteGuest}
             updateGuestStatus={updateGuestStatus}
+            confirmCompanion={confirmCompanion}
+            deleteCompanion={deleteCompanion}
+            restoreCompanion={restoreCompanion}
+            permanentlyDeleteCompanion={permanentlyDeleteCompanion}
           />
         </TabsContent>
 
@@ -94,6 +102,10 @@ const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, de
             deleteGuest={deleteGuest}
             permanentlyDeleteGuest={permanentlyDeleteGuest}
             updateGuestStatus={updateGuestStatus}
+            confirmCompanion={confirmCompanion}
+            deleteCompanion={deleteCompanion}
+            restoreCompanion={restoreCompanion}
+            permanentlyDeleteCompanion={permanentlyDeleteCompanion}
           />
         </TabsContent>
 
@@ -107,6 +119,10 @@ const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, de
             deleteGuest={deleteGuest}
             permanentlyDeleteGuest={permanentlyDeleteGuest}
             updateGuestStatus={updateGuestStatus}
+            confirmCompanion={confirmCompanion}
+            deleteCompanion={deleteCompanion}
+            restoreCompanion={restoreCompanion}
+            permanentlyDeleteCompanion={permanentlyDeleteCompanion}
           />
         </TabsContent>
       </Tabs>

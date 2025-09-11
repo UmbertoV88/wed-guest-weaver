@@ -16,6 +16,7 @@ export interface Companion {
   id: string;
   name: string;
   allergies?: string;
+  status: GuestStatus;
 }
 
 export type GuestCategory = 
