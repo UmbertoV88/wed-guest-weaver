@@ -102,6 +102,8 @@ export const useGuests = () => {
             const isForPrimary = primaryStatus === status;
             const companionsWithSameStatus = companionsByStatus[status] || [];
             
+            console.log(`Processing status: ${status}, isForPrimary: ${isForPrimary}, companionsWithSameStatus:`, companionsWithSameStatus);
+            
             // Only create entry if there are people with this status
             if (isForPrimary || companionsWithSameStatus.length > 0) {
               const baseGuest = {
@@ -137,6 +139,7 @@ export const useGuests = () => {
                 } as Guest);
               } else if (companionsWithSameStatus.length > 0) {
                 // Companions alone (primary has different status)
+                console.log(`Creating companion-only entry for status ${status}:`, companionsWithSameStatus);
                 if (companionsWithSameStatus.length === 1) {
                   // Single companion
                   const comp = companionsWithSameStatus[0];
