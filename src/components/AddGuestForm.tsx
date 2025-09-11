@@ -15,11 +15,14 @@ import {
   Check,
   X
 } from "lucide-react";
-import { GuestFormData, CATEGORY_LABELS, GuestCategory } from "@/types/guest";
-import { useGuests } from "@/hooks/useGuests";
+import { GuestFormData, CATEGORY_LABELS, GuestCategory, Guest } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 
-const AddGuestForm = () => {
+interface AddGuestFormProps {
+  addGuest: (formData: GuestFormData) => Promise<Guest>;
+}
+
+const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<GuestFormData>({
@@ -31,7 +34,6 @@ const AddGuestForm = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { addGuest } = useGuests();
   const { toast } = useToast();
 
   const totalSteps = 5;

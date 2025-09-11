@@ -3,11 +3,13 @@ import WeddingHeader from "@/components/WeddingHeader";
 import AddGuestForm from "@/components/AddGuestForm";
 import GuestTabs from "@/components/GuestTabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGuests } from "@/hooks/useGuests";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 const Index = () => {
   const { signOut, user } = useAuth();
+  const { addGuest, getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus } = useGuests();
 
   const handleSignOut = async () => {
     await signOut();
@@ -64,13 +66,21 @@ const Index = () => {
           </div>
           
           <div className="flex justify-center animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <AddGuestForm />
+            <AddGuestForm addGuest={addGuest} />
           </div>
         </section>
 
         {/* Guest management section */}
         <section className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <GuestTabs />
+          <GuestTabs 
+            getGuestsByStatus={getGuestsByStatus}
+            getStats={getStats}
+            confirmGuest={confirmGuest}
+            restoreGuest={restoreGuest}
+            deleteGuest={deleteGuest}
+            permanentlyDeleteGuest={permanentlyDeleteGuest}
+            updateGuestStatus={updateGuestStatus}
+          />
         </section>
 
         {/* Footer section with helpful tips */}

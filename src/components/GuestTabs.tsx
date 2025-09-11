@@ -1,12 +1,28 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle, Trash2 } from "lucide-react";
-import { useGuests } from "@/hooks/useGuests";
+import { Guest, GuestStatus } from "@/types/guest";
 import GuestList from "./GuestList";
 import GuestStats from "./GuestStats";
 
-const GuestTabs = () => {
-  const { getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus } = useGuests();
+interface GuestTabsProps {
+  getGuestsByStatus: (status: GuestStatus) => Guest[];
+  getStats: () => {
+    total: number;
+    totalWithCompanions: number;
+    confirmed: number;
+    pending: number;
+    deleted: number;
+    byCategory: Record<string, number>;
+  };
+  confirmGuest: (guestId: string) => Promise<void>;
+  restoreGuest: (guestId: string) => Promise<void>;
+  deleteGuest: (guestId: string) => Promise<void>;
+  permanentlyDeleteGuest: (guestId: string) => Promise<void>;
+  updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<void>;
+}
+
+const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus }: GuestTabsProps) => {
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
