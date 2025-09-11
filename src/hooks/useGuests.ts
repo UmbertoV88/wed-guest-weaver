@@ -187,24 +187,38 @@ export const useGuests = () => {
   };
 
   const updateGuestStatus = async (guestId: string, status: GuestStatus) => {
-    try {
-      const unitId = parseInt(guestId, 10);
-      if (Number.isNaN(unitId)) throw new Error('Invalid guest id');
+    const unitId = parseInt(guestId, 10);
+    if (Number.isNaN(unitId)) throw new Error('Invalid guest id');
 
+    // Optimistic update - update UI immediately
+    const previousState = guests.find(g => g.id === guestId);
+    
+    if (status === 'confirmed' || status === 'pending') {
+      setGuests((prev) =>
+        prev.map((g) =>
+          g.id === guestId
+            ? { ...g, status, updatedAt: new Date(), deletedAt: undefined }
+            : g
+        )
+      );
+    } else if (status === 'deleted') {
+      const deletedAt = new Date();
+      setGuests((prev) =>
+        prev.map((g) =>
+          g.id === guestId
+            ? { ...g, status: 'deleted', updatedAt: new Date(), deletedAt }
+            : g
+        )
+      );
+    }
+
+    try {
       if (status === 'confirmed' || status === 'pending') {
         const { error } = await supabase
           .from('invitati')
           .update({ confermato: status === 'confirmed' })
           .eq('unita_invito_id', unitId);
         if (error) throw error;
-
-        setGuests((prev) =>
-          prev.map((g) =>
-            g.id === guestId
-              ? { ...g, status, updatedAt: new Date(), deletedAt: undefined }
-              : g
-          )
-        );
       } else if (status === 'deleted') {
         const deletedAt = new Date().toISOString();
         const { error } = await supabase
@@ -212,41 +226,58 @@ export const useGuests = () => {
           .update({ note: buildNote({ allergies: null, deleted_at: deletedAt }) })
           .eq('unita_invito_id', unitId);
         if (error) throw error;
-
-        setGuests((prev) =>
-          prev.map((g) =>
-            g.id === guestId
-              ? { ...g, status: 'deleted', updatedAt: new Date(), deletedAt: new Date() }
-              : g
-          )
-        );
       }
     } catch (error) {
       console.error('Error updating guest status (invitati):', error);
+      // Revert optimistic update on error
+      if (previousState) {
+        setGuests((prev) =>
+          prev.map((g) => g.id === guestId ? previousState : g)
+        );
+      }
       throw error;
     }
   };
 
   const deleteGuest = (guestId: string) => updateGuestStatus(guestId, 'deleted');
   const restoreGuest = async (guestId: string) => {
+    const unitId = parseInt(guestId, 10);
+    const previousState = guests.find(g => g.id === guestId);
+    
+    // Optimistic update - update UI immediately
+    setGuests((prev) => 
+      prev.map((g) => 
+        g.id === guestId 
+          ? { ...g, status: 'pending' as GuestStatus, deletedAt: undefined, updatedAt: new Date() } 
+          : g
+      )
+    );
+
     try {
-      const unitId = parseInt(guestId, 10);
       const { error } = await supabase
         .from('invitati')
         .update({ note: buildNote({ allergies: null, deleted_at: null }) })
         .eq('unita_invito_id', unitId);
       if (error) throw error;
-      setGuests((prev) => prev.map((g) => (g.id === guestId ? { ...g, status: 'pending', deletedAt: undefined, updatedAt: new Date() } : g)));
     } catch (error) {
       console.error('Error restoring guest (invitati):', error);
+      // Revert optimistic update on error
+      if (previousState) {
+        setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
+      }
       throw error;
     }
   };
   const confirmGuest = (guestId: string) => updateGuestStatus(guestId, 'confirmed');
 
   const permanentlyDeleteGuest = async (guestId: string) => {
+    const unitId = parseInt(guestId, 10);
+    const previousState = guests.find(g => g.id === guestId);
+    
+    // Optimistic update - remove from UI immediately
+    setGuests((prev) => prev.filter((g) => g.id !== guestId));
+
     try {
-      const unitId = parseInt(guestId, 10);
       // Delete all invitati in the unit
       const { error: invErr } = await supabase
         .from('invitati')
@@ -255,10 +286,12 @@ export const useGuests = () => {
       if (invErr) throw invErr;
       // Optionally remove the unit itself
       await supabase.from('unita_invito').delete().eq('id', unitId);
-
-      setGuests((prev) => prev.filter((g) => g.id !== guestId));
     } catch (error) {
       console.error('Error permanently deleting guest (invitati):', error);
+      // Revert optimistic update on error
+      if (previousState) {
+        setGuests((prev) => [...prev, previousState]);
+      }
       throw error;
     }
   };
