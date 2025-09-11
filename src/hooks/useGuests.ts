@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Guest, GuestFormData, GuestStats, GuestStatus, GuestCategory } from '@/types/guest';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Utilities to map DB rows (invitati/unita_invito) to app Guest model
 const mapDbCategoryToGuestCategory = (value?: string | null): GuestCategory => {
@@ -29,6 +30,7 @@ const buildNote = (data: { allergies?: string | null; deleted_at?: string | null
 export const useGuests = () => {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   // Load guests from Supabase (invitati grouped by unita_invito) and set up realtime subscription
   useEffect(() => {
@@ -121,11 +123,13 @@ export const useGuests = () => {
   }, []);
 
   const addGuest = async (formData: GuestFormData): Promise<Guest> => {
+    if (!user) throw new Error('User not authenticated');
+    
     try {
       // 1) Create a new invitation unit
       const { data: unit, error: unitError } = await supabase
         .from('unita_invito')
-        .insert({})
+        .insert({ user_id: user.id })
         .select()
         .single();
 
@@ -135,6 +139,7 @@ export const useGuests = () => {
       const rows: any[] = [
         {
           unita_invito_id: unit.id,
+          user_id: user.id,
           is_principale: true,
           nome_visualizzato: formData.name,
           gruppo: formData.category,
@@ -143,6 +148,7 @@ export const useGuests = () => {
         },
         ...formData.companions.map((c) => ({
           unita_invito_id: unit.id,
+          user_id: user.id,
           is_principale: false,
           nome_visualizzato: c.name,
           gruppo: formData.category,

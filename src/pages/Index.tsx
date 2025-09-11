@@ -1,15 +1,33 @@
 import { useEffect } from "react";
-import WeddingHeader from "@/components/WeddingHeader";
+import { LogOut, Crown } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useGuests } from "@/hooks/useGuests";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import AddGuestForm from "@/components/AddGuestForm";
 import GuestTabs from "@/components/GuestTabs";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGuests } from "@/hooks/useGuests";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import WeddingHeader from "@/components/WeddingHeader";
 
 const Index = () => {
-  const { signOut, user } = useAuth();
-  const { addGuest, getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion } = useGuests();
+  const { user, signOut } = useAuth();
+  const { profile, isWeddingOrganizer } = useProfile();
+  const { toast } = useToast();
+  const { 
+    addGuest, 
+    getGuestsByStatus, 
+    getStats, 
+    confirmGuest, 
+    restoreGuest, 
+    deleteGuest, 
+    permanentlyDeleteGuest, 
+    updateGuestStatus, 
+    confirmCompanion, 
+    deleteCompanion, 
+    restoreCompanion, 
+    permanentlyDeleteCompanion 
+  } = useGuests();
 
   const handleSignOut = async () => {
     await signOut();
@@ -35,8 +53,14 @@ const Index = () => {
           <div className="flex justify-between items-center">
             <WeddingHeader />
             <div className="flex items-center gap-4">
+              {isWeddingOrganizer && (
+                <Badge variant="secondary" className="flex items-center gap-1 bg-gradient-to-r from-gold/20 to-primary/20 text-primary-deep border-primary/30">
+                  <Crown className="w-3 h-3" />
+                  Wedding Organizer
+                </Badge>
+              )}
               <span className="text-sm text-gray-600">
-                Ciao, {user?.email}
+                Ciao, {profile?.full_name || user?.email}
               </span>
               <Button
                 variant="outline"
@@ -57,11 +81,13 @@ const Index = () => {
         <section className="text-center space-y-6">
           <div className="space-y-3 animate-fade-in-up">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Crea la lista perfetta degli invitati
+              {isWeddingOrganizer ? 'Gestisci tutti i matrimoni' : 'Crea la lista perfetta degli invitati'}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Gestisci facilmente tutti gli invitati al tuo matrimonio. Aggiungi nomi, 
-              categorie, accompagnatori e note speciali per un evento indimenticabile.
+              {isWeddingOrganizer 
+                ? 'Come wedding organizer, puoi gestire gli invitati di tutte le coppie che organizzi.'
+                : 'Gestisci facilmente tutti gli invitati al tuo matrimonio. Aggiungi nomi, categorie, accompagnatori e note speciali per un evento indimenticabile.'
+              }
             </p>
           </div>
           
@@ -111,7 +137,7 @@ const Index = () => {
               </div>
             </div>
             
-            <p className="text-xs text-muted-foreground mt-8">
+            <p className="text-xs text-muted-foregor-mt-8">
               💝 Tutti i tuoi dati sono salvati in modo sicuro nel tuo database personale
             </p>
           </div>
