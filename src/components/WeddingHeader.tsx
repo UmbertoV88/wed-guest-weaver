@@ -3,7 +3,7 @@ import { Heart, Calendar } from "lucide-react";
 const WeddingHeader = () => {
   return (
     <header className="bg-elegant border-b border-primary/10 shadow-romantic">
-      <div className="container mx-auto px-4 py-6">
+      <div className="w-full px-4 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 animate-fade-in-up">
             <div className="relative">
