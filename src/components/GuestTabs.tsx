@@ -52,7 +52,7 @@ const GuestTabs = () => {
         </TabsList>
 
         <div className="mt-6">
-          <GuestStats />
+          <GuestStats stats={stats} />
         </div>
 
         <TabsContent value="pending" className="mt-6 animate-fade-in-up">

@@ -1,11 +1,19 @@
 import { Card } from "@/components/ui/card";
 import { Users, UserCheck, Calendar, Crown } from "lucide-react";
-import { useGuests } from "@/hooks/useGuests";
 import { CATEGORY_LABELS } from "@/types/guest";
 
-const GuestStats = () => {
-  const { getStats } = useGuests();
-  const stats = getStats();
+interface GuestStatsProps {
+  stats: {
+    total: number;
+    totalWithCompanions: number;
+    confirmed: number;
+    pending: number;
+    deleted: number;
+    byCategory: Record<string, number>;
+  };
+}
+
+const GuestStats = ({ stats }: GuestStatsProps) => {
 
   const statCards = [
     {
