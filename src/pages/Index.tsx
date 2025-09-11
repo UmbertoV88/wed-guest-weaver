@@ -22,6 +22,7 @@ const Index = () => {
     companionLoading,
     confirmGuest, 
     confirmGuestOnly,
+    revertGuestOnly,
     confirmGuestAndAllCompanions,
     restoreGuest, 
     deleteGuest, 
@@ -114,6 +115,7 @@ const Index = () => {
               companionLoading={companionLoading}
               confirmGuest={confirmGuest}
               confirmGuestOnly={confirmGuestOnly}
+              revertGuestOnly={revertGuestOnly}
               confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
               restoreGuest={restoreGuest}
               deleteGuest={deleteGuest}

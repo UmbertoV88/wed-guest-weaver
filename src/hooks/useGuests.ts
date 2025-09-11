@@ -394,6 +394,44 @@ export const useGuests = () => {
     }
   };
 
+  const revertGuestOnly = async (guestId: string) => {
+    const unitId = parseInt(guestId.split('_')[0], 10);
+    if (Number.isNaN(unitId)) throw new Error('Invalid guest id');
+
+    const guest = guests.find(g => g.id === guestId);
+    if (!guest) throw new Error('Guest not found');
+
+    // Optimistic update - update only the main guest in UI
+    setGuests((prev) =>
+      prev.map((g) =>
+        g.id === guestId
+          ? { ...g, status: 'pending' as GuestStatus, updatedAt: new Date(), deletedAt: undefined }
+          : g
+      )
+    );
+
+    try {
+      // Update only the main guest (is_principale = true) to pending
+      const { error } = await supabase
+        .from('invitati')
+        .update({ confermato: false })
+        .eq('unita_invito_id', unitId)
+        .eq('is_principale', true);
+      if (error) throw error;
+      
+      // Reload to get the latest state
+      loadGuests();
+    } catch (error) {
+      console.error('Error reverting main guest only:', error);
+      // Revert optimistic update on error
+      const previousState = guests.find(g => g.id === guestId);
+      if (previousState) {
+        setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
+      }
+      throw error;
+    }
+  };
+
   const confirmGuestAndAllCompanions = async (guestId: string) => {
     const guest = guests.find(g => g.id === guestId);
     if (!guest) throw new Error('Guest not found');
@@ -575,6 +613,7 @@ export const useGuests = () => {
     restoreGuest,
     confirmGuest,
     confirmGuestOnly,
+    revertGuestOnly,
     confirmGuestAndAllCompanions,
     permanentlyDeleteGuest,
     updateCompanionStatus,

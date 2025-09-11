@@ -18,6 +18,7 @@ interface GuestTabsProps {
   companionLoading?: string | null;
   confirmGuest: (guestId: string) => Promise<void>;
   confirmGuestOnly: (guestId: string) => Promise<void>;
+  revertGuestOnly: (guestId: string) => Promise<void>;
   confirmGuestAndAllCompanions: (guestId: string) => Promise<void>;
   restoreGuest: (guestId: string) => Promise<void>;
   deleteGuest: (guestId: string) => Promise<void>;
@@ -30,7 +31,7 @@ interface GuestTabsProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<void>;
 }
 
-const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, confirmGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
+const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
@@ -87,6 +88,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             confirmGuestOnly={confirmGuestOnly}
+            revertGuestOnly={revertGuestOnly}
             confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
@@ -108,6 +110,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             confirmGuestOnly={confirmGuestOnly}
+            revertGuestOnly={revertGuestOnly}
             confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
@@ -129,6 +132,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             confirmGuestOnly={confirmGuestOnly}
+            revertGuestOnly={revertGuestOnly}
             confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}

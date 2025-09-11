@@ -22,6 +22,7 @@ interface GuestListProps {
   companionLoading?: string | null;
   confirmGuest: (guestId: string) => Promise<any>;
   confirmGuestOnly: (guestId: string) => Promise<any>;
+  revertGuestOnly: (guestId: string) => Promise<any>;
   confirmGuestAndAllCompanions: (guestId: string) => Promise<any>;
   restoreGuest: (guestId: string) => Promise<any>;
   deleteGuest: (guestId: string) => Promise<any>;
@@ -34,7 +35,7 @@ interface GuestListProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
@@ -114,6 +115,22 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleRevertMainOnly = async (guestId: string, guestName: string) => {
+    try {
+      await revertGuestOnly(guestId);
+      toast({
+        title: "Invitato riportato a da confermare!",
+        description: `${guestName} è stato riportato nello stato da confermare (solo l'invitato principale).`,
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'operazione.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -249,7 +266,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                       {guest.status === 'confirmed' && (
                         <>
                           <Button
-                            onClick={() => handleConfirmedToending(guest.id, guest.name)}
+                            onClick={() => handleRevertMainOnly(guest.id, guest.name)}
                             size="sm"
                             variant="ghost"
                             className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
