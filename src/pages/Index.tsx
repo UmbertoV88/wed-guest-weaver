@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import AddGuestForm from "@/components/AddGuestForm";
 import GuestTabs from "@/components/GuestTabs";
 import WeddingHeader from "@/components/WeddingHeader";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -30,6 +31,11 @@ const Index = () => {
   } = useGuests();
 
   const handleSignOut = async () => {
+    try {
+      // Clear local session immediately to update UI/auth state
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch {}
+    // Attempt global sign-out (token revoke) via context, which also redirects
     await signOut();
   };
 
