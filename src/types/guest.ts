@@ -10,6 +10,7 @@ export interface Guest {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
+  unitId?: string; // Reference to original invitation unit
 }
 
 export interface Companion {

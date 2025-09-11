@@ -55,11 +55,13 @@ export const useGuests = () => {
           byUnit.set(row.unita_invito_id, arr);
         });
 
-        const transformed: Guest[] = Array.from(byUnit.entries()).map(([unitId, rows]) => {
+        const transformed: Guest[] = [];
+        
+        Array.from(byUnit.entries()).forEach(([unitId, rows]) => {
           const primary = (rows as any[]).find(r => r.is_principale) || (rows as any[])[0];
           const primaryNote = parseNote(primary?.note);
 
-          const status: GuestStatus = primaryNote.deleted_at
+          const primaryStatus: GuestStatus = primaryNote.deleted_at
             ? 'deleted'
             : primary?.confermato
               ? 'confirmed'
@@ -79,22 +81,89 @@ export const useGuests = () => {
                 name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
                 allergies: n.allergies || undefined,
                 status: companionStatus,
+                dbRow: r, // Keep reference to original data
               };
             });
 
-          const name = primary?.nome_visualizzato || [primary?.nome, primary?.cognome].filter(Boolean).join(' ') || 'Ospite';
+          const primaryName = primary?.nome_visualizzato || [primary?.nome, primary?.cognome].filter(Boolean).join(' ') || 'Ospite';
+          const category = mapDbCategoryToGuestCategory(primary?.gruppo);
 
-          return {
-            id: String(unitId), // use the unit id as Guest id in the app
-            name,
-            category: mapDbCategoryToGuestCategory(primary?.gruppo),
-            allergies: primaryNote.allergies || undefined,
-            status,
-            companions,
-            createdAt: new Date(primary?.created_at || Date.now()),
-            updatedAt: new Date(primary?.created_at || Date.now()),
-            deletedAt: primaryNote.deleted_at ? new Date(primaryNote.deleted_at) : undefined,
-          } as Guest;
+          // Group companions by status
+          const companionsByStatus = companions.reduce((acc, comp) => {
+            if (!acc[comp.status]) acc[comp.status] = [];
+            acc[comp.status].push(comp);
+            return acc;
+          }, {} as Record<GuestStatus, any[]>);
+
+          // Create entries based on status combinations
+          const statusesPresent = new Set([primaryStatus, ...companions.map(c => c.status)]);
+          
+          statusesPresent.forEach(status => {
+            const isForPrimary = primaryStatus === status;
+            const companionsWithSameStatus = companionsByStatus[status] || [];
+            
+            // Only create entry if there are people with this status
+            if (isForPrimary || companionsWithSameStatus.length > 0) {
+              const baseGuest = {
+                id: `${unitId}_${status}`, // Unique ID per unit per status
+                category,
+                status,
+                createdAt: new Date(primary?.created_at || Date.now()),
+                updatedAt: new Date(primary?.created_at || Date.now()),
+                deletedAt: status === 'deleted' ? new Date() : undefined,
+                unitId: String(unitId), // Keep reference to original unit
+              };
+
+              if (isForPrimary && companionsWithSameStatus.length > 0) {
+                // Primary + companions with same status - grouped together
+                transformed.push({
+                  ...baseGuest,
+                  name: primaryName,
+                  allergies: primaryNote.allergies || undefined,
+                  companions: companionsWithSameStatus.map(comp => ({
+                    id: comp.id,
+                    name: comp.name,
+                    allergies: comp.allergies,
+                    status: comp.status,
+                  })),
+                } as Guest);
+              } else if (isForPrimary) {
+                // Primary alone
+                transformed.push({
+                  ...baseGuest,
+                  name: primaryName,
+                  allergies: primaryNote.allergies || undefined,
+                  companions: [],
+                } as Guest);
+              } else if (companionsWithSameStatus.length > 0) {
+                // Companions alone (primary has different status)
+                if (companionsWithSameStatus.length === 1) {
+                  // Single companion
+                  const comp = companionsWithSameStatus[0];
+                  transformed.push({
+                    ...baseGuest,
+                    name: `${comp.name} (accomp. di ${primaryName})`,
+                    allergies: comp.allergies,
+                    companions: [],
+                  } as Guest);
+                } else {
+                  // Multiple companions with same status
+                  const firstComp = companionsWithSameStatus[0];
+                  transformed.push({
+                    ...baseGuest,
+                    name: `${firstComp.name} e altri (accomp. di ${primaryName})`,
+                    allergies: firstComp.allergies,
+                    companions: companionsWithSameStatus.slice(1).map(comp => ({
+                      id: comp.id,
+                      name: comp.name,
+                      allergies: comp.allergies,
+                      status: comp.status,
+                    })),
+                  } as Guest);
+                }
+              }
+            }
+          });
         });
 
         setGuests(transformed);
@@ -200,7 +269,8 @@ export const useGuests = () => {
   };
 
   const updateGuestStatus = async (guestId: string, status: GuestStatus) => {
-    const unitId = parseInt(guestId, 10);
+    // Extract unitId from composite ID (format: "unitId_status")
+    const unitId = parseInt(guestId.split('_')[0], 10);
     if (Number.isNaN(unitId)) throw new Error('Invalid guest id');
 
     // Optimistic update - update UI immediately
@@ -254,7 +324,7 @@ export const useGuests = () => {
 
   const deleteGuest = (guestId: string) => updateGuestStatus(guestId, 'deleted');
   const restoreGuest = async (guestId: string) => {
-    const unitId = parseInt(guestId, 10);
+    const unitId = parseInt(guestId.split('_')[0], 10);
     const previousState = guests.find(g => g.id === guestId);
     
     // Optimistic update - update UI immediately
@@ -284,7 +354,7 @@ export const useGuests = () => {
   const confirmGuest = (guestId: string) => updateGuestStatus(guestId, 'confirmed');
 
   const permanentlyDeleteGuest = async (guestId: string) => {
-    const unitId = parseInt(guestId, 10);
+    const unitId = parseInt(guestId.split('_')[0], 10);
     const previousState = guests.find(g => g.id === guestId);
     
     // Optimistic update - remove from UI immediately
@@ -438,36 +508,46 @@ export const useGuests = () => {
   const getGuestsByStatus = (status: GuestStatus) => guests.filter((g) => g.status === status);
 
   const getStats = (): GuestStats => {
-    const total = guests.length;
-    const confirmed = guests.filter((g) => g.status === 'confirmed').length;
-    const pending = guests.filter((g) => g.status === 'pending').length;
-    const deleted = guests.filter((g) => g.status === 'deleted').length;
-
-    const byCategory = guests.reduce((acc, g) => {
-      if (g.status !== 'deleted') {
-        // Count main guest only if not deleted
-        acc[g.category] = (acc[g.category] || 0) + 1;
+    // Get unique units to avoid double counting
+    const uniqueUnits = new Set(guests.map(g => g.unitId || g.id.split('_')[0]));
+    const total = uniqueUnits.size;
+    
+    // Count people by status (considering each person once)
+    const peopleByStatus = { confirmed: 0, pending: 0, deleted: 0 };
+    const peopleByCategory = {} as Record<string, number>;
+    
+    uniqueUnits.forEach(unitId => {
+      const unitGuests = guests.filter(g => (g.unitId || g.id.split('_')[0]) === unitId);
+      
+      unitGuests.forEach(guest => {
+        // Count main person (if guest represents a main person or single companion)
+        if (guest.status !== 'deleted') {
+          peopleByStatus[guest.status]++;
+          peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
+        } else {
+          peopleByStatus.deleted++;
+        }
         
-        // Count companions only if not deleted
-        const activeCompanions = g.companions.filter(c => c.status !== 'deleted').length;
-        acc[g.category] = acc[g.category] + activeCompanions;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+        // Count companions
+        guest.companions.forEach(comp => {
+          if (comp.status !== 'deleted') {
+            peopleByStatus[comp.status]++;
+            peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
+          } else {
+            peopleByStatus.deleted++;
+          }
+        });
+      });
+    });
 
-    const totalWithCompanions = guests
-      .filter((g) => g.status !== 'deleted')
-      .reduce((sum, g) => {
-        const activeCompanions = g.companions.filter(c => c.status !== 'deleted').length;
-        return sum + 1 + activeCompanions;
-      }, 0);
+    const totalWithCompanions = peopleByStatus.confirmed + peopleByStatus.pending;
 
     return {
       total,
-      confirmed,
-      pending,
-      deleted,
-      byCategory: byCategory as any,
+      confirmed: peopleByStatus.confirmed,
+      pending: peopleByStatus.pending,
+      deleted: peopleByStatus.deleted,
+      byCategory: peopleByCategory as any,
       totalWithCompanions,
     };
   };
