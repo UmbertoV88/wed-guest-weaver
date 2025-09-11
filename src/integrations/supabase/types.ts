@@ -27,6 +27,7 @@ export type Database = {
           nome_visualizzato: string
           note: string | null
           unita_invito_id: number
+          user_id: string
         }
         Insert: {
           cognome?: string | null
@@ -40,6 +41,7 @@ export type Database = {
           nome_visualizzato: string
           note?: string | null
           unita_invito_id: number
+          user_id: string
         }
         Update: {
           cognome?: string | null
@@ -53,6 +55,7 @@ export type Database = {
           nome_visualizzato?: string
           note?: string | null
           unita_invito_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -60,6 +63,42 @@ export type Database = {
             columns: ["unita_invito_id"]
             isOneToOne: false
             referencedRelation: "unita_invito"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      piani_salvati: {
+        Row: {
+          created_at: string | null
+          id: number
+          invitato_id: number
+          tavolo_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          invitato_id: number
+          tavolo_id: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          invitato_id?: number
+          tavolo_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "piani_salvati_invitato_id_fkey"
+            columns: ["invitato_id"]
+            isOneToOne: false
+            referencedRelation: "invitati"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "piani_salvati_tavolo_id_fkey"
+            columns: ["tavolo_id"]
+            isOneToOne: false
+            referencedRelation: "tavoli"
             referencedColumns: ["id"]
           },
         ]
@@ -135,18 +174,21 @@ export type Database = {
           capacita_max: number
           created_at: string | null
           id: number
+          lato: string | null
           nome_tavolo: string | null
         }
         Insert: {
           capacita_max: number
           created_at?: string | null
           id?: number
+          lato?: string | null
           nome_tavolo?: string | null
         }
         Update: {
           capacita_max?: number
           created_at?: string | null
           id?: number
+          lato?: string | null
           nome_tavolo?: string | null
         }
         Relationships: []
@@ -155,14 +197,17 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: number
+          user_id: string
         }
         Update: {
           created_at?: string | null
           id?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -174,6 +219,10 @@ export type Database = {
       is_wedding_organizer: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      promote_to_wedding_organizer: {
+        Args: { target_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
