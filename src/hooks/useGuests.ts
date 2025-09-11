@@ -306,7 +306,9 @@ export const useGuests = () => {
 
     const byCategory = guests.reduce((acc, g) => {
       if (g.status !== 'deleted') {
-        acc[g.category] = (acc[g.category] || 0) + 1;
+        // Count main guest + companions
+        const totalInCategory = 1 + g.companions.length;
+        acc[g.category] = (acc[g.category] || 0) + totalInCategory;
       }
       return acc;
     }, {} as Record<string, number>);
