@@ -102,68 +102,63 @@ export const useGuests = () => {
             const isForPrimary = primaryStatus === status;
             const companionsWithSameStatus = companionsByStatus[status] || [];
             
-            console.log(`Processing status: ${status}, isForPrimary: ${isForPrimary}, companionsWithSameStatus:`, companionsWithSameStatus);
+            const baseGuest = {
+              id: `${unitId}_${status}`, // Unique ID per unit per status
+              category,
+              status,
+              createdAt: new Date(primary?.created_at || Date.now()),
+              updatedAt: new Date(primary?.created_at || Date.now()),
+              deletedAt: status === 'deleted' ? new Date() : undefined,
+              unitId: String(unitId), // Keep reference to original unit
+            };
             
-            // Only create entry if there are people with this status
-            if (isForPrimary || companionsWithSameStatus.length > 0) {
-              const baseGuest = {
-                id: `${unitId}_${status}`, // Unique ID per unit per status
-                category,
-                status,
-                createdAt: new Date(primary?.created_at || Date.now()),
-                updatedAt: new Date(primary?.created_at || Date.now()),
-                deletedAt: status === 'deleted' ? new Date() : undefined,
-                unitId: String(unitId), // Keep reference to original unit
-              };
-
-              if (isForPrimary && companionsWithSameStatus.length > 0) {
-                // Primary + companions with same status - grouped together
+            // Always create entry if there are people with this status
+            if (isForPrimary && companionsWithSameStatus.length > 0) {
+              // Primary + companions with same status - grouped together
+              transformed.push({
+                ...baseGuest,
+                name: primaryName,
+                allergies: primaryNote.allergies || undefined,
+                companions: companionsWithSameStatus.map(comp => ({
+                  id: comp.id,
+                  name: comp.name,
+                  allergies: comp.allergies,
+                  status: comp.status,
+                })),
+              } as Guest);
+            } else if (isForPrimary && companionsWithSameStatus.length === 0) {
+              // Primary alone
+              transformed.push({
+                ...baseGuest,
+                name: primaryName,
+                allergies: primaryNote.allergies || undefined,
+                companions: [],
+              } as Guest);
+            } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
+              // Companions alone (primary has different status)
+              if (companionsWithSameStatus.length === 1) {
+                // Single companion
+                const comp = companionsWithSameStatus[0];
                 transformed.push({
                   ...baseGuest,
-                  name: primaryName,
-                  allergies: primaryNote.allergies || undefined,
-                  companions: companionsWithSameStatus.map(comp => ({
+                  name: `${comp.name} (accomp. di ${primaryName})`,
+                  allergies: comp.allergies,
+                  companions: [],
+                } as Guest);
+              } else {
+                // Multiple companions with same status
+                const firstComp = companionsWithSameStatus[0];
+                transformed.push({
+                  ...baseGuest,
+                  name: `${firstComp.name} e altri (accomp. di ${primaryName})`,
+                  allergies: firstComp.allergies,
+                  companions: companionsWithSameStatus.slice(1).map(comp => ({
                     id: comp.id,
                     name: comp.name,
                     allergies: comp.allergies,
                     status: comp.status,
                   })),
                 } as Guest);
-              } else if (isForPrimary) {
-                // Primary alone
-                transformed.push({
-                  ...baseGuest,
-                  name: primaryName,
-                  allergies: primaryNote.allergies || undefined,
-                  companions: [],
-                } as Guest);
-              } else if (companionsWithSameStatus.length > 0) {
-                // Companions alone (primary has different status)
-                console.log(`Creating companion-only entry for status ${status}:`, companionsWithSameStatus);
-                if (companionsWithSameStatus.length === 1) {
-                  // Single companion
-                  const comp = companionsWithSameStatus[0];
-                  transformed.push({
-                    ...baseGuest,
-                    name: `${comp.name} (accomp. di ${primaryName})`,
-                    allergies: comp.allergies,
-                    companions: [],
-                  } as Guest);
-                } else {
-                  // Multiple companions with same status
-                  const firstComp = companionsWithSameStatus[0];
-                  transformed.push({
-                    ...baseGuest,
-                    name: `${firstComp.name} e altri (accomp. di ${primaryName})`,
-                    allergies: firstComp.allergies,
-                    companions: companionsWithSameStatus.slice(1).map(comp => ({
-                      id: comp.id,
-                      name: comp.name,
-                      allergies: comp.allergies,
-                      status: comp.status,
-                    })),
-                  } as Guest);
-                }
               }
             }
           });
