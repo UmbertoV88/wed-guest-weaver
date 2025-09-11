@@ -27,6 +27,7 @@ const Index = () => {
     deleteGuest, 
     permanentlyDeleteGuest, 
     updateGuestStatus, 
+    updateCompanionStatus,
     confirmCompanion, 
     deleteCompanion, 
     restoreCompanion, 
@@ -118,6 +119,7 @@ const Index = () => {
               deleteGuest={deleteGuest}
               permanentlyDeleteGuest={permanentlyDeleteGuest}
               updateGuestStatus={updateGuestStatus}
+              updateCompanionStatus={updateCompanionStatus}
               confirmCompanion={confirmCompanion}
               deleteCompanion={deleteCompanion}
               restoreCompanion={restoreCompanion}

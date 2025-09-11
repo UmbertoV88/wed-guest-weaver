@@ -27,13 +27,14 @@ interface GuestListProps {
   deleteGuest: (guestId: string) => Promise<any>;
   permanentlyDeleteGuest: (guestId: string) => Promise<any>;
   updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<any>;
+  updateCompanionStatus: (guestId: string, companionId: string, status: GuestStatus) => Promise<any>;
   confirmCompanion: (guestId: string, companionId: string) => Promise<any>;
   deleteCompanion: (guestId: string, companionId: string) => Promise<any>;
   restoreCompanion: (guestId: string, companionId: string) => Promise<any>;
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
@@ -246,14 +247,24 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                         </>
                       )}
                       {guest.status === 'confirmed' && (
-                        <Button
-                          onClick={() => handleDelete(guest.id, guest.name)}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                        <>
+                          <Button
+                            onClick={() => handleConfirmedToending(guest.id, guest.name)}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(guest.id, guest.name)}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </>
                       )}
                       {type === "deleted" && guest.status === 'deleted' && (
                         <>
@@ -329,15 +340,29 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                   )}
                                   {/* Show delete for confirmed companions */}
                                   {companion.status === 'confirmed' && (
-                                    <Button
-                                      onClick={() => deleteCompanion(guest.id, companion.id)}
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                                      disabled={companionLoading === companion.id}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
+                                    <>
+                                      <Button
+                                        onClick={() => {
+                                          // Change companion status to pending
+                                          updateCompanionStatus(guest.id, companion.id, 'pending');
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <RotateCcw className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        onClick={() => deleteCompanion(guest.id, companion.id)}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </>
                                   )}
                                   {/* Show restore for deleted companions */}
                                   {type === "deleted" && companion.status === 'deleted' && (
