@@ -17,6 +17,7 @@ interface GuestTabsProps {
   };
   companionLoading?: string | null;
   confirmGuest: (guestId: string) => Promise<void>;
+  confirmGuestAndAllCompanions: (guestId: string) => Promise<void>;
   restoreGuest: (guestId: string) => Promise<void>;
   deleteGuest: (guestId: string) => Promise<void>;
   permanentlyDeleteGuest: (guestId: string) => Promise<void>;
@@ -27,7 +28,7 @@ interface GuestTabsProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<void>;
 }
 
-const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
+const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
@@ -83,6 +84,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             emptyMessage="Nessun invitato da confermare. Aggiungi il primo invitato!"
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
+            confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
             permanentlyDeleteGuest={permanentlyDeleteGuest}
@@ -101,6 +103,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             emptyMessage="Nessun invitato confermato ancora."
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
+            confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
             permanentlyDeleteGuest={permanentlyDeleteGuest}
@@ -119,6 +122,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             emptyMessage="Nessun invitato eliminato."
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
+            confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
             permanentlyDeleteGuest={permanentlyDeleteGuest}

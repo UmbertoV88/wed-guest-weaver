@@ -21,6 +21,7 @@ interface GuestListProps {
   emptyMessage: string;
   companionLoading?: string | null;
   confirmGuest: (guestId: string) => Promise<any>;
+  confirmGuestAndAllCompanions: (guestId: string) => Promise<any>;
   restoreGuest: (guestId: string) => Promise<any>;
   deleteGuest: (guestId: string) => Promise<any>;
   permanentlyDeleteGuest: (guestId: string) => Promise<any>;
@@ -31,7 +32,7 @@ interface GuestListProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
@@ -111,6 +112,22 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleConfirmAll = async (guestId: string, guestName: string) => {
+    try {
+      await confirmGuestAndAllCompanions(guestId);
+      toast({
+        title: "Gruppo confermato!",
+        description: `${guestName} e tutti gli accompagnatori sono stati confermati.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante la conferma del gruppo.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -320,11 +337,22 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                       <Button
                         onClick={() => handleConfirm(guest.id, guest.name)}
                         size="sm"
-                        className="bg-success hover:bg-success/90 text-white"
+                        variant="outline"
+                        className="border-success text-success hover:bg-success hover:text-white"
                       >
                         <UserCheck className="w-4 h-4 mr-1" />
-                        Conferma
+                        Solo invitato
                       </Button>
+                      {guest.companions.some(comp => comp.status === 'pending') && (
+                        <Button
+                          onClick={() => handleConfirmAll(guest.id, guest.name)}
+                          size="sm"
+                          className="bg-success hover:bg-success/90 text-white"
+                        >
+                          <UserCheck className="w-4 h-4 mr-1" />
+                          Conferma tutto
+                        </Button>
+                      )}
                       <Button
                         onClick={() => handleDelete(guest.id, guest.name)}
                         size="sm"

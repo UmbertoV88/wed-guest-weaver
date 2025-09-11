@@ -356,6 +356,25 @@ export const useGuests = () => {
   };
   const confirmGuest = (guestId: string) => updateGuestStatus(guestId, 'confirmed');
 
+  const confirmGuestAndAllCompanions = async (guestId: string) => {
+    const guest = guests.find(g => g.id === guestId);
+    if (!guest) throw new Error('Guest not found');
+
+    try {
+      // Confirm the main guest
+      await updateGuestStatus(guestId, 'confirmed');
+      
+      // Confirm all companions that are pending
+      const pendingCompanions = guest.companions.filter(comp => comp.status === 'pending');
+      for (const companion of pendingCompanions) {
+        await confirmCompanion(guestId, companion.id);
+      }
+    } catch (error) {
+      console.error('Error confirming guest and all companions:', error);
+      throw error;
+    }
+  };
+
   const permanentlyDeleteGuest = async (guestId: string) => {
     const unitId = parseInt(guestId.split('_')[0], 10);
     const previousState = guests.find(g => g.id === guestId);
@@ -517,6 +536,7 @@ export const useGuests = () => {
     deleteGuest,
     restoreGuest,
     confirmGuest,
+    confirmGuestAndAllCompanions,
     permanentlyDeleteGuest,
     updateCompanionStatus,
     confirmCompanion,

@@ -21,6 +21,7 @@ const Index = () => {
     getStats, 
     companionLoading,
     confirmGuest, 
+    confirmGuestAndAllCompanions,
     restoreGuest, 
     deleteGuest, 
     permanentlyDeleteGuest, 
@@ -110,6 +111,7 @@ const Index = () => {
               getStats={getStats}
               companionLoading={companionLoading}
               confirmGuest={confirmGuest}
+              confirmGuestAndAllCompanions={confirmGuestAndAllCompanions}
               restoreGuest={restoreGuest}
               deleteGuest={deleteGuest}
               permanentlyDeleteGuest={permanentlyDeleteGuest}
