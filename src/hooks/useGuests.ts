@@ -382,24 +382,6 @@ export const useGuests = () => {
     const companionDbId = parseInt(companionId, 10);
     if (Number.isNaN(companionDbId)) throw new Error('Invalid companion id');
 
-    // Optimistic update
-    const previousState = guests.find(g => g.id === guestId);
-    setGuests((prev) =>
-      prev.map((g) =>
-        g.id === guestId
-          ? {
-              ...g,
-              companions: g.companions.map((c) =>
-                c.id === companionId
-                  ? { ...c, status, updatedAt: new Date() }
-                  : c
-              ),
-              updatedAt: new Date(),
-            }
-          : g
-      )
-    );
-
     try {
       if (status === 'confirmed' || status === 'pending') {
         const { error } = await supabase
@@ -415,14 +397,9 @@ export const useGuests = () => {
           .eq('id', companionDbId);
         if (error) throw error;
       }
+      // Real-time listener will automatically reload the data
     } catch (error) {
       console.error('Error updating companion status:', error);
-      // Revert optimistic update on error
-      if (previousState) {
-        setGuests((prev) =>
-          prev.map((g) => g.id === guestId ? previousState : g)
-        );
-      }
       throw error;
     }
   };
@@ -435,70 +412,32 @@ export const useGuests = () => {
 
   const restoreCompanion = async (guestId: string, companionId: string) => {
     const companionDbId = parseInt(companionId, 10);
-    const previousState = guests.find(g => g.id === guestId);
     
-    // Optimistic update
-    setGuests((prev) =>
-      prev.map((g) =>
-        g.id === guestId
-          ? {
-              ...g,
-              companions: g.companions.map((c) =>
-                c.id === companionId
-                  ? { ...c, status: 'pending' as GuestStatus }
-                  : c
-              ),
-              updatedAt: new Date(),
-            }
-          : g
-      )
-    );
-
     try {
       const { error } = await supabase
         .from('invitati')
         .update({ note: buildNote({ allergies: null, deleted_at: null }) })
         .eq('id', companionDbId);
       if (error) throw error;
+      // Real-time listener will automatically reload the data
     } catch (error) {
       console.error('Error restoring companion:', error);
-      // Revert optimistic update on error
-      if (previousState) {
-        setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
-      }
       throw error;
     }
   };
 
   const permanentlyDeleteCompanion = async (guestId: string, companionId: string) => {
     const companionDbId = parseInt(companionId, 10);
-    const previousState = guests.find(g => g.id === guestId);
     
-    // Optimistic update - remove companion from UI
-    setGuests((prev) =>
-      prev.map((g) =>
-        g.id === guestId
-          ? {
-              ...g,
-              companions: g.companions.filter((c) => c.id !== companionId),
-              updatedAt: new Date(),
-            }
-          : g
-      )
-    );
-
     try {
       const { error } = await supabase
         .from('invitati')
         .delete()
         .eq('id', companionDbId);
       if (error) throw error;
+      // Real-time listener will automatically reload the data
     } catch (error) {
       console.error('Error permanently deleting companion:', error);
-      // Revert optimistic update on error
-      if (previousState) {
-        setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
-      }
       throw error;
     }
   };
