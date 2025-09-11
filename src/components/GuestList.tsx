@@ -21,6 +21,7 @@ interface GuestListProps {
   emptyMessage: string;
   companionLoading?: string | null;
   confirmGuest: (guestId: string) => Promise<any>;
+  confirmGuestOnly: (guestId: string) => Promise<any>;
   confirmGuestAndAllCompanions: (guestId: string) => Promise<any>;
   restoreGuest: (guestId: string) => Promise<any>;
   deleteGuest: (guestId: string) => Promise<any>;
@@ -32,7 +33,7 @@ interface GuestListProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
@@ -47,12 +48,12 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     return matchesSearch && matchesCategory;
   });
 
-  const handleConfirm = async (guestId: string, guestName: string) => {
+  const handleConfirmMainOnly = async (guestId: string, guestName: string) => {
     try {
-      await confirmGuest(guestId);
+      await confirmGuestOnly(guestId);
       toast({
         title: "Invitato confermato!",
-        description: `${guestName} è stato confermato per il matrimonio.`,
+        description: `${guestName} è stato confermato (solo l'invitato principale).`,
       });
     } catch (error) {
       toast({
@@ -335,7 +336,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                   {type === "pending" && (
                     <>
                       <Button
-                        onClick={() => handleConfirm(guest.id, guest.name)}
+                        onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
                         size="sm"
                         variant="outline"
                         className="border-success text-success hover:bg-success hover:text-white"
