@@ -249,67 +249,70 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                    'Eliminato'}
                                 </Badge>
                               </div>
-                              <div className="flex items-center gap-1">
-                                 {type === "pending" && companion.status === 'pending' && (
-                                   <>
-                                     <Button
-                                       onClick={() => confirmCompanion(guest.id, companion.id)}
-                                       size="sm"
-                                       variant="ghost"
-                                       className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
-                                       disabled={companionLoading === companion.id}
-                                     >
-                                       <UserCheck className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                       onClick={() => deleteCompanion(guest.id, companion.id)}
-                                       size="sm"
-                                       variant="ghost"
-                                       className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                                       disabled={companionLoading === companion.id}
-                                     >
-                                       <Trash2 className="w-3 h-3" />
-                                     </Button>
-                                   </>
-                                 )}
-                                 {type === "confirmed" && companion.status === 'confirmed' && (
-                                   <Button
-                                     onClick={() => deleteCompanion(guest.id, companion.id)}
-                                     size="sm"
-                                     variant="ghost"
-                                     className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                                     disabled={companionLoading === companion.id}
-                                   >
-                                     <Trash2 className="w-3 h-3" />
-                                   </Button>
-                                 )}
-                                 {type === "deleted" && companion.status === 'deleted' && (
-                                   <>
-                                     <Button
-                                       onClick={() => restoreCompanion(guest.id, companion.id)}
-                                       size="sm"
-                                       variant="ghost"
-                                       className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
-                                       disabled={companionLoading === companion.id}
-                                     >
-                                       <RotateCcw className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                       onClick={() => {
-                                         if (window.confirm(`Eliminare definitivamente ${companion.name}?`)) {
-                                           permanentlyDeleteCompanion(guest.id, companion.id);
-                                         }
-                                       }}
-                                       size="sm"
-                                       variant="ghost"
-                                       className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                                       disabled={companionLoading === companion.id}
-                                     >
-                                       <Trash2 className="w-3 h-3" />
-                                     </Button>
-                                   </>
-                                 )}
-                              </div>
+                               <div className="flex items-center gap-1">
+                                  {/* Show companion actions regardless of main guest status if companion is pending */}
+                                  {companion.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        onClick={() => confirmCompanion(guest.id, companion.id)}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <UserCheck className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        onClick={() => deleteCompanion(guest.id, companion.id)}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </>
+                                  )}
+                                  {/* Show delete for confirmed companions */}
+                                  {companion.status === 'confirmed' && (
+                                    <Button
+                                      onClick={() => deleteCompanion(guest.id, companion.id)}
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                      disabled={companionLoading === companion.id}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  )}
+                                  {/* Show restore for deleted companions */}
+                                  {type === "deleted" && companion.status === 'deleted' && (
+                                    <>
+                                      <Button
+                                        onClick={() => restoreCompanion(guest.id, companion.id)}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <RotateCcw className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        onClick={() => {
+                                          if (window.confirm(`Eliminare definitivamente ${companion.name}?`)) {
+                                            permanentlyDeleteCompanion(guest.id, companion.id);
+                                          }
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </>
+                                  )}
+                               </div>
                             </div>
                           ))}
                         </div>
@@ -335,15 +338,19 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                 <div className="flex items-center gap-2">
                   {type === "pending" && (
                     <>
-                      <Button
-                        onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
-                        size="sm"
-                        variant="outline"
-                        className="border-success text-success hover:bg-success hover:text-white"
-                      >
-                        <UserCheck className="w-4 h-4 mr-1" />
-                        Solo invitato
-                      </Button>
+                      {/* Show "Solo invitato" only if main guest is pending */}
+                      {guest.status === 'pending' && (
+                        <Button
+                          onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
+                          size="sm"
+                          variant="outline"
+                          className="border-success text-success hover:bg-success hover:text-white"
+                        >
+                          <UserCheck className="w-4 h-4 mr-1" />
+                          Solo invitato
+                        </Button>
+                      )}
+                      {/* Show "Conferma tutto" only if there are pending companions */}
                       {guest.companions.some(comp => comp.status === 'pending') && (
                         <Button
                           onClick={() => handleConfirmAll(guest.id, guest.name)}
