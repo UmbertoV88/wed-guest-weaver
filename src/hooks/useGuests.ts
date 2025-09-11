@@ -508,38 +508,34 @@ export const useGuests = () => {
   const getGuestsByStatus = (status: GuestStatus) => guests.filter((g) => g.status === status);
 
   const getStats = (): GuestStats => {
-    // Get unique units to avoid double counting
-    const uniqueUnits = new Set(guests.map(g => g.unitId || g.id.split('_')[0]));
-    const total = uniqueUnits.size;
-    
-    // Count people by status (considering each person once)
+    // Count people directly from guests list, but avoid double counting
     const peopleByStatus = { confirmed: 0, pending: 0, deleted: 0 };
     const peopleByCategory = {} as Record<string, number>;
+    const uniqueUnits = new Set<string>();
     
-    uniqueUnits.forEach(unitId => {
-      const unitGuests = guests.filter(g => (g.unitId || g.id.split('_')[0]) === unitId);
+    guests.forEach(guest => {
+      uniqueUnits.add(guest.unitId || guest.id.split('_')[0]);
       
-      unitGuests.forEach(guest => {
-        // Count main person (if guest represents a main person or single companion)
-        if (guest.status !== 'deleted') {
-          peopleByStatus[guest.status]++;
+      // Count the main person represented by this guest entry
+      if (guest.status !== 'deleted') {
+        peopleByStatus[guest.status]++;
+        peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
+      } else {
+        peopleByStatus.deleted++;
+      }
+      
+      // Count companions in this entry
+      guest.companions.forEach(comp => {
+        if (comp.status !== 'deleted') {
+          peopleByStatus[comp.status]++;
           peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
         } else {
           peopleByStatus.deleted++;
         }
-        
-        // Count companions
-        guest.companions.forEach(comp => {
-          if (comp.status !== 'deleted') {
-            peopleByStatus[comp.status]++;
-            peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
-          } else {
-            peopleByStatus.deleted++;
-          }
-        });
       });
     });
 
+    const total = uniqueUnits.size;
     const totalWithCompanions = peopleByStatus.confirmed + peopleByStatus.pending;
 
     return {
