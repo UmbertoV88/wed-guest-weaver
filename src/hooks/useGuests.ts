@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Guest, GuestFormData, GuestStats, GuestStatus, GuestCategory } from '@/types/guest';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,148 +30,150 @@ const buildNote = (data: { allergies?: string | null; deleted_at?: string | null
 export const useGuests = () => {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [companionLoading, setCompanionLoading] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Load guests from Supabase (invitati grouped by unita_invito) and set up realtime subscription
-  useEffect(() => {
-    const loadGuests = async () => {
-      try {
-        // Fetch all invitati and group by unita_invito_id
-        const { data, error } = await supabase
-          .from('invitati')
-          .select('*')
-          .order('created_at', { ascending: false });
+  // Load guests from Supabase (invitati grouped by unita_invito) - stable callback for manual refreshes
+  const loadGuests = useCallback(async () => {
+    try {
+      // Fetch all invitati and group by unita_invito_id
+      const { data, error } = await supabase
+        .from('invitati')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error loading invitati:', error);
-          return;
-        }
+      if (error) {
+        console.error('Error loading invitati:', error);
+        return;
+      }
 
-        const byUnit = new Map<number, any[]>();
-        (data || []).forEach((row: any) => {
-          if (!row.unita_invito_id) return;
-          const arr = byUnit.get(row.unita_invito_id) || [];
-          arr.push(row);
-          byUnit.set(row.unita_invito_id, arr);
-        });
+      const byUnit = new Map<number, any[]>();
+      (data || []).forEach((row: any) => {
+        if (!row.unita_invito_id) return;
+        const arr = byUnit.get(row.unita_invito_id) || [];
+        arr.push(row);
+        byUnit.set(row.unita_invito_id, arr);
+      });
 
-        const transformed: Guest[] = [];
-        
-        Array.from(byUnit.entries()).forEach(([unitId, rows]) => {
-          const primary = (rows as any[]).find(r => r.is_principale) || (rows as any[])[0];
-          const primaryNote = parseNote(primary?.note);
+      const transformed: Guest[] = [];
+      
+      Array.from(byUnit.entries()).forEach(([unitId, rows]) => {
+        const primary = (rows as any[]).find(r => r.is_principale) || (rows as any[])[0];
+        const primaryNote = parseNote(primary?.note);
 
-          const primaryStatus: GuestStatus = primaryNote.deleted_at
-            ? 'deleted'
-            : primary?.confermato
-              ? 'confirmed'
-              : 'pending';
+        const primaryStatus: GuestStatus = primaryNote.deleted_at
+          ? 'deleted'
+          : primary?.confermato
+            ? 'confirmed'
+            : 'pending';
 
-          const companions = (rows as any[])
-            .filter(r => r.id !== primary.id)
-            .map(r => {
-              const n = parseNote(r.note);
-              const companionStatus: GuestStatus = n.deleted_at
-                ? 'deleted'
-                : r.confermato
-                  ? 'confirmed'
-                  : 'pending';
-              return {
-                id: String(r.id),
-                name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
-                allergies: n.allergies || undefined,
-                status: companionStatus,
-                dbRow: r, // Keep reference to original data
-              };
-            });
-
-          const primaryName = primary?.nome_visualizzato || [primary?.nome, primary?.cognome].filter(Boolean).join(' ') || 'Ospite';
-          const category = mapDbCategoryToGuestCategory(primary?.gruppo);
-
-          // Group companions by status
-          const companionsByStatus = companions.reduce((acc, comp) => {
-            if (!acc[comp.status]) acc[comp.status] = [];
-            acc[comp.status].push(comp);
-            return acc;
-          }, {} as Record<GuestStatus, any[]>);
-
-          // Create entries based on status combinations
-          const statusesPresent = new Set([primaryStatus, ...companions.map(c => c.status)]);
-          
-          statusesPresent.forEach(status => {
-            const isForPrimary = primaryStatus === status;
-            const companionsWithSameStatus = companionsByStatus[status] || [];
-            
-            const baseGuest = {
-              id: `${unitId}_${status}`, // Unique ID per unit per status
-              category,
-              status,
-              createdAt: new Date(primary?.created_at || Date.now()),
-              updatedAt: new Date(primary?.created_at || Date.now()),
-              deletedAt: status === 'deleted' ? new Date() : undefined,
-              unitId: String(unitId), // Keep reference to original unit
+        const companions = (rows as any[])
+          .filter(r => r.id !== primary.id)
+          .map(r => {
+            const n = parseNote(r.note);
+            const companionStatus: GuestStatus = n.deleted_at
+              ? 'deleted'
+              : r.confermato
+                ? 'confirmed'
+                : 'pending';
+            return {
+              id: String(r.id),
+              name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
+              allergies: n.allergies || undefined,
+              status: companionStatus,
+              dbRow: r, // Keep reference to original data
             };
-            
-            // Always create entry if there are people with this status
-            if (isForPrimary && companionsWithSameStatus.length > 0) {
-              // Primary + companions with same status - grouped together
+          });
+
+        const primaryName = primary?.nome_visualizzato || [primary?.nome, primary?.cognome].filter(Boolean).join(' ') || 'Ospite';
+        const category = mapDbCategoryToGuestCategory(primary?.gruppo);
+
+        // Group companions by status
+        const companionsByStatus = companions.reduce((acc, comp) => {
+          if (!acc[comp.status]) acc[comp.status] = [];
+          acc[comp.status].push(comp);
+          return acc;
+        }, {} as Record<GuestStatus, any[]>);
+
+        // Create entries based on status combinations
+        const statusesPresent = new Set([primaryStatus, ...companions.map(c => c.status)]);
+        
+        statusesPresent.forEach(status => {
+          const isForPrimary = primaryStatus === status;
+          const companionsWithSameStatus = companionsByStatus[status] || [];
+          
+          const baseGuest = {
+            id: `${unitId}_${status}`, // Unique ID per unit per status
+            category,
+            status,
+            createdAt: new Date(primary?.created_at || Date.now()),
+            updatedAt: new Date(primary?.created_at || Date.now()),
+            deletedAt: status === 'deleted' ? new Date() : undefined,
+            unitId: String(unitId), // Keep reference to original unit
+          };
+          
+          // Always create entry if there are people with this status
+          if (isForPrimary && companionsWithSameStatus.length > 0) {
+            // Primary + companions with same status - grouped together
+            transformed.push({
+              ...baseGuest,
+              name: primaryName,
+              allergies: primaryNote.allergies || undefined,
+              companions: companionsWithSameStatus.map(comp => ({
+                id: comp.id,
+                name: comp.name,
+                allergies: comp.allergies,
+                status: comp.status,
+              })),
+            } as Guest);
+          } else if (isForPrimary && companionsWithSameStatus.length === 0) {
+            // Primary alone
+            transformed.push({
+              ...baseGuest,
+              name: primaryName,
+              allergies: primaryNote.allergies || undefined,
+              companions: [],
+            } as Guest);
+          } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
+            // Companions alone (primary has different status)
+            if (companionsWithSameStatus.length === 1) {
+              // Single companion
+              const comp = companionsWithSameStatus[0];
               transformed.push({
                 ...baseGuest,
-                name: primaryName,
-                allergies: primaryNote.allergies || undefined,
-                companions: companionsWithSameStatus.map(comp => ({
+                name: `${comp.name} (accomp. di ${primaryName})`,
+                allergies: comp.allergies,
+                companions: [],
+              } as Guest);
+            } else {
+              // Multiple companions with same status
+              const firstComp = companionsWithSameStatus[0];
+              transformed.push({
+                ...baseGuest,
+                name: `${firstComp.name} e altri (accomp. di ${primaryName})`,
+                allergies: firstComp.allergies,
+                companions: companionsWithSameStatus.slice(1).map(comp => ({
                   id: comp.id,
                   name: comp.name,
                   allergies: comp.allergies,
                   status: comp.status,
                 })),
               } as Guest);
-            } else if (isForPrimary && companionsWithSameStatus.length === 0) {
-              // Primary alone
-              transformed.push({
-                ...baseGuest,
-                name: primaryName,
-                allergies: primaryNote.allergies || undefined,
-                companions: [],
-              } as Guest);
-            } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
-              // Companions alone (primary has different status)
-              if (companionsWithSameStatus.length === 1) {
-                // Single companion
-                const comp = companionsWithSameStatus[0];
-                transformed.push({
-                  ...baseGuest,
-                  name: `${comp.name} (accomp. di ${primaryName})`,
-                  allergies: comp.allergies,
-                  companions: [],
-                } as Guest);
-              } else {
-                // Multiple companions with same status
-                const firstComp = companionsWithSameStatus[0];
-                transformed.push({
-                  ...baseGuest,
-                  name: `${firstComp.name} e altri (accomp. di ${primaryName})`,
-                  allergies: firstComp.allergies,
-                  companions: companionsWithSameStatus.slice(1).map(comp => ({
-                    id: comp.id,
-                    name: comp.name,
-                    allergies: comp.allergies,
-                    status: comp.status,
-                  })),
-                } as Guest);
-              }
             }
-          });
+          }
         });
+      });
 
-        setGuests(transformed);
-      } catch (err) {
-        console.error('Error loading guests (mapped from invitati):', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setGuests(transformed);
+    } catch (err) {
+      console.error('Error loading guests (mapped from invitati):', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
+  // Set up initial load and realtime subscription
+  useEffect(() => {
     loadGuests();
 
     // Realtime: listen to invitati changes and reload
@@ -180,14 +182,17 @@ export const useGuests = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'invitati' },
-        () => loadGuests()
+        (payload) => {
+          console.log('Realtime event received:', payload);
+          loadGuests();
+        }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [loadGuests]);
 
   const addGuest = async (formData: GuestFormData): Promise<Guest> => {
     if (!user) throw new Error('User not authenticated');
@@ -382,6 +387,8 @@ export const useGuests = () => {
     const companionDbId = parseInt(companionId, 10);
     if (Number.isNaN(companionDbId)) throw new Error('Invalid companion id');
 
+    setCompanionLoading(companionId);
+    
     try {
       if (status === 'confirmed' || status === 'pending') {
         const { error } = await supabase
@@ -397,10 +404,14 @@ export const useGuests = () => {
           .eq('id', companionDbId);
         if (error) throw error;
       }
-      // Real-time listener will automatically reload the data
+      
+      // Force immediate refresh instead of relying on realtime
+      await loadGuests();
     } catch (error) {
       console.error('Error updating companion status:', error);
       throw error;
+    } finally {
+      setCompanionLoading(null);
     }
   };
 
@@ -413,21 +424,29 @@ export const useGuests = () => {
   const restoreCompanion = async (guestId: string, companionId: string) => {
     const companionDbId = parseInt(companionId, 10);
     
+    setCompanionLoading(companionId);
+    
     try {
       const { error } = await supabase
         .from('invitati')
         .update({ note: buildNote({ allergies: null, deleted_at: null }) })
         .eq('id', companionDbId);
       if (error) throw error;
-      // Real-time listener will automatically reload the data
+      
+      // Force immediate refresh instead of relying on realtime
+      await loadGuests();
     } catch (error) {
       console.error('Error restoring companion:', error);
       throw error;
+    } finally {
+      setCompanionLoading(null);
     }
   };
 
   const permanentlyDeleteCompanion = async (guestId: string, companionId: string) => {
     const companionDbId = parseInt(companionId, 10);
+    
+    setCompanionLoading(companionId);
     
     try {
       const { error } = await supabase
@@ -435,10 +454,14 @@ export const useGuests = () => {
         .delete()
         .eq('id', companionDbId);
       if (error) throw error;
-      // Real-time listener will automatically reload the data
+      
+      // Force immediate refresh instead of relying on realtime
+      await loadGuests();
     } catch (error) {
       console.error('Error permanently deleting companion:', error);
       throw error;
+    } finally {
+      setCompanionLoading(null);
     }
   };
 
@@ -488,6 +511,7 @@ export const useGuests = () => {
   return {
     guests,
     loading,
+    companionLoading,
     addGuest,
     updateGuestStatus,
     deleteGuest,

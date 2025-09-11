@@ -15,6 +15,7 @@ interface GuestTabsProps {
     deleted: number;
     byCategory: Record<string, number>;
   };
+  companionLoading?: string | null;
   confirmGuest: (guestId: string) => Promise<void>;
   restoreGuest: (guestId: string) => Promise<void>;
   deleteGuest: (guestId: string) => Promise<void>;
@@ -26,7 +27,7 @@ interface GuestTabsProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<void>;
 }
 
-const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
+const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
@@ -80,6 +81,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, de
             guests={pendingGuests} 
             type="pending"
             emptyMessage="Nessun invitato da confermare. Aggiungi il primo invitato!"
+            companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
@@ -97,6 +99,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, de
             guests={confirmedGuests} 
             type="confirmed"
             emptyMessage="Nessun invitato confermato ancora."
+            companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}
@@ -114,6 +117,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, confirmGuest, restoreGuest, de
             guests={deletedGuests} 
             type="deleted"
             emptyMessage="Nessun invitato eliminato."
+            companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             restoreGuest={restoreGuest}
             deleteGuest={deleteGuest}

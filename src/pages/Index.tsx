@@ -19,6 +19,7 @@ const Index = () => {
     addGuest, 
     getGuestsByStatus, 
     getStats, 
+    companionLoading,
     confirmGuest, 
     restoreGuest, 
     deleteGuest, 
@@ -107,6 +108,7 @@ const Index = () => {
             <GuestTabs 
               getGuestsByStatus={getGuestsByStatus}
               getStats={getStats}
+              companionLoading={companionLoading}
               confirmGuest={confirmGuest}
               restoreGuest={restoreGuest}
               deleteGuest={deleteGuest}
