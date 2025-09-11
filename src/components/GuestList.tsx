@@ -3,29 +3,32 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  UserCheck, 
-  RotateCcw, 
-  Trash2, 
-  Users, 
+import {
+  Search,
+  UserCheck,
+  RotateCcw,
+  Trash2,
+  Users,
   AlertTriangle,
   Filter
 } from "lucide-react";
-import { Guest, CATEGORY_LABELS } from "@/types/guest";
-import { useGuests } from "@/hooks/useGuests";
+import { Guest, CATEGORY_LABELS, GuestStatus } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 
 interface GuestListProps {
   guests: Guest[];
   type: "pending" | "confirmed" | "deleted";
   emptyMessage: string;
+  confirmGuest: (guestId: string) => Promise<any>;
+  restoreGuest: (guestId: string) => Promise<any>;
+  deleteGuest: (guestId: string) => Promise<any>;
+  permanentlyDeleteGuest: (guestId: string) => Promise<any>;
+  updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const { confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus } = useGuests();
   const { toast } = useToast();
 
   // Filter guests based on search and category

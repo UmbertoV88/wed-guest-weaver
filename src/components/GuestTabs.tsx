@@ -6,7 +6,7 @@ import GuestList from "./GuestList";
 import GuestStats from "./GuestStats";
 
 const GuestTabs = () => {
-  const { getGuestsByStatus, getStats } = useGuests();
+  const { getGuestsByStatus, getStats, confirmGuest, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus } = useGuests();
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
@@ -60,6 +60,11 @@ const GuestTabs = () => {
             guests={pendingGuests} 
             type="pending"
             emptyMessage="Nessun invitato da confermare. Aggiungi il primo invitato!"
+            confirmGuest={confirmGuest}
+            restoreGuest={restoreGuest}
+            deleteGuest={deleteGuest}
+            permanentlyDeleteGuest={permanentlyDeleteGuest}
+            updateGuestStatus={updateGuestStatus}
           />
         </TabsContent>
 
@@ -68,6 +73,11 @@ const GuestTabs = () => {
             guests={confirmedGuests} 
             type="confirmed"
             emptyMessage="Nessun invitato confermato ancora."
+            confirmGuest={confirmGuest}
+            restoreGuest={restoreGuest}
+            deleteGuest={deleteGuest}
+            permanentlyDeleteGuest={permanentlyDeleteGuest}
+            updateGuestStatus={updateGuestStatus}
           />
         </TabsContent>
 
@@ -76,6 +86,11 @@ const GuestTabs = () => {
             guests={deletedGuests} 
             type="deleted"
             emptyMessage="Nessun invitato eliminato."
+            confirmGuest={confirmGuest}
+            restoreGuest={restoreGuest}
+            deleteGuest={deleteGuest}
+            permanentlyDeleteGuest={permanentlyDeleteGuest}
+            updateGuestStatus={updateGuestStatus}
           />
         </TabsContent>
       </Tabs>
