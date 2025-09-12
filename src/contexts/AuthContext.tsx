@@ -1,14 +1,18 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  signingOut: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
+  signOut: (showConfirmation?: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +29,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -70,16 +78,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signOut = async () => {
+  const signOut = async (showConfirmation: boolean = false) => {
+    if (signingOut) return; // Prevent multiple logout attempts
+    
+    setSigningOut(true);
+    
     try {
-      await supabase.auth.signOut();
-      // Force navigation to auth page after logout
-      window.location.href = '/auth';
+      // Clear local session first for immediate UI feedback
+      await supabase.auth.signOut({ scope: 'local' });
+      
+      // Clear all cached queries
+      queryClient.clear();
+      
+      // Clear any sensitive data from localStorage
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Attempt global sign-out (token revocation)
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Clear state
+      setSession(null);
+      setUser(null);
+      
+      // Show success message
+      toast({
+        title: "Logout effettuato",
+        description: "Sei stato disconnesso con successo.",
+      });
+      
+      // Navigate to landing page
+      navigate('/');
+      
     } catch (error) {
+      console.error('Logout error:', error);
+      
       // Even if logout fails, clear local state and redirect
       setSession(null);
       setUser(null);
-      window.location.href = '/auth';
+      queryClient.clear();
+      
+      toast({
+        title: "Logout completato",
+        description: "Disconnessione effettuata (con alcuni problemi di rete).",
+        variant: "default"
+      });
+      
+      navigate('/');
+    } finally {
+      setSigningOut(false);
     }
   };
 
@@ -87,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     loading,
+    signingOut,
     signIn,
     signUp,
     signOut,

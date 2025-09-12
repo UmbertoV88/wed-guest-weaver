@@ -18,6 +18,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import { LogoutConfirmDialog } from "@/components/LogoutConfirmDialog";
 import { cn } from "@/lib/utils";
 
 interface WeddingHeaderProps {
@@ -26,6 +27,7 @@ interface WeddingHeaderProps {
   profile?: { full_name?: string } | null;
   isWeddingOrganizer?: boolean;
   onSignOut?: () => void;
+  signingOut?: boolean;
 }
 
 const WeddingHeader = ({ 
@@ -33,7 +35,8 @@ const WeddingHeader = ({
   user, 
   profile, 
   isWeddingOrganizer, 
-  onSignOut 
+  onSignOut,
+  signingOut = false
 }: WeddingHeaderProps) => {
   const [weddingDate, setWeddingDate] = useState<Date>();
   const [countdown, setCountdown] = useState<string>("");
@@ -215,17 +218,17 @@ const WeddingHeader = ({
 
                     {/* Logout Button */}
                     {onSignOut && (
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2 text-destructive border-destructive/20 hover:bg-destructive/10"
-                        onClick={() => {
+                      <LogoutConfirmDialog
+                        onSignOut={async () => {
                           onSignOut();
                           setIsMobileMenuOpen(false);
                         }}
+                        signingOut={signingOut}
+                        className="w-full"
+                        showConfirmation={true}
                       >
-                        <LogOut className="w-4 h-4" />
-                        Esci
-                      </Button>
+                        {signingOut ? "Uscendo..." : "Esci"}
+                      </LogoutConfirmDialog>
                     )}
                   </div>
                 </div>

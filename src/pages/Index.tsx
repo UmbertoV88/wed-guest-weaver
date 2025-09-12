@@ -12,7 +12,7 @@ import WeddingHeader from "@/components/WeddingHeader";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, signingOut } = useAuth();
   const { profile, isWeddingOrganizer } = useProfile();
   const { toast } = useToast();
   const { 
@@ -36,11 +36,6 @@ const Index = () => {
   } = useGuests();
 
   const handleSignOut = async () => {
-    try {
-      // Clear local session immediately to update UI/auth state
-      await supabase.auth.signOut({ scope: 'local' });
-    } catch {}
-    // Attempt global sign-out (token revoke) via context, which also redirects
     await signOut();
   };
 
@@ -64,6 +59,7 @@ const Index = () => {
         profile={profile}
         isWeddingOrganizer={isWeddingOrganizer}
         onSignOut={handleSignOut}
+        signingOut={signingOut}
       />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
