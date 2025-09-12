@@ -93,7 +93,7 @@ const DashboardSidebar = ({
   ];
 
   return (
-    <Sidebar collapsible="icon" className="top-0">
+    <Sidebar collapsible="icon" className="top-16">
       <SidebarHeader className="p-4">
         {!collapsed && (
           <>
@@ -203,22 +203,20 @@ const DashboardSidebar = ({
         )}
 
         {/* Logout Button */}
-{onSignOut && (
-  <LogoutConfirmDialog
+        {onSignOut && (
+          <LogoutConfirmDialog
     onSignOut={async () => {
       onSignOut();
     }}
     signingOut={signingOut}
     className="w-full"
     showConfirmation={true}
+    buttonText={!collapsed && (signingOut ? "Uscendo..." : "Esci")}
+    icon={LogOut}
   >
-    <div className="w-full flex items-center justify-start gap-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer">
-      <LogOut className="w-5 h-5" />
-      {!collapsed && (signingOut ? "Uscendo..." : "Esci")}
-    </div>
+    
   </LogoutConfirmDialog>
-)}
-
+        )}
       </SidebarFooter>
 
       <SidebarRail />
