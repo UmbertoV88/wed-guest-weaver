@@ -449,8 +449,8 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                     <>
                       {type === "pending" && (
                         <>
-                          {/* Show "Conferma tutto" only if there are pending companions */}
-                          {guest.companions.some(comp => comp.status === 'pending') && (
+                          {/* Show "Conferma tutto" and "Elimina tutto" only if there are companions */}
+                          {guest.companions.length > 0 && guest.companions.some(comp => comp.status === 'pending') && (
                             <Button
                               onClick={() => handleConfirmAll(guest.id, guest.name)}
                               size="sm"
@@ -460,14 +460,16 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                               Conferma tutto
                             </Button>
                           )}
-                          <Button
-                            onClick={() => handleDelete(guest.id, guest.name)}
-                            size="sm"
-                            variant="destructive"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Elimina tutto
-                          </Button>
+                          {guest.companions.length > 0 && (
+                            <Button
+                              onClick={() => handleDelete(guest.id, guest.name)}
+                              size="sm"
+                              variant="destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Elimina tutto
+                            </Button>
+                          )}
                         </>
                       )}
                       
