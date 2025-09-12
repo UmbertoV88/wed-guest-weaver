@@ -12,7 +12,7 @@ import {
   AlertTriangle,
   Filter
 } from "lucide-react";
-import { Guest, CATEGORY_LABELS, GuestStatus } from "@/types/guest";
+import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 
 interface GuestListProps {
@@ -240,6 +240,11 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                     <Badge variant="secondary">
                       {CATEGORY_LABELS[guest.category]}
                     </Badge>
+                    {guest.ageGroup && guest.containsPrimary !== false && (
+                      <Badge variant="outline" className="text-xs">
+                        {AGE_GROUP_LABELS[guest.ageGroup]}
+                      </Badge>
+                    )}
                     
                     {/* Main guest action icons - only show for cards that contain the primary guest */}
                     {guest.containsPrimary && (
@@ -320,6 +325,11 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                             <div key={companion.id} className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{companion.name}</span>
+                                {companion.ageGroup && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {AGE_GROUP_LABELS[companion.ageGroup]}
+                                  </Badge>
+                                )}
                                 <Badge 
                                   variant={
                                     companion.status === 'confirmed' ? 'default' : 

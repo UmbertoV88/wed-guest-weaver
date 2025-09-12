@@ -81,6 +81,7 @@ export const useGuests = () => {
               name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
               allergies: n.allergies || undefined,
               status: companionStatus,
+              ageGroup: r.fascia_eta || undefined,
               dbRow: r, // Keep reference to original data
             };
           });
@@ -119,12 +120,14 @@ export const useGuests = () => {
               ...baseGuest,
               name: primaryName,
               allergies: primaryNote.allergies || undefined,
+              ageGroup: primary?.fascia_eta || undefined,
               containsPrimary: true,
               companions: companionsWithSameStatus.map(comp => ({
                 id: comp.id,
                 name: comp.name,
                 allergies: comp.allergies,
                 status: comp.status,
+                ageGroup: comp.ageGroup,
               })),
             } as Guest);
           } else if (isForPrimary && companionsWithSameStatus.length === 0) {
@@ -133,6 +136,7 @@ export const useGuests = () => {
               ...baseGuest,
               name: primaryName,
               allergies: primaryNote.allergies || undefined,
+              ageGroup: primary?.fascia_eta || undefined,
               containsPrimary: true,
               companions: [],
             } as Guest);
@@ -148,6 +152,7 @@ export const useGuests = () => {
                 name: comp.name,
                 allergies: comp.allergies,
                 status: comp.status,
+                ageGroup: comp.ageGroup,
               })),
             } as Guest);
           }
@@ -206,6 +211,7 @@ export const useGuests = () => {
           nome_visualizzato: formData.name,
           gruppo: formData.category,
           confermato: false,
+          fascia_eta: formData.ageGroup || null,
           note: buildNote({ allergies: formData.allergies ?? null, deleted_at: null }),
         },
         ...formData.companions.map((c) => ({
@@ -215,6 +221,7 @@ export const useGuests = () => {
           nome_visualizzato: c.name,
           gruppo: formData.category,
           confermato: false,
+          fascia_eta: c.ageGroup || null,
           note: buildNote({ allergies: c.allergies ?? null, deleted_at: null }),
         })),
       ];
@@ -236,6 +243,7 @@ export const useGuests = () => {
               name: r.nome_visualizzato,
               allergies: n.allergies || undefined,
               status: 'pending' as GuestStatus,
+              ageGroup: r.fascia_eta || undefined,
             };
           });
 
@@ -247,6 +255,7 @@ export const useGuests = () => {
         category: mapDbCategoryToGuestCategory(primary?.gruppo || formData.category),
         allergies: note.allergies || undefined,
         status: 'pending',
+        ageGroup: primary?.fascia_eta || formData.ageGroup,
         companions,
         createdAt: new Date(primary?.created_at || Date.now()),
         updatedAt: new Date(primary?.created_at || Date.now()),

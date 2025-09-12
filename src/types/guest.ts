@@ -12,6 +12,7 @@ export interface Guest {
   deletedAt?: Date;
   unitId?: string; // Reference to original invitation unit
   containsPrimary?: boolean; // True if this card contains the main guest
+  ageGroup?: AgeGroup; // Age group for the main guest
 }
 
 export interface Companion {
@@ -19,6 +20,7 @@ export interface Companion {
   name: string;
   allergies?: string;
   status: GuestStatus;
+  ageGroup?: AgeGroup; // Age group for the companion
 }
 
 export type GuestCategory = 
@@ -32,12 +34,15 @@ export type GuestStatus =
   | "confirmed" 
   | "deleted";
 
+export type AgeGroup = "Adulto" | "Ragazzo" | "Bambino";
+
 export interface GuestFormData {
   name: string;
   category: GuestCategory;
   companionCount: number;
-  companions: Array<{ name: string; allergies?: string }>;
+  companions: Array<{ name: string; allergies?: string; ageGroup?: AgeGroup }>;
   allergies?: string;
+  ageGroup?: AgeGroup;
 }
 
 export interface GuestStats {
@@ -60,4 +65,10 @@ export const STATUS_LABELS: Record<GuestStatus, string> = {
   "pending": "Da confermare",
   "confirmed": "Confermato",
   "deleted": "Eliminato"
+};
+
+export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
+  "Adulto": "Adulto",
+  "Ragazzo": "Ragazzo (13-17 anni)",
+  "Bambino": "Bambino (0-12 anni)"
 };
