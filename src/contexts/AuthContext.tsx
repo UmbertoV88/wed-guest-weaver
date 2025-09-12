@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,7 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -106,8 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Sei stato disconnesso con successo.",
       });
       
-      // Navigate to landing page
-      navigate('/');
+      // Use window.location instead of navigate to avoid router context issues
+      window.location.href = '/';
       
     } catch (error) {
       console.error('Logout error:', error);
@@ -123,7 +121,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "default"
       });
       
-      navigate('/');
+      // Use window.location instead of navigate to avoid router context issues
+      window.location.href = '/';
     } finally {
       setSigningOut(false);
     }
