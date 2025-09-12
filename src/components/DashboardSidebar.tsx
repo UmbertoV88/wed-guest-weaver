@@ -211,8 +211,11 @@ const DashboardSidebar = ({
             signingOut={signingOut}
             className="w-full justify-start gap-3"
             showConfirmation={true}
+            icon={LogOut}
+            text={!collapsed ? (signingOut ? "Uscendo..." : "Esci") : undefined}
+            collapsed={collapsed}
           >
-            {!collapsed && (signingOut ? "Uscendo..." : "Esci")}
+            
           </LogoutConfirmDialog>
         )}
 
