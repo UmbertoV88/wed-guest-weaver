@@ -265,10 +265,16 @@ export const useGuests = () => {
         companions,
         createdAt: new Date(primary?.created_at || Date.now()),
         updatedAt: new Date(primary?.created_at || Date.now()),
+        containsPrimary: true,
+        unitId: String(unit.id),
       };
 
       // optimistic local update
       setGuests((prev) => [newGuest, ...prev]);
+      
+      // Reload to ensure UI is properly synced with all required flags
+      await loadGuests();
+      
       return newGuest;
     } catch (error) {
       console.error('Error adding guest (invitati):', error);
