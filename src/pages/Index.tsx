@@ -59,33 +59,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-white/80 backdrop-blur-sm border-b border-rose-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <WeddingHeader />
-            <div className="flex items-center gap-4">
-              {isWeddingOrganizer && (
-                <Badge variant="secondary" className="flex items-center gap-1 bg-gradient-to-r from-gold/20 to-primary/20 text-primary-deep border-primary/30">
-                  <Crown className="w-3 h-3" />
-                  Wedding Organizer
-                </Badge>
-              )}
-              <span className="text-sm text-gray-600">
-                Ciao, {profile?.full_name || user?.email}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Esci
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WeddingHeader 
+        user={user}
+        profile={profile}
+        isWeddingOrganizer={isWeddingOrganizer}
+        onSignOut={handleSignOut}
+      />
       
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero section with add guest form */}
