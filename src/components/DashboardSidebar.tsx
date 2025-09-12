@@ -183,7 +183,7 @@ const DashboardSidebar = ({
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 space-y-3">
+      <SidebarFooter className="p-2 space-y-3">
         {/* User Info */}
         {!collapsed && (
           <>
