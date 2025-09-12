@@ -119,6 +119,7 @@ export const useGuests = () => {
               ...baseGuest,
               name: primaryName,
               allergies: primaryNote.allergies || undefined,
+              containsPrimary: true,
               companions: companionsWithSameStatus.map(comp => ({
                 id: comp.id,
                 name: comp.name,
@@ -132,34 +133,23 @@ export const useGuests = () => {
               ...baseGuest,
               name: primaryName,
               allergies: primaryNote.allergies || undefined,
+              containsPrimary: true,
               companions: [],
             } as Guest);
           } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
-            // Companions alone (primary has different status)
-            if (companionsWithSameStatus.length === 1) {
-              // Single companion
-              const comp = companionsWithSameStatus[0];
-              transformed.push({
-                ...baseGuest,
-                name: `${comp.name} (accomp. di ${primaryName})`,
+            // Companions alone (primary has different status) - show as "Accompagnatori di {primary}"
+            transformed.push({
+              ...baseGuest,
+              name: `Accompagnatori di ${primaryName}`,
+              allergies: undefined,
+              containsPrimary: false,
+              companions: companionsWithSameStatus.map(comp => ({
+                id: comp.id,
+                name: comp.name,
                 allergies: comp.allergies,
-                companions: [],
-              } as Guest);
-            } else {
-              // Multiple companions with same status
-              const firstComp = companionsWithSameStatus[0];
-              transformed.push({
-                ...baseGuest,
-                name: `${firstComp.name} e altri (accomp. di ${primaryName})`,
-                allergies: firstComp.allergies,
-                companions: companionsWithSameStatus.slice(1).map(comp => ({
-                  id: comp.id,
-                  name: comp.name,
-                  allergies: comp.allergies,
-                  status: comp.status,
-                })),
-              } as Guest);
-            }
+                status: comp.status,
+              })),
+            } as Guest);
           }
         });
       });
@@ -313,6 +303,9 @@ export const useGuests = () => {
           .eq('unita_invito_id', unitId);
         if (error) throw error;
       }
+      
+      // Refresh immediately after group status update to realign UI
+      await loadGuests();
     } catch (error) {
       console.error('Error updating guest status (invitati):', error);
       // Revert optimistic update on error

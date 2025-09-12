@@ -11,6 +11,7 @@ export interface Guest {
   updatedAt: Date;
   deletedAt?: Date;
   unitId?: string; // Reference to original invitation unit
+  containsPrimary?: boolean; // True if this card contains the main guest
 }
 
 export interface Companion {

@@ -241,69 +241,71 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                       {CATEGORY_LABELS[guest.category]}
                     </Badge>
                     
-                    {/* Main guest action icons */}
-                    <div className="flex items-center gap-1">
-                      {guest.status === 'pending' && (
-                        <>
-                          <Button
-                            onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
-                          >
-                            <UserCheck className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDelete(guest.id, guest.name)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </>
-                      )}
-                      {guest.status === 'confirmed' && (
-                        <>
-                          <Button
-                            onClick={() => handleRevertMainOnly(guest.id, guest.name)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
-                          >
-                            <RotateCcw className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDelete(guest.id, guest.name)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </>
-                      )}
-                      {type === "deleted" && guest.status === 'deleted' && (
-                        <>
-                          <Button
-                            onClick={() => handleRestore(guest.id, guest.name)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
-                          >
-                            <RotateCcw className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handlePermanentDelete(guest.id, guest.name)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    {/* Main guest action icons - only show for cards that contain the primary guest */}
+                    {guest.containsPrimary && (
+                      <div className="flex items-center gap-1">
+                        {guest.status === 'pending' && (
+                          <>
+                            <Button
+                              onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
+                            >
+                              <UserCheck className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDelete(guest.id, guest.name)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </>
+                        )}
+                        {guest.status === 'confirmed' && (
+                          <>
+                            <Button
+                              onClick={() => handleRevertMainOnly(guest.id, guest.name)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDelete(guest.id, guest.name)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </>
+                        )}
+                        {type === "deleted" && guest.status === 'deleted' && (
+                          <>
+                            <Button
+                              onClick={() => handleRestore(guest.id, guest.name)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              onClick={() => handlePermanentDelete(guest.id, guest.name)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-2 text-sm">
@@ -432,59 +434,64 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  {type === "pending" && (
+                  {/* Show group actions only for cards that contain the primary guest */}
+                  {guest.containsPrimary && (
                     <>
-                      {/* Show "Conferma tutto" only if there are pending companions */}
-                      {guest.companions.some(comp => comp.status === 'pending') && (
+                      {type === "pending" && (
+                        <>
+                          {/* Show "Conferma tutto" only if there are pending companions */}
+                          {guest.companions.some(comp => comp.status === 'pending') && (
+                            <Button
+                              onClick={() => handleConfirmAll(guest.id, guest.name)}
+                              size="sm"
+                              className="bg-success hover:bg-success/90 text-white"
+                            >
+                              <UserCheck className="w-4 h-4 mr-1" />
+                              Conferma tutto
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => handleDelete(guest.id, guest.name)}
+                            size="sm"
+                            variant="destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Elimina tutto
+                          </Button>
+                        </>
+                      )}
+                      
+                      {type === "confirmed" && (
                         <Button
-                          onClick={() => handleConfirmAll(guest.id, guest.name)}
+                          onClick={() => handleConfirmedToending(guest.id, guest.name)}
                           size="sm"
-                          className="bg-success hover:bg-success/90 text-white"
+                          variant="outline"
                         >
-                          <UserCheck className="w-4 h-4 mr-1" />
-                          Conferma tutto
+                          <RotateCcw className="w-4 h-4 mr-1" />
+                          Riporta a da confermare
                         </Button>
                       )}
-                      <Button
-                        onClick={() => handleDelete(guest.id, guest.name)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Elimina tutto
-                      </Button>
-                    </>
-                  )}
-                  
-                  {type === "confirmed" && (
-                    <Button
-                      onClick={() => handleConfirmedToending(guest.id, guest.name)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      <RotateCcw className="w-4 h-4 mr-1" />
-                      Riporta a da confermare
-                    </Button>
-                  )}
-                  
-                  {type === "deleted" && (
-                    <>
-                      <Button
-                        onClick={() => handleRestore(guest.id, guest.name)}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <RotateCcw className="w-4 h-4 mr-1" />
-                        Ripristina
-                      </Button>
-                      <Button
-                        onClick={() => handlePermanentDelete(guest.id, guest.name)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Elimina per sempre
-                      </Button>
+                      
+                      {type === "deleted" && (
+                        <>
+                          <Button
+                            onClick={() => handleRestore(guest.id, guest.name)}
+                            size="sm"
+                            variant="outline"
+                          >
+                            <RotateCcw className="w-4 h-4 mr-1" />
+                            Ripristina
+                          </Button>
+                          <Button
+                            onClick={() => handlePermanentDelete(guest.id, guest.name)}
+                            size="sm"
+                            variant="destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Elimina per sempre
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
