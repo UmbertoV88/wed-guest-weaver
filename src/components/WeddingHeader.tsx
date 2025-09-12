@@ -92,29 +92,32 @@ const WeddingHeader = ({
       <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto">
           
-          {/* Mobile Header */}
-          <div className="flex md:hidden justify-between items-center">
-            {/* Logo Section - Mobile */}
+          {/* Unified Header - Mobile and Desktop */}
+          <div className="flex justify-between items-center">
+            {/* Logo Section */}
             <div className="flex items-center gap-3 animate-fade-in-up">
               <div className="relative">
-                <Heart className="w-6 h-6 text-primary animate-heartbeat" fill="currentColor" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gold rounded-full animate-sparkle"></div>
+                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-heartbeat" fill="currentColor" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-gold rounded-full animate-sparkle"></div>
               </div>
               <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-primary-deep to-gold bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary-deep to-gold bg-clip-text text-transparent">
                   Gestione Invitati Matrimonio
                 </h1>
+                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">
+                  Organizza il tuo giorno speciale con eleganza
+                </p>
               </div>
             </div>
 
-            {/* Mobile Menu Trigger */}
+            {/* Menu Trigger */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm" className="p-2">
-                  <Menu className="w-5 h-5" />
+                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80">
+              <SheetContent side="right" className="w-80 sm:w-96">
                 <SheetHeader>
                   <SheetTitle className="text-left">Menu</SheetTitle>
                 </SheetHeader>
@@ -228,103 +231,6 @@ const WeddingHeader = ({
                 </div>
               </SheetContent>
             </Sheet>
-          </div>
-
-          {/* Desktop Header */}
-          <div className="hidden md:flex flex-col xl:flex-row gap-4 xl:gap-6 items-center">
-            {/* Top Row: Logo and User Actions */}
-            <div className="flex flex-col sm:flex-row justify-between items-center w-full xl:w-auto gap-4">
-              {/* Logo Section */}
-              <div className="flex items-center gap-3 animate-fade-in-up">
-                <div className="relative">
-                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-primary animate-heartbeat" fill="currentColor" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-gold rounded-full animate-sparkle"></div>
-                </div>
-                <div className="text-center sm:text-left">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary-deep to-gold bg-clip-text text-transparent">
-                    Gestione Invitati Matrimonio
-                  </h1>
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">
-                    Organizza il tuo giorno speciale con eleganza
-                  </p>
-                </div>
-              </div>
-
-              {/* User Actions Section */}
-              {(user || profile || onSignOut) && (
-                <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-center sm:justify-end">
-                  {isWeddingOrganizer && (
-                    <Badge variant="secondary" className="flex items-center gap-1 bg-gradient-to-r from-gold/20 to-primary/20 text-primary-deep border-primary/30 text-xs">
-                      <Crown className="w-3 h-3" />
-                      <span className="hidden sm:inline">Wedding Organizer</span>
-                      <span className="sm:hidden">Organizer</span>
-                    </Badge>
-                  )}
-                  {(profile?.full_name || user?.email) && (
-                    <span className="text-xs sm:text-sm text-gray-600 max-w-[120px] sm:max-w-none truncate">
-                      Ciao, {profile?.full_name || user?.email}
-                    </span>
-                  )}
-                  {onSignOut && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={onSignOut}
-                      className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3"
-                    >
-                      <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Esci</span>
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Row: Wedding Date and Countdown */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 xl:ml-auto">
-              {/* Wedding Date Section */}
-              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-full shadow-soft animate-slide-in-right border-primary/20 hover:border-primary/40 transition-all duration-300 text-xs sm:text-sm"
-                  >
-                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
-                    <span className="font-medium text-primary-deep">
-                      {weddingDate 
-                        ? format(weddingDate, "dd MMM yyyy", { locale: it })
-                        : "Scegli data matrimonio"
-                      }
-                    </span>
-                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-primary/60" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="center">
-                  <CalendarComponent
-                    mode="single"
-                    selected={weddingDate}
-                    onSelect={handleDateSelect}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-
-              {/* Countdown Section */}
-              {weddingDate && countdown && (
-                <div className="px-3 sm:px-4 py-2 bg-gradient-to-r from-primary/10 to-gold/10 backdrop-blur-sm rounded-full shadow-soft border border-primary/20">
-                  <div className="text-center">
-                    <div className="text-xs sm:text-sm font-semibold text-primary-deep">
-                      {countdown}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      al grande giorno
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
