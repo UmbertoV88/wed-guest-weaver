@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, ChevronDown, ChevronLeft, ChevronRight, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart } from "lucide-react";
+import { Calendar, ChevronDown, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart } from "lucide-react";
 import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
 import { it } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Sidebar,
   SidebarContent,
@@ -45,7 +39,7 @@ const DashboardSidebar = ({
   onSignOut,
   signingOut = false
 }: DashboardSidebarProps) => {
-  const { state, toggleSidebar } = useSidebar();
+  const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [weddingDate, setWeddingDate] = useState<Date>();
   const [countdown, setCountdown] = useState<string>("");
@@ -99,35 +93,11 @@ const DashboardSidebar = ({
   ];
 
   return (
-    <TooltipProvider>
-      <Sidebar collapsible="icon">
-        <SidebarHeader className="p-4">
-          {/* Toggle Button - Always visible */}
-          <div className="flex items-center justify-between mb-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleSidebar}
-                  className="h-8 w-8 p-0 hover:bg-primary/10 hidden lg:flex"
-                >
-                  {collapsed ? (
-                    <ChevronRight className="h-4 w-4 text-primary" />
-                  ) : (
-                    <ChevronLeft className="h-4 w-4 text-primary" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>{collapsed ? "Espandi sidebar" : "Comprimi sidebar"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          {!collapsed && (
-            <>
-              {/* Wedding Date Section */}
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="p-4">
+        {!collapsed && (
+          <>
+            {/* Wedding Date Section */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <Heart className="w-4 h-4 text-primary" />
@@ -247,17 +217,8 @@ const DashboardSidebar = ({
 
       </SidebarFooter>
 
-      {/* Enhanced SidebarRail with tooltip */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SidebarRail className="bg-primary/20 hover:bg-primary/30 transition-colors duration-200 cursor-pointer" />
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p>{collapsed ? "Espandi sidebar" : "Comprimi sidebar"}</p>
-        </TooltipContent>
-      </Tooltip>
+      <SidebarRail />
     </Sidebar>
-    </TooltipProvider>
   );
 };
 
