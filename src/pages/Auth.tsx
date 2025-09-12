@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Heart } from 'lucide-react';
+import { Heart, ArrowLeft } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -77,6 +77,17 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Link to homepage */}
+        <div className="mb-6">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-rose-600 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Torna alla pagina principale
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Heart className="w-8 h-8 text-rose-500" />
@@ -174,9 +185,17 @@ const Auth = () => {
           </CardContent>
         </Card>
         
-        <p className="text-xs text-gray-500 text-center mt-4">
-          I tuoi dati sono protetti e sicuri. Solo gli organizzatori del matrimonio possono accedere alle informazioni degli invitati.
-        </p>
+        <div className="text-center mt-6 space-y-2">
+          <p className="text-xs text-gray-500">
+            I tuoi dati sono protetti e sicuri. Solo gli organizzatori del matrimonio possono accedere alle informazioni degli invitati.
+          </p>
+          <Link 
+            to="/" 
+            className="inline-block text-sm text-rose-600 hover:text-rose-700 transition-colors"
+          >
+            Scopri di più sul nostro Wedding Planner
+          </Link>
+        </div>
       </div>
     </div>
   );
