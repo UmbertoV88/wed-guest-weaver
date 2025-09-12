@@ -15,7 +15,7 @@ const CommonHeader = ({ showAuthButtons = false, className = "" }: CommonHeaderP
   const logoHref = user ? "/dashboard" : "/";
 
   return (
-    <nav className={`relative z-10 bg-white/80 backdrop-blur-sm border-b border-primary/10 ${className}`}>
+    <nav className={`relative z-20 bg-white/80 backdrop-blur-sm border-b border-primary/10 ${className}`}>
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to={logoHref} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Heart className="w-6 h-6 text-primary" fill="currentColor" />
