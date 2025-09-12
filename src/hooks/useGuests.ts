@@ -353,6 +353,9 @@ export const useGuests = () => {
         .update({ note: buildNote({ allergies: null, deleted_at: null }) })
         .eq('unita_invito_id', unitId);
       if (error) throw error;
+      
+      // Reload to get the latest state and fix companion status display
+      await loadGuests();
     } catch (error) {
       console.error('Error restoring guest (invitati):', error);
       // Revert optimistic update on error
