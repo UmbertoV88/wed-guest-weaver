@@ -55,19 +55,20 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <DashboardSidebar 
-          user={user}
-          profile={profile}
-          isWeddingOrganizer={isWeddingOrganizer}
-          onSignOut={handleSignOut}
-          signingOut={signingOut}
-        />
+      <div className="min-h-screen flex flex-col w-full bg-background">
+        <CommonHeader />
         
-        <SidebarInset className="flex-1">
-          <CommonHeader />
+        <div className="flex flex-1 w-full">
+          <DashboardSidebar 
+            user={user}
+            profile={profile}
+            isWeddingOrganizer={isWeddingOrganizer}
+            onSignOut={handleSignOut}
+            signingOut={signingOut}
+          />
           
-          <main className="container mx-auto px-4 py-8 space-y-8">
+          <SidebarInset className="flex-1">
+            <main className="container mx-auto px-4 py-8 space-y-8">
             {/* Hero section with add guest form */}
             <section className="text-center space-y-6">
               <div className="space-y-3 animate-fade-in-up">
@@ -138,8 +139,9 @@ const Index = () => {
                 </p>
               </div>
             </footer>
-          </main>
-        </SidebarInset>
+            </main>
+          </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   );
