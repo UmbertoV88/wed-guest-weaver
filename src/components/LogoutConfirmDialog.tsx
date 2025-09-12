@@ -12,6 +12,7 @@ interface LogoutConfirmDialogProps {
   size?: "default" | "sm" | "lg";
   children?: React.ReactNode;
   showConfirmation?: boolean;
+  collapsed?: boolean;
 }
 
 export const LogoutConfirmDialog = ({
@@ -21,7 +22,8 @@ export const LogoutConfirmDialog = ({
   variant = "outline",
   size = "default",
   children,
-  showConfirmation = true
+  showConfirmation = true,
+  collapsed = false
 }: LogoutConfirmDialogProps) => {
   const [showDialog, setShowDialog] = useState(false);
 
@@ -45,13 +47,14 @@ export const LogoutConfirmDialog = ({
         size={size}
         className={cn(
           "gap-2 text-destructive border-destructive/20 hover:bg-destructive/10",
+          collapsed && "justify-center px-2",
           className
         )}
         onClick={handleLogoutClick}
         disabled={signingOut}
       >
         <LogOut className={cn("w-4 h-4", signingOut && "animate-spin")} />
-        {children || (signingOut ? "Uscendo..." : "Esci")}
+        {!collapsed && (children || (signingOut ? "Uscendo..." : "Esci"))}
       </Button>
 
       <ConfirmDialog
