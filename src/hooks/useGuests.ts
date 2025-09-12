@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Guest, GuestFormData, GuestStats, GuestStatus, GuestCategory } from '@/types/guest';
+import { Guest, GuestFormData, GuestStats, GuestStatus, GuestCategory, AgeGroup } from '@/types/guest';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,6 +8,12 @@ const mapDbCategoryToGuestCategory = (value?: string | null): GuestCategory => {
   const allowed: GuestCategory[] = ['family-his', 'family-hers', 'friends', 'colleagues'];
   if (value && allowed.includes(value as GuestCategory)) return value as GuestCategory;
   return 'friends';
+};
+
+const mapDbAgeGroupToAgeGroup = (value?: string | null): AgeGroup | undefined => {
+  const allowed: AgeGroup[] = ['adulto', 'ragazzo', 'bambino'];
+  if (value && allowed.includes(value as AgeGroup)) return value as AgeGroup;
+  return undefined;
 };
 
 const parseNote = (note?: string | null): { allergies?: string | null; deleted_at?: string | null } => {
@@ -81,6 +87,7 @@ export const useGuests = () => {
               name: r.nome_visualizzato || [r.nome, r.cognome].filter(Boolean).join(' '),
               allergies: n.allergies || undefined,
               status: companionStatus,
+              ageGroup: mapDbAgeGroupToAgeGroup(r.fascia_eta),
               dbRow: r, // Keep reference to original data
             };
           });
@@ -120,11 +127,13 @@ export const useGuests = () => {
               name: primaryName,
               allergies: primaryNote.allergies || undefined,
               containsPrimary: true,
+              ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta),
               companions: companionsWithSameStatus.map(comp => ({
                 id: comp.id,
                 name: comp.name,
                 allergies: comp.allergies,
                 status: comp.status,
+                ageGroup: comp.ageGroup,
               })),
             } as Guest);
           } else if (isForPrimary && companionsWithSameStatus.length === 0) {
@@ -134,6 +143,7 @@ export const useGuests = () => {
               name: primaryName,
               allergies: primaryNote.allergies || undefined,
               containsPrimary: true,
+              ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta),
               companions: [],
             } as Guest);
           } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
@@ -148,6 +158,7 @@ export const useGuests = () => {
                 name: comp.name,
                 allergies: comp.allergies,
                 status: comp.status,
+                ageGroup: comp.ageGroup,
               })),
             } as Guest);
           }
@@ -205,6 +216,7 @@ export const useGuests = () => {
           is_principale: true,
           nome_visualizzato: formData.name,
           gruppo: formData.category,
+          fascia_eta: formData.ageGroup || null,
           confermato: false,
           note: buildNote({ allergies: formData.allergies ?? null, deleted_at: null }),
         },
@@ -214,6 +226,7 @@ export const useGuests = () => {
           is_principale: false,
           nome_visualizzato: c.name,
           gruppo: formData.category,
+          fascia_eta: c.ageGroup || null,
           confermato: false,
           note: buildNote({ allergies: c.allergies ?? null, deleted_at: null }),
         })),
@@ -236,6 +249,7 @@ export const useGuests = () => {
               name: r.nome_visualizzato,
               allergies: n.allergies || undefined,
               status: 'pending' as GuestStatus,
+              ageGroup: mapDbAgeGroupToAgeGroup(r.fascia_eta),
             };
           });
 
@@ -246,6 +260,7 @@ export const useGuests = () => {
         name: primary?.nome_visualizzato || formData.name,
         category: mapDbCategoryToGuestCategory(primary?.gruppo || formData.category),
         allergies: note.allergies || undefined,
+        ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta) || formData.ageGroup,
         status: 'pending',
         companions,
         createdAt: new Date(primary?.created_at || Date.now()),

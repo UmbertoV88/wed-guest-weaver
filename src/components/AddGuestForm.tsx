@@ -15,7 +15,7 @@ import {
   Check,
   X
 } from "lucide-react";
-import { GuestFormData, CATEGORY_LABELS, GuestCategory, Guest } from "@/types/guest";
+import { GuestFormData, CATEGORY_LABELS, GuestCategory, Guest, AGE_GROUP_LABELS, AgeGroup } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddGuestFormProps {
@@ -30,7 +30,8 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
     category: '' as GuestCategory,
     companionCount: 0,
     companions: [],
-    allergies: ''
+    allergies: '',
+    ageGroup: undefined
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -50,6 +51,9 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
         } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(formData.name.trim())) {
           newErrors.name = 'Il nome può contenere solo lettere, spazi, apostrofi e trattini';
         }
+        if (!formData.ageGroup) {
+          newErrors.ageGroup = 'Seleziona la fascia d\'età';
+        }
         break;
       
       case 2:
@@ -65,6 +69,9 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               newErrors[`companion-${index}`] = 'Il nome dell\'accompagnatore è obbligatorio';
             } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(companion.name.trim())) {
               newErrors[`companion-${index}`] = 'Nome non valido';
+            }
+            if (!companion.ageGroup) {
+              newErrors[`companion-age-${index}`] = 'Seleziona la fascia d\'età';
             }
           });
         }
@@ -87,12 +94,12 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
 
   const updateCompanions = (count: number) => {
     const companions = Array.from({ length: count }, (_, index) => 
-      formData.companions[index] || { name: '', allergies: '' }
+      formData.companions[index] || { name: '', allergies: '', ageGroup: undefined }
     );
     setFormData(prev => ({ ...prev, companionCount: count, companions }));
   };
 
-  const updateCompanion = (index: number, field: 'name' | 'allergies', value: string) => {
+  const updateCompanion = (index: number, field: 'name' | 'allergies' | 'ageGroup', value: string | AgeGroup) => {
     setFormData(prev => ({
       ...prev,
       companions: prev.companions.map((comp, i) => 
@@ -107,7 +114,8 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
       category: '' as GuestCategory,
       companionCount: 0,
       companions: [],
-      allergies: ''
+      allergies: '',
+      ageGroup: undefined
     });
     setCurrentStep(1);
     setErrors({});
@@ -155,6 +163,24 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               />
               {errors.name && (
                 <p className="text-destructive text-sm mt-1">{errors.name}</p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="ageGroup">Fascia d'età *</Label>
+              <select
+                id="ageGroup"
+                value={formData.ageGroup || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value as AgeGroup }))}
+                className={`w-full px-3 py-2 border rounded-md bg-background ${errors.ageGroup ? 'border-destructive' : 'border-border'}`}
+              >
+                <option value="">Seleziona fascia d'età</option>
+                {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+              {errors.ageGroup && (
+                <p className="text-destructive text-sm mt-1">{errors.ageGroup}</p>
               )}
             </div>
           </div>
@@ -216,19 +242,40 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
 
             {formData.companionCount > 0 && (
               <div className="space-y-3">
-                <h4 className="font-medium">Nome degli accompagnatori:</h4>
+                <h4 className="font-medium">Nome e fascia d'età accompagnatori:</h4>
                 {formData.companions.map((companion, index) => (
-                  <div key={index}>
-                    <Label>Accompagnatore {index + 1}</Label>
-                    <Input
-                      value={companion.name}
-                      onChange={(e) => updateCompanion(index, 'name', e.target.value)}
-                      placeholder="Nome completo"
-                      className={errors[`companion-${index}`] ? 'border-destructive' : ''}
-                    />
-                    {errors[`companion-${index}`] && (
-                      <p className="text-destructive text-sm mt-1">{errors[`companion-${index}`]}</p>
-                    )}
+                  <div key={index} className="space-y-3 p-3 border rounded-lg">
+                    <Label className="text-sm font-medium">Accompagnatore {index + 1}</Label>
+                    <div>
+                      <Label htmlFor={`companion-name-${index}`}>Nome completo *</Label>
+                      <Input
+                        id={`companion-name-${index}`}
+                        value={companion.name}
+                        onChange={(e) => updateCompanion(index, 'name', e.target.value)}
+                        placeholder="Nome completo"
+                        className={errors[`companion-${index}`] ? 'border-destructive' : ''}
+                      />
+                      {errors[`companion-${index}`] && (
+                        <p className="text-destructive text-sm mt-1">{errors[`companion-${index}`]}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor={`companion-age-${index}`}>Fascia d'età *</Label>
+                      <select
+                        id={`companion-age-${index}`}
+                        value={companion.ageGroup || ''}
+                        onChange={(e) => updateCompanion(index, 'ageGroup', e.target.value as AgeGroup)}
+                        className={`w-full px-3 py-2 border rounded-md bg-background ${errors[`companion-age-${index}`] ? 'border-destructive' : 'border-border'}`}
+                      >
+                        <option value="">Seleziona fascia d'età</option>
+                        {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
+                          <option key={key} value={key}>{label}</option>
+                        ))}
+                      </select>
+                      {errors[`companion-age-${index}`] && (
+                        <p className="text-destructive text-sm mt-1">{errors[`companion-age-${index}`]}</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -290,13 +337,20 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                   <strong>Nome:</strong> {formData.name}
                 </div>
                 <div>
+                  <strong>Fascia d'età:</strong> {formData.ageGroup ? AGE_GROUP_LABELS[formData.ageGroup] : 'Non specificata'}
+                </div>
+                <div>
                   <strong>Categoria:</strong> {CATEGORY_LABELS[formData.category]}
                 </div>
                 <div>
                   <strong>Accompagnatori:</strong> {formData.companionCount}
                   {formData.companions.length > 0 && (
-                    <div className="ml-4 text-sm text-muted-foreground">
-                      {formData.companions.map(comp => comp.name).join(', ')}
+                    <div className="ml-4 text-sm text-muted-foreground space-y-1">
+                      {formData.companions.map((comp, idx) => (
+                        <div key={idx}>
+                          {comp.name} ({comp.ageGroup ? AGE_GROUP_LABELS[comp.ageGroup] : 'Fascia d\'età non specificata'})
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
