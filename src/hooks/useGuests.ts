@@ -556,23 +556,26 @@ export const useGuests = () => {
   const getGuestsByStatus = (status: GuestStatus) => guests.filter((g) => g.status === status);
 
   const getStats = (): GuestStats => {
-    // Count people directly from guests list, but avoid double counting
-    const peopleByStatus = { confirmed: 0, pending: 0, deleted: 0 };
-    const peopleByCategory = {} as Record<string, number>;
+    // Count people accurately without double-counting across split cards
+    const peopleByStatus: Record<Exclude<GuestStatus, never>, number> = { confirmed: 0, pending: 0, deleted: 0 } as any;
+    const peopleByCategory: Record<string, number> = {};
     const uniqueUnits = new Set<string>();
     
     guests.forEach(guest => {
-      uniqueUnits.add(guest.unitId || guest.id.split('_')[0]);
-      
-      // Count the main person represented by this guest entry
-      if (guest.status !== 'deleted') {
-        peopleByStatus[guest.status]++;
-        peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
-      } else {
-        peopleByStatus.deleted++;
+      const unitKey = guest.unitId || guest.id.split('_')[0];
+      uniqueUnits.add(unitKey);
+
+      // Count main person only if this card contains the primary (default true when undefined)
+      if (guest.containsPrimary !== false) {
+        if (guest.status !== 'deleted') {
+          peopleByStatus[guest.status]++;
+          peopleByCategory[guest.category] = (peopleByCategory[guest.category] || 0) + 1;
+        } else {
+          peopleByStatus.deleted++;
+        }
       }
       
-      // Count companions in this entry
+      // Count companions listed in this card
       guest.companions.forEach(comp => {
         if (comp.status !== 'deleted') {
           peopleByStatus[comp.status]++;
@@ -583,7 +586,7 @@ export const useGuests = () => {
       });
     });
 
-    const total = uniqueUnits.size;
+    const total = uniqueUnits.size; // number of invitation units (main invites)
     const totalWithCompanions = peopleByStatus.confirmed + peopleByStatus.pending;
 
     return {
