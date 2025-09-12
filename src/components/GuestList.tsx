@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS, AgeGroup } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface GuestListProps {
   guests: Guest[];
@@ -38,6 +39,17 @@ interface GuestListProps {
 const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: "",
+    description: "",
+    onConfirm: () => {}
+  });
   const { toast } = useToast();
 
   // Filter guests based on search and category
@@ -100,22 +112,27 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   };
 
   const handlePermanentDelete = async (guestId: string, guestName: string) => {
-    if (window.confirm(`Sei sicuro di voler eliminare definitivamente ${guestName}? Questa azione non può essere annullata.`)) {
-      try {
-        await permanentlyDeleteGuest(guestId);
-        toast({
-          title: "Invitato eliminato definitivamente",
-          description: `${guestName} è stato rimosso permanentemente.`,
-          variant: "destructive",
-        });
-      } catch (error) {
-        toast({
-          title: "Errore",
-          description: "Si è verificato un errore durante l'eliminazione permanente.",
-          variant: "destructive",
-        });
+    setDeleteDialog({
+      open: true,
+      title: "Elimina definitivamente invitato",
+      description: `Sei sicuro di voler eliminare definitivamente ${guestName}? Questa azione non può essere annullata.`,
+      onConfirm: async () => {
+        try {
+          await permanentlyDeleteGuest(guestId);
+          toast({
+            title: "Invitato eliminato definitivamente",
+            description: `${guestName} è stato rimosso permanentemente.`,
+            variant: "destructive",
+          });
+        } catch (error) {
+          toast({
+            title: "Errore",
+            description: "Si è verificato un errore durante l'eliminazione permanente.",
+            variant: "destructive",
+          });
+        }
       }
-    }
+    });
   };
 
   const handleRevertMainOnly = async (guestId: string, guestName: string) => {
@@ -405,19 +422,22 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                       >
                                         <RotateCcw className="w-3 h-3" />
                                       </Button>
-                                      <Button
-                                        onClick={() => {
-                                          if (window.confirm(`Eliminare definitivamente ${companion.name}?`)) {
-                                            permanentlyDeleteCompanion(guest.id, companion.id);
-                                          }
-                                        }}
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
-                                        disabled={companionLoading === companion.id}
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </Button>
+                                       <Button
+                                         onClick={() => {
+                                           setDeleteDialog({
+                                             open: true,
+                                             title: "Elimina definitivamente accompagnatore",
+                                             description: `Eliminare definitivamente ${companion.name}?`,
+                                             onConfirm: () => permanentlyDeleteCompanion(guest.id, companion.id)
+                                           });
+                                         }}
+                                         size="sm"
+                                         variant="ghost"
+                                         className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                         disabled={companionLoading === companion.id}
+                                       >
+                                         <Trash2 className="w-3 h-3" />
+                                       </Button>
                                     </>
                                   )}
                                </div>
@@ -512,6 +532,17 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
           ))}
         </div>
       )}
+      
+      <ConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
+        title={deleteDialog.title}
+        description={deleteDialog.description}
+        confirmText="Elimina"
+        cancelText="Annulla"
+        onConfirm={deleteDialog.onConfirm}
+        variant="destructive"
+      />
     </div>
   );
 };
