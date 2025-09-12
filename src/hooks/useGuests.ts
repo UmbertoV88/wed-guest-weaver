@@ -11,7 +11,7 @@ const mapDbCategoryToGuestCategory = (value?: string | null): GuestCategory => {
 };
 
 const mapDbAgeGroupToAgeGroup = (value?: string | null): AgeGroup | undefined => {
-  const allowed: AgeGroup[] = ['adulto', 'ragazzo', 'bambino'];
+  const allowed: AgeGroup[] = ['Adulto', 'Ragazzo', 'Bambino'];
   if (value && allowed.includes(value as AgeGroup)) return value as AgeGroup;
   return undefined;
 };

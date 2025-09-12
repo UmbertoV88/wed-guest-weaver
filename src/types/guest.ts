@@ -35,9 +35,9 @@ export type GuestStatus =
   | "deleted";
 
 export type AgeGroup = 
-  | "adulto"
-  | "ragazzo" 
-  | "bambino";
+  | "Adulto"
+  | "Ragazzo" 
+  | "Bambino";
 
 export interface GuestFormData {
   name: string;
@@ -71,7 +71,7 @@ export const STATUS_LABELS: Record<GuestStatus, string> = {
 };
 
 export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
-  "adulto": "Adulto",
-  "ragazzo": "Ragazzo",
-  "bambino": "Bambino"
+  "Adulto": "Adulto",
+  "Ragazzo": "Ragazzo",
+  "Bambino": "Bambino"
 };
