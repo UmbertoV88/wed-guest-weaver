@@ -69,6 +69,6 @@ export const STATUS_LABELS: Record<GuestStatus, string> = {
 
 export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
   "Adulto": "Adulto",
-  "Ragazzo": "Ragazzo (13-17 anni)",
-  "Bambino": "Bambino (0-12 anni)"
+  "Ragazzo": "Ragazzo",
+  "Bambino": "Bambino"
 };

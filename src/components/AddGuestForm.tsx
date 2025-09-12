@@ -37,7 +37,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
 
   const { toast } = useToast();
 
-  const totalSteps = 6;
+  const totalSteps = 5;
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
@@ -51,6 +51,9 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
         } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(formData.name.trim())) {
           newErrors.name = 'Il nome può contenere solo lettere, spazi, apostrofi e trattini';
         }
+        if (!formData.ageGroup) {
+          newErrors.ageGroup = 'Seleziona la fascia d\'età';
+        }
         break;
       
       case 2:
@@ -60,12 +63,6 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
         break;
       
       case 3:
-        if (!formData.ageGroup) {
-          newErrors.ageGroup = 'Seleziona la fascia d\'età';
-        }
-        break;
-      
-      case 4:
         if (formData.companionCount > 0) {
           formData.companions.forEach((companion, index) => {
             if (!companion.name.trim()) {
@@ -78,6 +75,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
             }
           });
         }
+        break;
         break;
     }
 
@@ -126,7 +124,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   };
 
   const handleSubmit = async () => {
-    if (validateStep(5)) {
+    if (validateStep(4)) {
       try {
         await addGuest(formData);
         toast({
@@ -166,6 +164,26 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               />
               {errors.name && (
                 <p className="text-destructive text-sm mt-1">{errors.name}</p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="ageGroup">Fascia d'età *</Label>
+              <select
+                id="ageGroup"
+                value={formData.ageGroup || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value as AgeGroup }))}
+                className={`w-full px-3 py-2 border rounded-md bg-background ${
+                  errors.ageGroup ? 'border-destructive' : 'border-border'
+                }`}
+              >
+                <option value="">Seleziona fascia d'età</option>
+                {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+              {errors.ageGroup && (
+                <p className="text-destructive text-sm mt-1">{errors.ageGroup}</p>
               )}
             </div>
           </div>
@@ -233,7 +251,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           </div>
         );
 
-      case 4:
+      case 3:
         return (
           <div className="space-y-4">
             <div className="text-center mb-6">
@@ -301,7 +319,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           </div>
         );
 
-      case 5:
+      case 4:
         return (
           <div className="space-y-4">
             <div className="text-center mb-6">
@@ -385,7 +403,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           </div>
         );
 
-      case 6:
+      case 5:
         return (
           <div className="space-y-4">
             <div className="text-center mb-6">
