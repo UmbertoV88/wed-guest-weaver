@@ -209,16 +209,10 @@ const DashboardSidebar = ({
               onSignOut();
             }}
             signingOut={signingOut}
+            className="w-full justify-start gap-3"
             showConfirmation={true}
           >
-            <Button
-              variant="ghost"
-              className={`w-full h-10 ${collapsed ? 'justify-center px-2' : 'justify-start gap-3 px-4'}`}
-              disabled={signingOut}
-            >
-              <LogOut className="w-5 h-5" />
-              {!collapsed && <span>{signingOut ? "Uscendo..." : "Esci"}</span>}
-            </Button>
+            {!collapsed && (signingOut ? "Uscendo..." : "Esci")}
           </LogoutConfirmDialog>
         )}
 
