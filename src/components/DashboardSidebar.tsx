@@ -93,7 +93,7 @@ const DashboardSidebar = ({
   ];
 
   return (
-    <Sidebar collapsible="icon" className="top-16">
+    <Sidebar collapsible="icon" className="top-0">
       <SidebarHeader className="p-4">
         {!collapsed && (
           <>
