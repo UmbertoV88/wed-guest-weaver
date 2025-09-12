@@ -124,7 +124,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   };
 
   const handleSubmit = async () => {
-    if (validateStep(4)) {
+    if (validateStep(5)) {
       try {
         await addGuest(formData);
         toast({
