@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Heart, Users, Calendar, CheckCircle, Star, Clock, Shield, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import CommonHeader from "@/components/CommonHeader";
 
 const Landing = () => {
   const [email, setEmail] = useState("");
@@ -24,27 +25,7 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-elegant">
-      {/* Header Navigation */}
-      <nav className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-primary/10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="w-6 h-6 text-primary" fill="currentColor" />
-            <span className="text-xl font-bold text-primary-deep">Wedding Planner</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link to="/auth?tab=signin">
-              <Button variant="ghost" className="text-primary-deep hover:text-primary">
-                Accedi
-              </Button>
-            </Link>
-            <Link to="/auth?tab=signup">
-              <Button className="bg-primary hover:bg-primary/90 text-white">
-                Registrati
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <CommonHeader showAuthButtons={true} />
 
       {/* Hero Section */}
       <header className="relative overflow-hidden">
