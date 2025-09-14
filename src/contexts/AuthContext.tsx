@@ -3,6 +3,8 @@ import { User, Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useIdleTimer } from '@/hooks/useIdleTimer';
+import { SessionWarningDialog } from '@/components/SessionWarningDialog';
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +14,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: (showConfirmation?: boolean) => Promise<void>;
+  extendSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
+  const [showSessionWarning, setShowSessionWarning] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -128,6 +132,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const handleIdleWarning = () => {
+    if (user && !signingOut) {
+      setShowSessionWarning(true);
+    }
+  };
+
+  const handleIdleLogout = async () => {
+    if (user && !signingOut) {
+      setShowSessionWarning(false);
+      toast({
+        title: "Sessione scaduta",
+        description: "Sei stato disconnesso per inattività.",
+        variant: "destructive"
+      });
+      await signOut(false);
+    }
+  };
+
+  const extendSession = () => {
+    setShowSessionWarning(false);
+    // Reset the idle timer by calling resetTimer from useIdleTimer
+    idleTimer.resetTimer();
+    toast({
+      title: "Sessione estesa",
+      description: "La tua sessione è stata estesa con successo.",
+    });
+  };
+
+  // Initialize idle timer
+  const idleTimer = useIdleTimer({
+    timeout: 20 * 60 * 1000, // 20 minutes
+    warningTime: 5 * 60 * 1000, // 5 minutes warning
+    onWarning: handleIdleWarning,
+    onIdle: handleIdleLogout,
+    enabled: !!user && !loading && !signingOut
+  });
+
   const value = {
     user,
     session,
@@ -136,7 +177,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
+    extendSession,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <SessionWarningDialog
+        open={showSessionWarning}
+        onExtendSession={extendSession}
+        onLogout={() => handleIdleLogout()}
+        warningTimeMs={5 * 60 * 1000} // 5 minutes
+      />
+    </AuthContext.Provider>
+  );
 };
