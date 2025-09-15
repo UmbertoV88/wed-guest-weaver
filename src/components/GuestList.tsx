@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Filter
 } from "lucide-react";
+import EditGuestForm from "@/components/EditGuestForm";
 import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS, AgeGroup } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -28,6 +29,7 @@ interface GuestListProps {
   restoreGuest: (guestId: string) => Promise<any>;
   deleteGuest: (guestId: string) => Promise<any>;
   permanentlyDeleteGuest: (guestId: string) => Promise<any>;
+  updateGuest: (guestId: string, formData: any) => Promise<any>;
   updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<any>;
   updateCompanionStatus: (guestId: string, companionId: string, status: GuestStatus) => Promise<any>;
   confirmCompanion: (guestId: string, companionId: string) => Promise<any>;
@@ -36,7 +38,7 @@ interface GuestListProps {
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -266,6 +268,9 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                     {/* Main guest action icons - only show for cards that contain the primary guest */}
                     {guest.containsPrimary && (
                       <div className="flex items-center gap-1">
+                        {/* Edit button - available for all statuses */}
+                        <EditGuestForm guest={guest} updateGuest={updateGuest} />
+                        
                         {guest.status === 'pending' && (
                           <>
                             <Button

@@ -29,6 +29,7 @@ const DashboardLayout = () => {
     restoreGuest, 
     deleteGuest, 
     permanentlyDeleteGuest, 
+    updateGuest,
     updateGuestStatus, 
     updateCompanionStatus,
     confirmCompanion, 
@@ -89,6 +90,7 @@ const DashboardLayout = () => {
                 restoreGuest={restoreGuest}
                 deleteGuest={deleteGuest}
                 permanentlyDeleteGuest={permanentlyDeleteGuest}
+                updateGuest={updateGuest}
                 updateGuestStatus={updateGuestStatus}
                 updateCompanionStatus={updateCompanionStatus}
                 confirmCompanion={confirmCompanion}

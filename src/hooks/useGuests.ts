@@ -195,7 +195,7 @@ export const useGuests = () => {
     };
   }, [loadGuests]);
 
-  const addGuest = async (formData: GuestFormData): Promise<Guest> => {
+const addGuest = async (formData: GuestFormData): Promise<Guest> => {
     if (!user) throw new Error('User not authenticated');
     
     try {
@@ -278,6 +278,105 @@ export const useGuests = () => {
       return newGuest;
     } catch (error) {
       console.error('Error adding guest (invitati):', error);
+      throw error;
+    }
+  };
+
+  const updateGuest = async (guestId: string, formData: GuestFormData): Promise<void> => {
+    if (!user) throw new Error('User not authenticated');
+    
+    try {
+      // Extract unitId from composite ID (format: "unitId_status")
+      const unitId = parseInt(guestId.split('_')[0], 10);
+      if (Number.isNaN(unitId)) throw new Error('Invalid guest id');
+
+      // 1) Update primary guest
+      const { error: updatePrimaryError } = await supabase
+        .from('invitati')
+        .update({
+          nome_visualizzato: formData.name,
+          gruppo: formData.category,
+          fascia_eta: formData.ageGroup || null,
+          note: buildNote({ allergies: formData.allergies ?? null, deleted_at: null }),
+        })
+        .eq('unita_invito_id', unitId)
+        .eq('is_principale', true);
+
+      if (updatePrimaryError) throw updatePrimaryError;
+
+      // 2) Get existing companions to determine what to add/update/delete
+      const { data: existingCompanions, error: fetchError } = await supabase
+        .from('invitati')
+        .select('*')
+        .eq('unita_invito_id', unitId)
+        .eq('is_principale', false);
+
+      if (fetchError) throw fetchError;
+
+      const existingIds = (existingCompanions || []).map(c => c.id);
+
+      // 3) Handle new companions (add them)
+      const newCompanions = formData.companions.slice(existingCompanions?.length || 0);
+      if (newCompanions.length > 0) {
+        const newRows = newCompanions.map((c) => ({
+          unita_invito_id: unitId,
+          user_id: user.id,
+          is_principale: false,
+          nome_visualizzato: c.name,
+          gruppo: formData.category,
+          fascia_eta: c.ageGroup || null,
+          confermato: false,
+          note: buildNote({ allergies: c.allergies ?? null, deleted_at: null }),
+        }));
+
+        const { error: insertError } = await supabase
+          .from('invitati')
+          .insert(newRows);
+
+        if (insertError) throw insertError;
+      }
+
+      // 4) Update existing companions
+      const existingCompanionsToUpdate = formData.companions.slice(0, existingCompanions?.length || 0);
+      for (let i = 0; i < existingCompanionsToUpdate.length; i++) {
+        const companion = existingCompanionsToUpdate[i];
+        const existingCompanion = existingCompanions?.[i];
+        
+        if (existingCompanion) {
+          // Restore if it was deleted, then update
+          const { error: updateError } = await supabase
+            .from('invitati')
+            .update({
+              nome_visualizzato: companion.name,
+              gruppo: formData.category,
+              fascia_eta: companion.ageGroup || null,
+              note: buildNote({ allergies: companion.allergies ?? null, deleted_at: null }),
+            })
+            .eq('id', existingCompanion.id);
+
+          if (updateError) throw updateError;
+        }
+      }
+
+      // 5) Soft delete companions that were removed (mark as deleted if user reduced companion count)
+      if (existingCompanions && existingCompanions.length > formData.companions.length) {
+        const companionsToDelete = existingCompanions.slice(formData.companions.length);
+        const deletedAt = new Date().toISOString();
+        
+        for (const companionToDelete of companionsToDelete) {
+          const { error: deleteError } = await supabase
+            .from('invitati')
+            .update({ note: buildNote({ allergies: null, deleted_at: deletedAt }) })
+            .eq('id', companionToDelete.id);
+
+          if (deleteError) throw deleteError;
+        }
+      }
+
+      // Reload guests to reflect changes
+      await loadGuests();
+    } catch (error) {
+      console.error('Error updating guest:', error);
       throw error;
     }
   };
@@ -643,5 +742,6 @@ export const useGuests = () => {
     permanentlyDeleteCompanion,
     getGuestsByStatus,
     getStats,
+    updateGuest,
   };
 };
