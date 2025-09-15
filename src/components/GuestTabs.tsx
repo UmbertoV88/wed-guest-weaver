@@ -77,7 +77,11 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
         </TabsList>
 
         <div className="mt-6">
-          <GuestStats stats={stats} />
+          <GuestStats 
+            stats={stats} 
+            getAllGuests={() => [...pendingGuests, ...confirmedGuests, ...deletedGuests]}
+            getGuestsByStatus={getGuestsByStatus}
+          />
         </div>
 
         <TabsContent value="pending" className="mt-6 animate-fade-in-up">

@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Users, UserCheck, Calendar, Crown } from "lucide-react";
-import { CATEGORY_LABELS } from "@/types/guest";
+import { CATEGORY_LABELS, Guest, GuestStatus } from "@/types/guest";
+import ExportButton from "./ExportButton";
 
 interface GuestStatsProps {
   stats: {
@@ -11,9 +12,11 @@ interface GuestStatsProps {
     deleted: number;
     byCategory: Record<string, number>;
   };
+  getAllGuests: () => Guest[];
+  getGuestsByStatus: (status: GuestStatus) => Guest[];
 }
 
-const GuestStats = ({ stats }: GuestStatsProps) => {
+const GuestStats = ({ stats, getAllGuests, getGuestsByStatus }: GuestStatsProps) => {
 
   const statCards = [
     {
@@ -51,7 +54,17 @@ const GuestStats = ({ stats }: GuestStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <ExportButton 
+          getAllGuests={getAllGuests}
+          getGuestsByStatus={getGuestsByStatus}
+        />
+      </div>
+      
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
@@ -100,6 +113,7 @@ const GuestStats = ({ stats }: GuestStatsProps) => {
           </div>
         </Card>
       )}
+      </div>
     </div>
   );
 };
