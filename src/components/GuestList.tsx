@@ -191,7 +191,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     <div className="space-y-4">
       {/* Search and filters */}
       <Card className="p-4 shadow-soft border-primary/10">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -199,17 +199,17 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                 placeholder="Cerca invitati..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
+            <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm w-full sm:w-auto"
             >
               <option value="all">Tutte le categorie</option>
               {categories.map(category => (
@@ -250,24 +250,29 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
               className="p-4 shadow-soft border-primary/10 hover:shadow-elegant transition-romantic animate-fade-in-up"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-col gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      {guest.name}
-                    </h3>
-                    <Badge variant="secondary">
-                      {CATEGORY_LABELS[guest.category]}
-                    </Badge>
-                    {guest.ageGroup && (
-                      <Badge variant="outline" className="text-xs">
-                        {AGE_GROUP_LABELS[guest.ageGroup]}
-                      </Badge>
-                    )}
+                  {/* Mobile-first responsive header with name and badges */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-lg font-semibold text-foreground break-words">
+                        {guest.name}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {CATEGORY_LABELS[guest.category]}
+                        </Badge>
+                        {guest.ageGroup && (
+                          <Badge variant="outline" className="text-xs">
+                            {AGE_GROUP_LABELS[guest.ageGroup]}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                     
-                    {/* Main guest action icons - only show for cards that contain the primary guest */}
+                    {/* Action buttons - responsive layout */}
                     {guest.containsPrimary && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap sm:ml-auto mt-2 sm:mt-0">
                         {/* Edit button - available for all statuses */}
                         <EditGuestForm guest={guest} updateGuest={updateGuest} />
                         
@@ -277,17 +282,19 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                               onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
+                              className="h-8 px-3 text-xs bg-success/10 hover:bg-success/20 text-success"
                             >
-                              <UserCheck className="w-3 h-3" />
+                              <UserCheck className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Conferma</span>
                             </Button>
                             <Button
                               onClick={() => handleDelete(guest.id, guest.name)}
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                              className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Elimina</span>
                             </Button>
                           </>
                         )}
@@ -297,17 +304,19 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                               onClick={() => handleRevertMainOnly(guest.id, guest.name)}
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                              className="h-8 px-3 text-xs text-primary hover:bg-primary/10"
                             >
-                              <RotateCcw className="w-3 h-3" />
+                              <RotateCcw className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Ripristina</span>
                             </Button>
                             <Button
                               onClick={() => handleDelete(guest.id, guest.name)}
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                              className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Elimina</span>
                             </Button>
                           </>
                         )}
@@ -317,17 +326,19 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                               onClick={() => handleRestore(guest.id, guest.name)}
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                              className="h-8 px-3 text-xs text-primary hover:bg-primary/10"
                             >
-                              <RotateCcw className="w-3 h-3" />
+                              <RotateCcw className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Ripristina</span>
                             </Button>
                             <Button
                               onClick={() => handlePermanentDelete(guest.id, guest.name)}
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                              className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Elimina</span>
                             </Button>
                           </>
                         )}
@@ -342,30 +353,32 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           <Users className="w-3 h-3" />
                           <span>Accompagnatori:</span>
                         </div>
-                        <div className="pl-5 space-y-2">
+                        <div className="pl-3 sm:pl-5 space-y-3">
                           {guest.companions.map(companion => (
-                            <div key={companion.id} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm">{companion.name}</span>
-                                {companion.ageGroup && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {AGE_GROUP_LABELS[companion.ageGroup]}
+                            <div key={companion.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0 flex-1">
+                                <span className="text-sm font-medium break-words">{companion.name}</span>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {companion.ageGroup && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {AGE_GROUP_LABELS[companion.ageGroup]}
+                                    </Badge>
+                                  )}
+                                  <Badge 
+                                    variant={
+                                      companion.status === 'confirmed' ? 'default' : 
+                                      companion.status === 'pending' ? 'secondary' : 
+                                      'destructive'
+                                    }
+                                    className="text-xs"
+                                  >
+                                    {companion.status === 'confirmed' ? 'Confermato' : 
+                                     companion.status === 'pending' ? 'Da confermare' : 
+                                     'Eliminato'}
                                   </Badge>
-                                )}
-                                <Badge 
-                                  variant={
-                                    companion.status === 'confirmed' ? 'default' : 
-                                    companion.status === 'pending' ? 'secondary' : 
-                                    'destructive'
-                                  }
-                                  className="text-xs"
-                                >
-                                  {companion.status === 'confirmed' ? 'Confermato' : 
-                                   companion.status === 'pending' ? 'Da confermare' : 
-                                   'Eliminato'}
-                                </Badge>
+                                </div>
                               </div>
-                               <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1 flex-shrink-0">
                                   {/* Show companion actions regardless of main guest status if companion is pending */}
                                   {companion.status === 'pending' && (
                                     <>
@@ -373,19 +386,21 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         onClick={() => confirmCompanion(guest.id, companion.id)}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-6 px-2 text-xs bg-success/10 hover:bg-success/20 text-success"
+                                        className="h-8 px-3 text-xs bg-success/10 hover:bg-success/20 text-success"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <UserCheck className="w-3 h-3" />
+                                        <UserCheck className="w-3 h-3 sm:mr-1" />
+                                        <span className="hidden sm:inline">Conferma</span>
                                       </Button>
                                       <Button
                                         onClick={() => deleteCompanion(guest.id, companion.id)}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                        className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 className="w-3 h-3 sm:mr-1" />
+                                        <span className="hidden sm:inline">Elimina</span>
                                       </Button>
                                     </>
                                   )}
@@ -399,10 +414,11 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         }}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                                        className="h-8 px-3 text-xs text-primary hover:bg-primary/10"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <RotateCcw className="w-3 h-3" />
+                                        <RotateCcw className="w-3 h-3 sm:mr-1" />
+                                        <span className="hidden sm:inline">Ripristina</span>
                                       </Button>
                                       <Button
                                         onClick={() => deleteCompanion(guest.id, companion.id)}

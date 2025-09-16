@@ -57,7 +57,7 @@ const DashboardLayout = () => {
       <SidebarInset className="flex-1 flex flex-col">
         <CommonHeader showSidebarTrigger={true} />
         
-        <main className="flex-1 container mx-auto px-4 py-8 space-y-8">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 max-w-full overflow-hidden">
           {/* Hero section with add guest form */}
           <section className="text-center space-y-6">
             <div className="space-y-3 animate-fade-in-up">
@@ -107,7 +107,7 @@ const DashboardLayout = () => {
                 Suggerimenti per organizzare il tuo matrimonio
               </h3>
               
-              <div className="grid md:grid-cols-3 gap-6 text-sm text-muted-foreground">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-sm text-muted-foreground">
                 <div className="p-4 bg-white/60 rounded-lg shadow-soft">
                   <h4 className="font-semibold text-primary mb-2">📝 Pianifica in anticipo</h4>
                   <p>Inizia a creare la lista degli invitati almeno 3-4 mesi prima del matrimonio</p>

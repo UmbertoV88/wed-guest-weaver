@@ -64,7 +64,7 @@ const GuestStats = ({ stats, getAllGuests, getGuestsByStatus }: GuestStatsProps)
       </div>
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
@@ -99,7 +99,7 @@ const GuestStats = ({ stats, getAllGuests, getGuestsByStatus }: GuestStatsProps)
           <h3 className="text-lg font-semibold mb-4 text-foreground">
             Distribuzione per Categoria
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {Object.entries(stats.byCategory).map(([category, count]) => (
               <div key={category} className="text-center">
                 <div className="bg-gradient-to-br from-primary/10 to-gold/10 rounded-lg p-3 mb-2">
