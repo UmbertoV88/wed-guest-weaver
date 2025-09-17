@@ -1,0 +1,180 @@
+import React, { useState } from "react";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useSeating } from "@/hooks/useSeating";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, Plus, Download, RotateCcw } from "lucide-react";
+import TableCard from "./TableCard";
+import UnassignedGuests from "./UnassignedGuests";
+import TrashZone from "./TrashZone";
+
+const SeatingEditor = () => {
+  const {
+    tables,
+    guests,
+    globalCapacity,
+    isLoading,
+    addTable,
+    deleteTable,
+    moveGuest,
+    updateGlobalCapacity,
+    exportCSV,
+  } = useSeating();
+
+  const [newCapacity, setNewCapacity] = useState(globalCapacity);
+  const [isAddingTable, setIsAddingTable] = useState(false);
+
+  const handleCapacityChange = (value: number) => {
+    if (value >= 1) {
+      setNewCapacity(value);
+      updateGlobalCapacity(value);
+    }
+  };
+
+  const handleAddTable = () => {
+    const tableNumber = tables.length + 1;
+    addTable({
+      nome_tavolo: `Tavolo ${tableNumber}`,
+      capacita_max: globalCapacity,
+    });
+    setIsAddingTable(true);
+    setTimeout(() => setIsAddingTable(false), 1000);
+  };
+
+  const handleReset = () => {
+    if (confirm('Vuoi davvero resettare tutte le assegnazioni dei tavoli?')) {
+      // Move all guests back to unassigned
+      guests.forEach(guest => {
+        if (guest.tableId) {
+          moveGuest(guest.id);
+        }
+      });
+    }
+  };
+
+  // Get unassigned guests
+  const unassignedGuests = guests.filter(guest => !guest.tableId);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Caricamento disposizione tavoli...</span>
+      </div>
+    );
+  }
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div className="space-y-6">
+        {/* Controls */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Impostazioni Tavoli</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+              <div className="space-y-2">
+                <Label htmlFor="capacity">Capienza massima per tavolo</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  min="1"
+                  value={newCapacity}
+                  onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
+                  className="w-20"
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={handleAddTable}
+                  disabled={isAddingTable}
+                  variant="default"
+                >
+                  {isAddingTable ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Plus className="h-4 w-4 mr-2" />
+                  )}
+                  Aggiungi Tavolo
+                </Button>
+                
+                <Button onClick={exportCSV} variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Scarica CSV
+                </Button>
+                
+                <Button onClick={handleReset} variant="outline">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Separator />
+
+        {/* Unassigned guests */}
+        {unassignedGuests.length > 0 && (
+          <UnassignedGuests guests={unassignedGuests} />
+        )}
+
+        {/* Tables grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {tables.map((table) => {
+            const tableGuests = guests.filter(guest => guest.tableId === table.id);
+            return (
+              <TableCard
+                key={table.id}
+                table={table}
+                guests={tableGuests}
+                globalCapacity={globalCapacity}
+                onDeleteTable={deleteTable}
+                onMoveGuest={moveGuest}
+              />
+            );
+          })}
+        </div>
+
+        {/* Trash zone */}
+        <TrashZone onMoveGuest={moveGuest} />
+
+        {/* Summary */}
+        <Card className="bg-muted/50">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-primary">{tables.length}</div>
+                <div className="text-sm text-muted-foreground">Tavoli</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-primary">{guests.length}</div>
+                <div className="text-sm text-muted-foreground">Invitati totali</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-600">
+                  {guests.filter(g => g.tableId).length}
+                </div>
+                <div className="text-sm text-muted-foreground">Assegnati</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {unassignedGuests.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Non assegnati</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </DndProvider>
+  );
+};
+
+export default SeatingEditor;
