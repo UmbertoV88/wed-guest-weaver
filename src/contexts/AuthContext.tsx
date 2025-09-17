@@ -132,13 +132,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleIdleWarning = useCallback(() => {
+  const handleIdleWarning = () => {
     if (user && !signingOut) {
       setShowSessionWarning(true);
     }
-  }, [user, signingOut]);
+  };
 
-  const handleIdleLogout = useCallback(async () => {
+  const handleIdleLogout = async () => {
     if (user && !signingOut) {
       setShowSessionWarning(false);
       toast({
@@ -148,24 +148,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       await signOut(false);
     }
-  }, [user, signingOut]);
+  };
 
-  const idleTimer = useIdleTimer({
-    timeout: 5000,
-    warningTime: 10000,
-    onWarning: handleIdleWarning,
-    onIdle: handleIdleLogout,
-    enabled: !!user && !loading && !signingOut
-  });
-
-  const extendSession = useCallback(() => {
+  const extendSession = () => {
     setShowSessionWarning(false);
+    // Reset the idle timer by calling resetTimer from useIdleTimer
     idleTimer.resetTimer();
     toast({
       title: "Sessione estesa",
       description: "La tua sessione è stata estesa con successo.",
     });
-  }, [idleTimer]);
+  };
+
+  // Initialize idle timer
+  const idleTimer = useIdleTimer({
+    timeout: 20 * 60 * 1000, // 20 minutes
+    warningTime: 5 * 60 * 1000, // 5 minutes warning
+    onWarning: handleIdleWarning,
+    onIdle: handleIdleLogout,
+    enabled: !!user && !loading && !signingOut
+  });
 
   const value = {
     user,
@@ -185,7 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         open={showSessionWarning}
         onExtendSession={extendSession}
         onLogout={() => handleIdleLogout()}
-        warningTimeMs={10000} // Deve corrispondere al warningTime dell'idle timer
+        warningTimeMs={5 * 60 * 1000} // 5 minutes
       />
     </AuthContext.Provider>
   );
