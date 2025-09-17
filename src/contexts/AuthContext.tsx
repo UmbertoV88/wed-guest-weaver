@@ -162,8 +162,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize idle timer
   const idleTimer = useIdleTimer({
-    timeout: 20 * 60 * 1000, // 20 minutes
-    warningTime: 5 * 60 * 1000, // 5 minutes warning
+    timeout: 6000, // 20 minutes
+    warningTime: 10000, // 5 minutes warning
     onWarning: handleIdleWarning,
     onIdle: handleIdleLogout,
     enabled: !!user && !loading && !signingOut
