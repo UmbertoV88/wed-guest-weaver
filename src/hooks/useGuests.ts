@@ -16,15 +16,19 @@ const mapDbAgeGroupToAgeGroup = (value?: string | null): AgeGroup | undefined =>
   return undefined;
 };
 
-const parseNote = useCallback((note?: string | null): { allergies?: string | null; deleted_at?: string | null } => {
+const parseNote = (note?: string | null): { allergies?: string | null; deleted_at?: string | null } => {
   if (!note) return {};
   try {
     const obj = JSON.parse(note);
     if (obj && typeof obj === 'object') return obj;
   } catch {}
+  // legacy simple format e.g. "deleted_at:2025-01-01T00:00:00Z"
+  if (note.includes('deleted_at:')) {
+    const ts = note.split('deleted_at:')[1]?.trim();
+    return { deleted_at: ts || undefined };
+  }
   return { allergies: note };
-}, []);
-
+};
 
 const buildNote = (data: { allergies?: string | null; deleted_at?: string | null }) =>
   JSON.stringify({ allergies: data.allergies ?? null, deleted_at: data.deleted_at ?? null });
