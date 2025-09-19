@@ -52,18 +52,21 @@ const DashboardSidebar = ({
 
     const updateCountdown = () => {
       const now = new Date();
-      const days = differenceInDays(weddingDate, now);
-      const hours = differenceInHours(weddingDate, now) % 24;
-      const minutes = differenceInMinutes(weddingDate, now) % 60;
-
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const wedding = new Date(weddingDate.getFullYear(), weddingDate.getMonth(), weddingDate.getDate());
+      
+      const diffTime = wedding.getTime() - today.getTime();
+      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
       if (days < 0) {
         setCountdown("Matrimonio celebrato! 💕");
       } else if (days === 0) {
         setCountdown("È oggi! 🎉");
       } else {
-        setCountdown(`${days} giorni, ${hours}h, ${minutes}m`);
+        setCountdown(`${days} ${days === 1 ? 'giorno' : 'giorni'}`);
       }
     };
+
 
     updateCountdown();
     const interval = setInterval(updateCountdown, 60000); // Update every minute
