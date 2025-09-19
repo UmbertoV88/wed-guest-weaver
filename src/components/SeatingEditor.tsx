@@ -151,8 +151,8 @@ const SeatingEditor = () => {
           })}
         </div>
 
-        {/* Trash zone */}
-        <TrashZone onMoveGuest={moveGuest} />
+        {/* Trash zone 
+        <TrashZone onMoveGuest={moveGuest} />*/}
 
         {/* Summary */}
         <Card className="bg-muted/50">
