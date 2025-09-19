@@ -25,9 +25,11 @@ export interface SeatingGuest {
   gruppo: string | null;
   note: string | null;
   confermato: boolean | null;
-  is_principale: boolean | null; // AGGIUNTO: per distinguere principali da accompagnatori
+  is_principale: boolean | null;
+  allergies?: string; // <-- Aggiungi questa riga
   tableId?: number;
 }
+
 
 export const useSeating = () => {
   const { user } = useAuth();
