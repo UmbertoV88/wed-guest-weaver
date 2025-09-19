@@ -25,6 +25,7 @@ export interface SeatingGuest {
   gruppo: string | null;
   note: string | null;
   confermato: boolean | null;
+  is_principale: boolean | null; // AGGIUNTO: per distinguere principali da accompagnatori
   tableId?: number;
 }
 
@@ -65,13 +66,13 @@ export const useSeating = () => {
 
       // Fetch guests manually
       const guestsQuery = await supabaseClient
-        .from('invitati')
-        .select('id, nome_visualizzato, gruppo, note, confermato')
-        .eq('user_id', user.id)
-        .eq('is_principale', true)
-        .order('nome_visualizzato');
-      
-      if (guestsQuery.error) throw guestsQuery.error;
+      .from('invitati')
+      .select('id, nome_visualizzato, gruppo, note, confermato, is_principale')
+      .eq('user_id', user.id)
+      // Rimuovi il filtro .eq('is_principale', true)
+      .order('nome_visualizzato');
+    
+    if (guestsQuery.error) throw guestsQuery.error;
 
       setTables(tablesQuery.data || []);
       setAssignments(assignmentsQuery.data || []);
