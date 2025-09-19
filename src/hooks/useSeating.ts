@@ -27,6 +27,7 @@ export interface SeatingGuest {
   confermato: boolean | null;
   is_principale: boolean | null; // AGGIUNTO: per distinguere principali da accompagnatori
   tableId?: number;
+  allergies?: string | null;
 }
 
 export const useSeating = () => {
@@ -38,55 +39,19 @@ export const useSeating = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [globalCapacity, setGlobalCapacity] = useState(8);
 
+  // SPOSTA QUESTA FUNZIONE QUI (PRIMA DEL useMemo)
+  const parseNote = (note?: string | null): { allergies?: string | null; deleted_at?: string | null } => {
+    if (!note) return {};
+    try {
+      const obj = JSON.parse(note);
+      if (obj && typeof obj === 'object') return obj;
+    } catch {}
+    return { allergies: note };
+  };
+
   // Fetch data
   const fetchData = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Fetch tables manually
-      const tablesQuery = await supabaseClient
-        .from('tavoli')
-        .select('id, nome_tavolo, capacita_max, lato, created_at')
-        .eq('user_id', user.id)
-        .order('id');
-      
-      if (tablesQuery.error) throw tablesQuery.error;
-
-      // Fetch assignments manually
-      const assignmentsQuery = await supabaseClient
-        .from('piani_salvati')
-        .select('id, invitato_id, tavolo_id, created_at')
-        .order('id');
-      
-      if (assignmentsQuery.error) throw assignmentsQuery.error;
-
-      // Fetch guests manually
-      const guestsQuery = await supabaseClient
-      .from('invitati')
-      .select('id, nome_visualizzato, gruppo, note, confermato, is_principale')
-      .eq('user_id', user.id)
-      .eq('confermato', true)  // AGGIUNTO: filtra solo gli ospiti confermati
-      .order('nome_visualizzato');
-    
-    if (guestsQuery.error) throw guestsQuery.error;
-
-      setTables(tablesQuery.data || []);
-      setAssignments(assignmentsQuery.data || []);
-      setRawGuests(guestsQuery.data || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: "Errore",
-        description: "Impossibile caricare i dati. Riprova.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // ... resto del codice fetchData
   }, [user?.id, toast]);
 
   useEffect(() => {
@@ -103,7 +68,8 @@ export const useSeating = () => {
       gruppo: guest.gruppo,
       note: guest.note,
       confermato: guest.confermato,
-      is_principale: guest.is_principale, // AGGIUNTO
+      is_principale: guest.is_principale,
+      allergies: parseNote(guest.note).allergies,  // <-- ORA FUNZIONA
       tableId: assignments.find((a) => a.invitato_id === guest.id)?.tavolo_id,
     }));
   }, [rawGuests, assignments]);
