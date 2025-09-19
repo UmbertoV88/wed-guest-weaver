@@ -84,7 +84,28 @@ const DashboardSidebar = ({
       setIsCalendarOpen(false);
     }
   };
+  
+  const { profile, weddingDate, updateWeddingDate } = useProfile();
 
+  // Calendar per selezionare la data
+  <CalendarComponent
+    mode="single"
+    selected={weddingDate || undefined}
+    onSelect={handleDateSelect}  // 📅 Salva quando l'utente seleziona
+    disabled={(date) => date < today}  // Solo date future
+  />
+  
+  // Salvataggio della data selezionata
+  const handleDateSelect = async (date: Date | undefined) => {
+    if (!date) return;
+    
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    await updateWeddingDate(dateOnly);  // 📅 Salva nel database
+    
+    // Backup in localStorage
+    localStorage.setItem('weddingDate', dateOnly.toISOString().split('T')[0]);
+  };
+  
   const menuItems = [
     { icon: Users, label: "Invitati", href: "/dashboard", isActive: window.location.pathname === "/dashboard" },
     { icon: Utensils, label: "Tavoli", href: "/dashboard/seating", isActive: window.location.pathname === "/dashboard/seating" },

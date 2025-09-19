@@ -8,6 +8,7 @@ export interface UserProfile {
   email: string | null;
   full_name: string | null;
   is_wedding_organizer: boolean;
+  wedding_date: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -49,6 +50,18 @@ export const useProfile = () => {
     fetchProfile();
   }, [user]);
 
+  const updateWeddingDate = async (date: Date | null): Promise<void> => {
+    const dateString = date ? date.toISOString().split('T')[0] : null;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        wedding_date: dateString,  // 📅 Salva nel DB
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', user.id);
+  };
+  
   const promoteToWeddingOrganizer = async (targetUserId: string) => {
     try {
       const { error } = await supabase.rpc('promote_to_wedding_organizer', {
