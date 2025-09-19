@@ -17,6 +17,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
   onMoveGuest,
   showRemoveButton = true,
 }) => {
+  console.log('DraggableGuest - guest object:', guest);
   const [{ isDragging }, drag] = useDrag({
     type: 'guest',
     item: { guestId: guest.id },
