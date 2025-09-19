@@ -69,8 +69,10 @@ export const useSeating = () => {
       .from('invitati')
       .select('id, nome_visualizzato, gruppo, note, confermato, is_principale')
       .eq('user_id', user.id)
-      // Rimuovi il filtro .eq('is_principale', true)
+      .eq('confermato', true)  // AGGIUNTO: filtra solo gli ospiti confermati
       .order('nome_visualizzato');
+    
+    if (guestsQuery.error) throw guestsQuery.error;
     
     if (guestsQuery.error) throw guestsQuery.error;
 
