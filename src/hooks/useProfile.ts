@@ -90,7 +90,7 @@ export const useProfile = () => {
     profile,
     loading,
     isWeddingOrganizer: profile?.is_wedding_organizer || false,
-    promoteToWeddingOrganizer
+    promoteToWeddingOrganizer,
     updateWeddingDate
   };
 };
