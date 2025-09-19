@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Download, RotateCcw } from "lucide-react";
 import TableCard from "./TableCard";
 import UnassignedGuests from "./UnassignedGuests";
-import TrashZone from "./TrashZone";
+//import TrashZone from "./TrashZone";
 
 const SeatingEditor = () => {
   const {
