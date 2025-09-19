@@ -51,16 +51,28 @@ export const useProfile = () => {
   }, [user]);
 
   const updateWeddingDate = async (date: Date | null): Promise<void> => {
+    if (!user?.id) throw new Error('User not authenticated');
+    
     const dateString = date ? date.toISOString().split('T')[0] : null;
     
     const { data, error } = await supabase
       .from('profiles')
       .update({
-        wedding_date: dateString,  // 📅 Salva nel DB
+        wedding_date: dateString,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .select()  // <-- AGGIUNGI .select() per ottenere i dati aggiornati
+      .single();
+    
+    if (error) throw error;
+    
+    // AGGIUNGI: Aggiorna lo stato locale immediatamente
+    if (data) {
+      setProfile(data);
+    }
   };
+
   
   const promoteToWeddingOrganizer = async (targetUserId: string) => {
     try {
