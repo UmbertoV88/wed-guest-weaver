@@ -38,9 +38,14 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
       className={`
         cursor-move transition-all duration-200 hover:shadow-md
         ${isDragging ? 'opacity-50 transform rotate-2' : ''}
-        ${guest.is_principale ? 'ring-1 ring-blue-500/30 bg-blue-50 dark:bg-blue-950/20' : 'ring-1 ring-purple-500/30 bg-purple-50 dark:bg-purple-950/20'}
+        ${guest.gruppo === 'family-his' ? 
+          'ring-1 ring-blue-500/30 bg-blue-50 dark:bg-blue-950/20' : 
+          guest.gruppo === 'family-hers' ? 
+          'ring-1 ring-purple-500/30 bg-purple-50 dark:bg-purple-950/20' :
+          'ring-1 ring-green-500/30 bg-green-50 dark:bg-green-950/20'}
       `}
     >
+
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
