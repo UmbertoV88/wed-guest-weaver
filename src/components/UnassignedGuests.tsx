@@ -89,8 +89,15 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
           {guestList.map((guest) => (
             <div 
               key={guest.id} 
-              className="flex items-center space-x-3 p-2 bg-card rounded-lg border"
+              className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors ${
+                guest.gruppo === 'family-his' ? 
+                  'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800' : 
+                  guest.gruppo === 'family-hers' ? 
+                  'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800' :
+                  'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+              }`}
             >
+
               <Checkbox
                 checked={selectedGuests.includes(guest.id)}
                 onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
