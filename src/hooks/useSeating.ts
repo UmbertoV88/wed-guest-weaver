@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+const supabaseClient: any = supabase;
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -30,9 +31,9 @@ export interface SeatingGuest {
 export const useSeating = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [tables, setTables] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [rawGuests, setRawGuests] = useState([]);
+  const [tables, setTables] = useState<Table[]>([]);
+  const [assignments, setAssignments] = useState<TableAssignment[]>([]);
+  const [rawGuests, setRawGuests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [globalCapacity, setGlobalCapacity] = useState(4);
 
@@ -45,36 +46,36 @@ export const useSeating = () => {
 
     setIsLoading(true);
     try {
-      // Fetch tables
-      const tablesResponse: any = await supabase
+      // Fetch tables manually
+      const tablesQuery = await supabaseClient
         .from('tavoli')
         .select('id, nome_tavolo, capacita_max, lato, created_at')
         .eq('user_id', user.id)
         .order('id');
+      
+      if (tablesQuery.error) throw tablesQuery.error;
 
-      if (tablesResponse.error) throw tablesResponse.error;
-
-      // Fetch assignments
-      const assignmentsResponse = await supabase
+      // Fetch assignments manually
+      const assignmentsQuery = await supabaseClient
         .from('piani_salvati')
         .select('id, invitato_id, tavolo_id, created_at')
         .order('id');
+      
+      if (assignmentsQuery.error) throw assignmentsQuery.error;
 
-      if (assignmentsResponse.error) throw assignmentsResponse.error;
-
-      // Fetch guests
-      const guestsResponse = await supabase
+      // Fetch guests manually
+      const guestsQuery = await supabaseClient
         .from('invitati')
         .select('id, nome_visualizzato, gruppo, note, confermato')
         .eq('user_id', user.id)
         .eq('is_principale', true)
         .order('nome_visualizzato');
+      
+      if (guestsQuery.error) throw guestsQuery.error;
 
-      if (guestsResponse.error) throw guestsResponse.error;
-
-      setTables(tablesResponse.data || []);
-      setAssignments(assignmentsResponse.data || []);
-      setRawGuests(guestsResponse.data || []);
+      setTables(tablesQuery.data || []);
+      setAssignments(assignmentsQuery.data || []);
+      setRawGuests(guestsQuery.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -92,7 +93,7 @@ export const useSeating = () => {
   }, [fetchData]);
 
   // Combine guests with their table assignments
-  const guests = useMemo(() => {
+  const guests: SeatingGuest[] = useMemo(() => {
     if (!rawGuests || !assignments) return [];
     
     return rawGuests.map((guest: any) => ({
@@ -101,7 +102,7 @@ export const useSeating = () => {
       gruppo: guest.gruppo,
       note: guest.note,
       confermato: guest.confermato,
-      tableId: assignments.find((a: any) => a.invitato_id === guest.id)?.tavolo_id,
+      tableId: assignments.find((a) => a.invitato_id === guest.id)?.tavolo_id,
     }));
   }, [rawGuests, assignments]);
 
@@ -117,7 +118,7 @@ export const useSeating = () => {
     }
 
     try {
-      const response = await supabase
+      const insertQuery = supabaseClient
         .from('tavoli')
         .insert({
           nome_tavolo: tableData.nome_tavolo,
@@ -128,9 +129,10 @@ export const useSeating = () => {
         .select('id, nome_tavolo, capacita_max, lato, created_at')
         .single();
 
+      const response = await insertQuery;
       if (response.error) throw response.error;
 
-      setTables((prev: any) => [...prev, response.data]);
+      setTables((prev) => [...prev, response.data]);
       toast({
         title: "Tavolo creato",
         description: "Il nuovo tavolo è stato aggiunto con successo.",
@@ -149,21 +151,24 @@ export const useSeating = () => {
   const deleteTable = useCallback(async (tableId: number) => {
     try {
       // First remove all assignments for this table
-      await supabase
+      const deleteAssignmentsQuery = supabaseClient
         .from('piani_salvati')
         .delete()
         .eq('tavolo_id', tableId);
+      
+      await deleteAssignmentsQuery;
 
       // Then delete the table
-      const response = await supabase
+      const deleteTableQuery = supabaseClient
         .from('tavoli')
         .delete()
         .eq('id', tableId);
-
+      
+      const response = await deleteTableQuery;
       if (response.error) throw response.error;
 
-      setTables((prev: any) => prev.filter((table: any) => table.id !== tableId));
-      setAssignments((prev: any) => prev.filter((assignment: any) => assignment.tavolo_id !== tableId));
+      setTables((prev) => prev.filter((table) => table.id !== tableId));
+      setAssignments((prev) => prev.filter((assignment) => assignment.tavolo_id !== tableId));
       
       toast({
         title: "Tavolo eliminato",
@@ -183,17 +188,19 @@ export const useSeating = () => {
   const moveGuest = useCallback(async (guestId: number, tableId?: number) => {
     try {
       // First remove existing assignment
-      await supabase
+      const deleteQuery = supabaseClient
         .from('piani_salvati')
         .delete()
         .eq('invitato_id', guestId);
+      
+      await deleteQuery;
 
       // Update local state
-      setAssignments((prev: any) => prev.filter((assignment: any) => assignment.invitato_id !== guestId));
+      setAssignments((prev) => prev.filter((assignment) => assignment.invitato_id !== guestId));
 
       // If tableId is provided, create new assignment
       if (tableId) {
-        const response = await supabase
+        const insertQuery = supabaseClient
           .from('piani_salvati')
           .insert({
             invitato_id: guestId,
@@ -202,10 +209,11 @@ export const useSeating = () => {
           .select('id, invitato_id, tavolo_id, created_at')
           .single();
 
+        const response = await insertQuery;
         if (response.error) throw response.error;
 
         // Update local state
-        setAssignments((prev: any) => [...prev, response.data]);
+        setAssignments((prev) => [...prev, response.data]);
       }
     } catch (error) {
       console.error('Error moving guest:', error);
@@ -218,6 +226,53 @@ export const useSeating = () => {
       fetchData();
     }
   }, [toast, fetchData]);
+
+  // Function to assign multiple guests to a table
+  const assignMultipleGuests = useCallback(async (guestIds: number[], tableId: number): Promise<void> => {
+    if (!user?.id) return;
+
+    try {
+      // Check table capacity
+      const table = tables.find((t) => t.id === tableId);
+      if (!table) throw new Error('Tavolo non trovato');
+      
+      const currentAssignments = assignments.filter((a) => a.tavolo_id === tableId);
+      const availableSpots = table.capacita_max - currentAssignments.length;
+      
+      if (guestIds.length > availableSpots) {
+        throw new Error(`Il tavolo ha solo ${availableSpots} posti disponibili`);
+      }
+
+      // Create assignments for all selected guests
+      const newAssignments = guestIds.map(guestId => ({
+        invitato_id: guestId,
+        tavolo_id: tableId,
+      }));
+
+      const insertQuery = supabaseClient
+        .from('piani_salvati')
+        .insert(newAssignments)
+        .select('id, invitato_id, tavolo_id, created_at');
+
+      const { data, error } = await insertQuery;
+      if (error) throw error;
+
+      // Update local state
+      setAssignments((prev) => [...prev, ...(data || [])]);
+      
+      toast({
+        title: "Successo",
+        description: `${guestIds.length} ospiti assegnati al ${table.nome_tavolo}`,
+      });
+    } catch (error) {
+      console.error('Error assigning multiple guests:', error);
+      toast({
+        title: "Errore",
+        description: error instanceof Error ? error.message : "Errore nell'assegnazione degli ospiti",
+        variant: "destructive",
+      });
+    }
+  }, [user?.id, tables, assignments, toast]);
 
   // Update global capacity
   const updateGlobalCapacity = useCallback(async (newCapacity: number) => {
@@ -233,15 +288,16 @@ export const useSeating = () => {
     setGlobalCapacity(newCapacity);
 
     try {
-      const response = await supabase
+      const updateQuery = supabaseClient
         .from('tavoli')
         .update({ capacita_max: newCapacity })
         .eq('user_id', user.id);
 
+      const response = await updateQuery;
       if (response.error) throw response.error;
 
       // Update local state
-      setTables((prev: any) => prev.map((table: any) => ({ ...table, capacita_max: newCapacity })));
+      setTables((prev) => prev.map((table) => ({ ...table, capacita_max: newCapacity })));
 
       toast({
         title: "Capienza aggiornata",
@@ -261,13 +317,13 @@ export const useSeating = () => {
   const exportCSV = useCallback(() => {
     const rows = ['table_id,table_name,seat_position,guest_id,guest_name'];
     
-    tables.forEach((table: any) => {
-      const tableGuests = guests.filter((guest: any) => guest.tableId === table.id);
+    tables.forEach((table) => {
+      const tableGuests = guests.filter((guest) => guest.tableId === table.id);
       
       if (tableGuests.length === 0) {
         rows.push(`${table.id},"${table.nome_tavolo || 'Tavolo ' + table.id}",0,,"Tavolo vuoto"`);
       } else {
-        tableGuests.forEach((guest: any, index: number) => {
+        tableGuests.forEach((guest, index) => {
           rows.push(`${table.id},"${table.nome_tavolo || 'Tavolo ' + table.id}",${index + 1},${guest.id},"${guest.nome_visualizzato}"`);
         });
       }
@@ -301,6 +357,7 @@ export const useSeating = () => {
     deleteTable,
     moveGuest,
     updateGlobalCapacity,
+    assignMultipleGuests,
     exportCSV,
   };
 };

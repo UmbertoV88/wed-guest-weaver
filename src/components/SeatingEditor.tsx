@@ -16,12 +16,14 @@ const SeatingEditor = () => {
   const {
     tables,
     guests,
+    assignments,
     globalCapacity,
     isLoading,
     addTable,
     deleteTable,
     moveGuest,
     updateGlobalCapacity,
+    assignMultipleGuests,
     exportCSV,
   } = useSeating();
 
@@ -122,7 +124,14 @@ const SeatingEditor = () => {
 
         {/* Unassigned guests */}
         {unassignedGuests.length > 0 && (
-          <UnassignedGuests guests={unassignedGuests} />
+        <UnassignedGuests 
+          guests={unassignedGuests} 
+          tables={tables.map(table => ({
+            ...table,
+            currentGuests: assignments.filter(a => a.tavolo_id === table.id).length
+          }))}
+          onAssignMultipleGuests={assignMultipleGuests}
+        />
         )}
 
         {/* Tables grid */}
