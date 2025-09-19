@@ -128,6 +128,9 @@ const DashboardSidebar = ({
                     disabled={(date) => date < new Date()}
                     locale={it}
                     initialFocus
+                    captionLayout="dropdown"  
+                    fromYear={2024}         
+                    toYear={2030}
                   />
                 </PopoverContent>
               </Popover>
