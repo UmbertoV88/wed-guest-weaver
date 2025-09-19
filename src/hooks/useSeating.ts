@@ -103,6 +103,7 @@ export const useSeating = () => {
       gruppo: guest.gruppo,
       note: guest.note,
       confermato: guest.confermato,
+      is_principale: guest.is_principale, // AGGIUNTO
       tableId: assignments.find((a) => a.invitato_id === guest.id)?.tavolo_id,
     }));
   }, [rawGuests, assignments]);
