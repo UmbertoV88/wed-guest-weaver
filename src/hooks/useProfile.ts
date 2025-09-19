@@ -91,5 +91,6 @@ export const useProfile = () => {
     loading,
     isWeddingOrganizer: profile?.is_wedding_organizer || false,
     promoteToWeddingOrganizer
+    updateWeddingDate
   };
 };
