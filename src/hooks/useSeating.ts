@@ -228,9 +228,17 @@ export const useSeating = () => {
   }, [toast, fetchData]);
 
   // Function to assign multiple guests to a table
+  // Function to assign multiple guests to a table - VERSIONE CORRETTA
   const assignMultipleGuests = useCallback(async (guestIds: number[], tableId: number): Promise<void> => {
-    if (!user?.id) return;
-
+    if (!user?.id) {
+      toast({
+        title: "Errore",
+        description: "Utente non autenticato.",
+        variant: "destructive",
+      });
+      return;
+    }
+  
     try {
       // Check table capacity
       const table = tables.find((t) => t.id === tableId);
@@ -242,21 +250,22 @@ export const useSeating = () => {
       if (guestIds.length > availableSpots) {
         throw new Error(`Il tavolo ha solo ${availableSpots} posti disponibili`);
       }
-
+  
       // Create assignments for all selected guests
       const newAssignments = guestIds.map(guestId => ({
         invitato_id: guestId,
         tavolo_id: tableId,
+        user_id: user.id,  // AGGIUNTO: questo era il campo mancante!
       }));
-
+  
       const insertQuery = supabaseClient
         .from('piani_salvati')
         .insert(newAssignments)
         .select('id, invitato_id, tavolo_id, created_at');
-
+  
       const { data, error } = await insertQuery;
       if (error) throw error;
-
+  
       // Update local state
       setAssignments((prev) => [...prev, ...(data || [])]);
       
