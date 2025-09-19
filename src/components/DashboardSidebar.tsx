@@ -126,6 +126,7 @@ const DashboardSidebar = ({
                     selected={weddingDate}
                     onSelect={handleDateSelect}
                     disabled={(date) => date < new Date()}
+                    locale={it}
                     initialFocus
                   />
                 </PopoverContent>
