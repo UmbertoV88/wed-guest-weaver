@@ -73,8 +73,6 @@ export const useSeating = () => {
       .order('nome_visualizzato');
     
     if (guestsQuery.error) throw guestsQuery.error;
-    
-    if (guestsQuery.error) throw guestsQuery.error;
 
       setTables(tablesQuery.data || []);
       setAssignments(assignmentsQuery.data || []);
