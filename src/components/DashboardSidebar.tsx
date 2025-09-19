@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { LogoutConfirmDialog } from "@/components/LogoutConfirmDialog";
+import { useProfile } from '@/hooks/useProfile';
 
 interface DashboardSidebarProps {
   user?: { email?: string } | null;
@@ -41,18 +42,11 @@ const DashboardSidebar = ({
 }: DashboardSidebarProps) => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const [weddingDate, setWeddingDate] = useState<Date>();
   const [countdown, setCountdown] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  useEffect(() => {
-    // Load saved date from localStorage
-    const savedDate = localStorage.getItem('weddingDate');
-    if (savedDate) {
-      setWeddingDate(new Date(savedDate));
-    }
-  }, []);
-
+  const { profile, updateWeddingDate } = useProfile();
+  const weddingDate = profile?.wedding_date ? new Date(profile.wedding_date) : undefined;
+  
   useEffect(() => {
     if (!weddingDate) return;
 
@@ -77,33 +71,15 @@ const DashboardSidebar = ({
     return () => clearInterval(interval);
   }, [weddingDate]);
 
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      setWeddingDate(date);
-      localStorage.setItem('weddingDate', date.toISOString());
-      setIsCalendarOpen(false);
-    }
-  };
-  
-  const { profile, weddingDate, updateWeddingDate } = useProfile();
-
-  // Calendar per selezionare la data
-  <CalendarComponent
-    mode="single"
-    selected={weddingDate || undefined}
-    onSelect={handleDateSelect}  // 📅 Salva quando l'utente seleziona
-    disabled={(date) => date < today}  // Solo date future
-  />
-  
-  // Salvataggio della data selezionata
   const handleDateSelect = async (date: Date | undefined) => {
     if (!date) return;
     
-    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    await updateWeddingDate(dateOnly);  // 📅 Salva nel database
-    
-    // Backup in localStorage
-    localStorage.setItem('weddingDate', dateOnly.toISOString().split('T')[0]);
+    try {
+      await updateWeddingDate(date);
+      setIsCalendarOpen(false);
+    } catch (error) {
+      console.error('Errore salvando la data:', error);
+    }
   };
   
   const menuItems = [
