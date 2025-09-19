@@ -53,7 +53,8 @@ export const useProfile = () => {
   const updateWeddingDate = async (date: Date | null): Promise<void> => {
     if (!user?.id) throw new Error('User not authenticated');
     
-    const dateString = date ? date.toISOString().split('T')[0] : null;
+    const dateString = date ? `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}` : null;
+
     
     const { data, error } = await supabase
       .from('profiles')
