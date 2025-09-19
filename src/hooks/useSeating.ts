@@ -36,7 +36,7 @@ export const useSeating = () => {
   const [assignments, setAssignments] = useState<TableAssignment[]>([]);
   const [rawGuests, setRawGuests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [globalCapacity, setGlobalCapacity] = useState(4);
+  const [globalCapacity, setGlobalCapacity] = useState(8);
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -188,15 +188,6 @@ export const useSeating = () => {
 
   // Move guest to table
   const moveGuest = useCallback(async (guestId: number, tableId?: number) => {
-    if (!user?.id) {  // AGGIUNGI QUESTO CONTROLLO
-      toast({
-        title: "Errore",
-        description: "Utente non autenticato.",
-        variant: "destructive",
-      });
-      return;
-    }
-  
     try {
       // First remove existing assignment
       const deleteQuery = supabaseClient
@@ -205,10 +196,10 @@ export const useSeating = () => {
         .eq('invitato_id', guestId);
       
       await deleteQuery;
-      
+
       // Update local state
       setAssignments((prev) => prev.filter((assignment) => assignment.invitato_id !== guestId));
-      
+
       // If tableId is provided, create new assignment
       if (tableId) {
         const insertQuery = supabaseClient
@@ -216,14 +207,13 @@ export const useSeating = () => {
           .insert({
             invitato_id: guestId,
             tavolo_id: tableId,
-            user_id: user.id,  // <-- AGGIUNGI QUESTA RIGA
           })
           .select('id, invitato_id, tavolo_id, created_at')
           .single();
-        
+
         const response = await insertQuery;
         if (response.error) throw response.error;
-        
+
         // Update local state
         setAssignments((prev) => [...prev, response.data]);
       }
@@ -234,10 +224,12 @@ export const useSeating = () => {
         description: "Impossibile spostare l'ospite. Riprova.",
         variant: "destructive",
       });
+      // Refresh data on error
       fetchData();
     }
-  }, [user?.id, toast, fetchData]);
-  
+  }, [toast, fetchData]);
+
+  // Function to assign multiple guests to a table
   // Function to assign multiple guests to a table - VERSIONE CORRETTA
   const assignMultipleGuests = useCallback(async (guestIds: number[], tableId: number): Promise<void> => {
     if (!user?.id) {
