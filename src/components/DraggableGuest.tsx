@@ -66,12 +66,12 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             {/* Tipo ospite badge */}
-            <Badge 
+            {/*<Badge 
               variant={guest.is_principale ? "default" : "secondary"} 
               className="text-xs"
             >
               {guest.is_principale ? 'Principale' : 'Accompagnatore'}
-            </Badge>
+            </Badge>*/}
             
             {/* Remove button */}
             {showRemoveButton && (
