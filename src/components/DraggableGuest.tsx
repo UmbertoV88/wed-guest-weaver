@@ -92,37 +92,21 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
             <strong>Note:</strong> {guest.note}
           </p>
         )}
-        {(() => {
-          try {
-            // Se allergies è una stringa JSON, parsala
-            let allergiesText = '';
-            
-            if (guest.allergies) {
-              if (typeof guest.allergies === 'string' && guest.allergies.startsWith('{')) {
-                // È un JSON, parsalo
-                const allergiesJson = JSON.parse(guest.allergies);
-                allergiesText = allergiesJson.allergies || '';
-              } else {
-                // È già una stringa normale
-                allergiesText = guest.allergies;
-              }
-            }
-            
-            // Mostra solo se le allergie non sono vuote
-            return allergiesText && allergiesText.trim() !== '' ? (
-              <div className="flex items-start gap-1 text-red-600 mt-1">
-                <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <div className="text-xs">
-                  {guest.nome_visualizzato}: {allergiesText}
-                </div>
+        {guest.allergies && (() => {
+          const allergiesText = guest.allergies.includes('"allergies":"') 
+            ? JSON.parse(guest.allergies).allergies 
+            : guest.allergies;
+          
+          return allergiesText && allergiesText.trim() !== '' ? (
+            <div className="flex items-start gap-1 text-red-600 mt-1">
+              <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+              <div className="text-xs">
+                {guest.nome_visualizzato}: {allergiesText}
               </div>
-            ) : null;
-            
-          } catch (error) {
-            // Se c'è un errore nel parsing, non mostrare nulla
-            return null;
-          }
+            </div>
+          ) : null;
         })()}
+
       </CardContent>
     </Card>
   );
