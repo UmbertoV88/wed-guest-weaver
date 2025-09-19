@@ -3,7 +3,7 @@ import { useDrag } from 'react-dnd';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Crown, Users, UserPlus, AlertTriangle } from "lucide-react";
+import { X, Crown, Users, UserPlus } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
 
 interface DraggableGuestProps {
@@ -89,24 +89,9 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
         {/* Notes preview */}
         {guest.note && (
           <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-            <strong>Note:</strong> {guest.note}
+            {guest.note}
           </p>
         )}
-        {guest.allergies && (() => {
-          const allergiesText = guest.allergies.includes('"allergies":"') 
-            ? JSON.parse(guest.allergies).allergies 
-            : guest.allergies;
-          
-          return allergiesText && allergiesText.trim() !== '' ? (
-            <div className="flex items-start gap-1 text-red-600 mt-1">
-              <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-              <div className="text-xs">
-                {guest.nome_visualizzato}: {allergiesText}
-              </div>
-            </div>
-          ) : null;
-        })()}
-
       </CardContent>
     </Card>
   );
