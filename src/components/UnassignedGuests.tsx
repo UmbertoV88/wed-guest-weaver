@@ -28,9 +28,16 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
   const [selectedGuests, setSelectedGuests] = useState<number[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [isAssigning, setIsAssigning] = useState(false);
+  const [groupFilter, setGroupFilter] = useState<string>("all");
 
-  const confirmedGuests = guests.filter(g => g.confermato === true);
-  const pendingGuests = guests.filter(g => g.confermato !== true);
+  // Filtra gli ospiti in base al gruppo
+  const filteredGuests = guests.filter(guest => {
+    if (groupFilter === "all") return true;
+    return guest.gruppo === groupFilter;
+  });
+
+  const confirmedGuests = filteredGuests.filter(g => g.confermato === true);
+  const pendingGuests = filteredGuests.filter(g => g.confermato !== true);
 
   const handleGuestSelect = (guestId: number, checked: boolean) => {
     if (checked) {
@@ -97,7 +104,6 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                   'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
               }`}
             >
-
               <Checkbox
                 checked={selectedGuests.includes(guest.id)}
                 onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
@@ -135,20 +141,38 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
           </CardTitle>
           <Badge variant="outline" className="bg-white dark:bg-gray-950">
             <Users className="h-3 w-3 mr-1" />
-            {guests.length}
+            {filteredGuests.length}
           </Badge>
         </div>
+        
+        {/* Filtro per gruppo */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Filtra per gruppo:</label>
+          <Select value={groupFilter} onValueChange={setGroupFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutti i gruppi</SelectItem>
+              <SelectItem value="family-his">Famiglia di lui</SelectItem>
+              <SelectItem value="family-hers">Famiglia di lei</SelectItem>
+              <SelectItem value="friends">Amici</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <p className="text-xs text-muted-foreground">
           Seleziona gli ospiti e scegli un tavolo per l'assegnazione
         </p>
       </CardHeader>
-
       <CardContent className="space-y-4">
-        {guests.length === 0 ? (
+        {filteredGuests.length === 0 ? (
           <div className="text-center py-8">
             <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
             <p className="text-muted-foreground">
-              Tutti gli ospiti sono stati assegnati ai tavoli!
+              {groupFilter === "all" 
+                ? "Tutti gli ospiti sono stati assegnati ai tavoli!" 
+                : `Nessun ospite nel gruppo selezionato da assegnare`}
             </p>
           </div>
         ) : (
@@ -200,7 +224,6 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                 </div>
               </div>
             )}
-
             {/* Guest Lists */}
             <div className="space-y-6">
               {renderGuestList(
