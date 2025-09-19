@@ -44,7 +44,7 @@ const DashboardSidebar = ({
   const collapsed = state === "collapsed";
   const [countdown, setCountdown] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const { profile, updateWeddingDate } = useProfile();
+  const { profile: userProfile, updateWeddingDate } = useProfile();
   const weddingDate = profile?.wedding_date ? new Date(profile.wedding_date) : undefined;
   
   useEffect(() => {
