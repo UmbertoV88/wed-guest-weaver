@@ -1,7 +1,7 @@
 import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
-  // 1) Definisci ordine di category e status
+  // Ordine categorie e status
   const categoryOrder: Record<GuestCategory, number> = {
     'family-hers': 0,
     'family-his' : 1,
@@ -14,8 +14,11 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     'deleted'  : 2,
   };
 
-  // 2) Ordina prima per categoria, poi per status
-  const sortedGuests = [...guests].sort((a, b) => {
+  // Filtra solo invitati principali (evita righe “Accompagnatori di…”)
+  const mainGuests = guests.filter(g => g.containsPrimary !== false);
+
+  // Ordina per categoria poi per status
+  const sorted = mainGuests.sort((a, b) => {
     const ca = categoryOrder[a.category] ?? 2;
     const cb = categoryOrder[b.category] ?? 2;
     if (ca !== cb) return ca - cb;
@@ -24,7 +27,7 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     return sa - sb;
   });
 
-  // 3) Header e righe senza colonna “Accompagnatori”
+  // Header
   const headers = [
     "Nome",
     "Categoria",
@@ -33,10 +36,12 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Allergie",
     "Data Creazione"
   ];
+
+  // Costruisci righe
   const rows: string[][] = [];
 
-  // 4) Genera righe per ospiti principali e companions
-  sortedGuests.forEach(guest => {
+  sorted.forEach(guest => {
+    // Riga principale
     rows.push([
       guest.name,
       CATEGORY_LABELS[guest.category],
@@ -45,6 +50,7 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
       guest.allergies || "",
       guest.createdAt.toLocaleDateString("it-IT")
     ]);
+    // Righe veri accompagnatori
     guest.companions.forEach(comp => {
       rows.push([
         comp.name,
@@ -57,11 +63,13 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     });
   });
 
-  // 5) Crea e scarica CSV
+  // Crea CSV
   const csvContent = [
     headers.join(","),
     ...rows.map(r => r.map(f => `"${f}"`).join(","))
   ].join("\n");
+
+  // Scarica
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
