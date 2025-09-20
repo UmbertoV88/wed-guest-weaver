@@ -1,24 +1,28 @@
 import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
-  // 1) Mappa per l’ordine di categoria
+  // Ordine categorie e status
   const categoryOrder: Record<GuestCategory, number> = {
     'family-hers': 0,
     'family-his' : 1,
     'friends'    : 2,
     'colleagues' : 2,
   };
+  const statusOrder: Record<GuestStatus, number> = {
+    'pending'  : 0,
+    'confirmed': 1,
+    'deleted'  : 2,
+  };
 
-  // 2) Ordina per categoria, poi per confermato (false prima di true)
+  // Ordina per categoria e poi per status
   const sortedGuests = [...guests].sort((a, b) => {
     const ca = categoryOrder[a.category] ?? 2;
     const cb = categoryOrder[b.category] ?? 2;
     if (ca !== cb) return ca - cb;
-    // confermato: false (0) prima di true (1)
-    return (a.confermato ? 1 : 0) - (b.confermato ? 1 : 0);
+    return (statusOrder[a.status] ?? 2) - (statusOrder[b.status] ?? 2);
   });
 
-  // 3) Intestazioni
+  // Header
   const headers = [
     "Nome",
     "Categoria",
@@ -28,32 +32,32 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Data Creazione"
   ];
 
-  // 4) Costruisci righe solo per invitati principali e poi i companions
+  // Costruisci righe principali e accompagnatori
   const rows: string[][] = [];
   sortedGuests.forEach(guest => {
-    // Riga ospite principale
+    // Riga principale
     rows.push([
       guest.name,
       CATEGORY_LABELS[guest.category],
-      guest.confermato ? "Confermato" : "Da confermare",
-      guest.fascia_eta || "",
+      STATUS_LABELS[guest.status],                 // Usa STATUS_LABELS qui
+      guest.ageGroup || "",
       guest.allergies || "",
       guest.createdAt.toLocaleDateString("it-IT")
     ]);
-    // Righe accompagnatori (se presenti)
+    // Companions
     guest.companions.forEach(comp => {
       rows.push([
         comp.name,
         CATEGORY_LABELS[guest.category],
-        comp.confermato ? "Confermato" : "Da confermare",
-        comp.fascia_eta || "",
+        STATUS_LABELS[comp.status],                // E qui per ciascun companion
+        comp.ageGroup || "",
         comp.allergies || "",
         guest.createdAt.toLocaleDateString("it-IT")
       ]);
     });
   });
 
-  // 5) Genera e scarica il CSV
+  // Genera e scarica
   const csvContent = [
     headers.join(","),
     ...rows.map(r => r.map(f => `"${f}"`).join(","))
@@ -67,3 +71,4 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
   link.click();
   document.body.removeChild(link);
 };
+
