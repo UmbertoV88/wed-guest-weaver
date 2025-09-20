@@ -115,7 +115,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
             const parsedNote = JSON.parse(guest.note);
             // If it's JSON, check for other fields besides allergies
             const otherNotes = Object.entries(parsedNote)
-              .filter(([key]) => key !== 'allergies' && key !== 'deleted_at')
+              .filter(([key]) => key !== 'allergies')
               .map(([key, value]) => `${key}: ${value}`)
               .join(', ');
             return otherNotes ? (
