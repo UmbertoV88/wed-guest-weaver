@@ -1,22 +1,30 @@
 import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
-  // 1) Mappa per ordinare prima famiglia di lei, poi famiglia di lui, poi altri
-  const orderMap: Record<GuestCategory, number> = {
+  // 1) Definisci ordine di category e status
+  const categoryOrder: Record<GuestCategory, number> = {
     'family-hers': 0,
-    'family-his': 1,
-    'friends': 2,
-    'colleagues': 2,
+    'family-his' : 1,
+    'friends'    : 2,
+    'colleagues' : 2,
+  };
+  const statusOrder: Record<GuestStatus, number> = {
+    'pending'  : 0,
+    'confirmed': 1,
+    'deleted'  : 2,
   };
 
-  // 2) Ordina gli invitati principali per categoria
+  // 2) Ordina prima per categoria, poi per status
   const sortedGuests = [...guests].sort((a, b) => {
-    const oa = orderMap[a.category] ?? 2;
-    const ob = orderMap[b.category] ?? 2;
-    return oa - ob;
+    const ca = categoryOrder[a.category] ?? 2;
+    const cb = categoryOrder[b.category] ?? 2;
+    if (ca !== cb) return ca - cb;
+    const sa = statusOrder[a.status] ?? 2;
+    const sb = statusOrder[b.status] ?? 2;
+    return sa - sb;
   });
 
-  // 3) Intestazioni senza “Accompagnatori”
+  // 3) Header e righe senza colonna “Accompagnatori”
   const headers = [
     "Nome",
     "Categoria",
@@ -25,12 +33,10 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Allergie",
     "Data Creazione"
   ];
-
-  // 4) Costruisci le righe: per ogni guest principale e poi i suoi companions (se presenti)
   const rows: string[][] = [];
 
+  // 4) Genera righe per ospiti principali e companions
   sortedGuests.forEach(guest => {
-    // Riga dell'ospite principale
     rows.push([
       guest.name,
       CATEGORY_LABELS[guest.category],
@@ -39,13 +45,11 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
       guest.allergies || "",
       guest.createdAt.toLocaleDateString("it-IT")
     ]);
-
-    // Righe degli accompagnatori (solo se ne esistono)
     guest.companions.forEach(comp => {
       rows.push([
-        comp.name,                                 // Nome del companion
-        CATEGORY_LABELS[guest.category],          // Stessa categoria del principale
-        STATUS_LABELS[comp.status],               // Status del companion
+        comp.name,
+        CATEGORY_LABELS[guest.category],
+        STATUS_LABELS[comp.status],
         comp.ageGroup || "",
         comp.allergies || "",
         guest.createdAt.toLocaleDateString("it-IT")
@@ -53,21 +57,18 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     });
   });
 
-  // 5) Componi il contenuto CSV
+  // 5) Crea e scarica CSV
   const csvContent = [
-    headers.join(","),                         // Header
-    ...rows.map(row => row.map(field => `"${field}"`).join(","))
+    headers.join(","),
+    ...rows.map(r => r.map(f => `"${f}"`).join(","))
   ].join("\n");
-
-  // 6) Creazione e download del file
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.setAttribute("href", url);
-  link.setAttribute("download", `${filename}.csv`);
-  link.style.visibility = "hidden";
+  link.href = URL.createObjectURL(blob);
+  link.download = `${filename}.csv`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
+
 
