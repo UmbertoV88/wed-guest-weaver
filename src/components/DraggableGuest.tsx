@@ -109,12 +109,29 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
             )}
           </div>
         </div>
-        {/* Notes preview */}
-        {guest.note && (
-          <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-            {guest.note}
-          </p>
-        )}
+        {/* Notes preview - show only non-allergy notes */}
+        {guest.note && (() => {
+          try {
+            const parsedNote = JSON.parse(guest.note);
+            // If it's JSON, check for other fields besides allergies
+            const otherNotes = Object.entries(parsedNote)
+              .filter(([key]) => key !== 'allergies')
+              .map(([key, value]) => `${key}: ${value}`)
+              .join(', ');
+            return otherNotes ? (
+              <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                {otherNotes}
+              </p>
+            ) : null;
+          } catch (error) {
+            // If not JSON, show the note as is (it might contain allergies info)
+            return (
+              <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                {guest.note}
+              </p>
+            );
+          }
+        })()}
       </CardContent>
     </Card>
   );
