@@ -93,72 +93,55 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             className="mr-2"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-            {guestList.map((guest) => (
-              <div
-                key={guest.id}
-                className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors ${
-                  guest.gruppo === 'family-his'
-                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
-                    : guest.gruppo === 'family-hers'
-                    ? 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800'
-                    : 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
-                }`}
-              >
-                <Checkbox
-                  checked={selectedGuests.includes(guest.id)}
-                  onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate">
-                      {guest.nome_visualizzato}
-                    </p>
-                    {guest.is_principale ? (
-                      <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" />
-                    ) : (
-                      <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" />
-                    )}
-                    {guest.allergies && (
-                      <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1 mt-1">
-                    {guest.gruppo && (
-                      <Badge variant="outline" className="text-xs">
-                        {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] ||
-                          guest.gruppo}
-                      </Badge>
-                    )}
-                    {guest.fascia_eta && (
-                      <Badge variant="secondary" className="text-xs">
-                        {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] ||
-                          guest.fascia_eta}
-                      </Badge>
-                    )}
-                  </div>
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {guestList.map((guest) => (
+            <div 
+              key={guest.id} 
+              className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors ${
+                guest.gruppo === 'family-his' ? 
+                  'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800' : 
+                  guest.gruppo === 'family-hers' ? 
+                  'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800' :
+                  'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+              }`}
+            >
+              <Checkbox
+                checked={selectedGuests.includes(guest.id)}
+                onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{guest.nome_visualizzato}</p>
+                  {guest.is_principale ? (
+                    <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                  ) : (
+                    <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" />
+                  )}
                   {guest.allergies && (
-                    <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-1">
-                      Allergie: {guest.allergies}
-                    </p>
+                    <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
                   )}
                 </div>
-                <div className="flex items-center gap-1">
-                  {guest.confermato && (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    >
-                      Conf.
+                <div className="flex flex-wrap items-center gap-1 mt-1">
+                  {guest.gruppo && (
+                    <Badge variant="outline" className="text-xs">
+                      {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
+                    </Badge>
+                  )}
+                  {guest.fascia_eta && (
+                    <Badge variant="secondary" className="text-xs">
+                      {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
                     </Badge>
                   )}
                 </div>
+                {guest.allergies && (
+                  <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-1">
+                    Allergie: {guest.allergies}
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-
       </div>
     );
   };
