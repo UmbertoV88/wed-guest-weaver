@@ -21,10 +21,10 @@ interface UnassignedGuestsProps {
   onAssignMultipleGuests: (guestIds: number[], tableId: number) => Promise<void>;
 }
 
-const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({ 
-  guests, 
-  tables, 
-  onAssignMultipleGuests 
+const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
+  guests,
+  tables,
+  onAssignMultipleGuests
 }) => {
   const [selectedGuests, setSelectedGuests] = useState<number[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>("");
@@ -59,7 +59,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
 
   const handleAssign = async () => {
     if (!selectedTable || selectedGuests.length === 0) return;
-    
+
     setIsAssigning(true);
     try {
       await onAssignMultipleGuests(selectedGuests, parseInt(selectedTable));
@@ -76,9 +76,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
 
   const renderGuestList = (guestList: SeatingGuest[], title: string, titleColor: string) => {
     if (guestList.length === 0) return null;
-
     const allSelected = guestList.every(g => selectedGuests.includes(g.id));
-    const someSelected = guestList.some(g => selectedGuests.includes(g.id));
 
     return (
       <div className="space-y-3">
@@ -93,57 +91,57 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             className="mr-2"
           />
         </div>
-        <div className="space-y-2 max-h-60 overflow-y-auto">
-          {guestList.map((guest) => (
-            <div 
-              key={guest.id} 
-              className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors ${
-                guest.gruppo === 'family-his' ? 
-                  'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800' : 
-                  guest.gruppo === 'family-hers' ? 
-                  'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800' :
-                  'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
-              }`}
-            >
-              <Checkbox
-                checked={selectedGuests.includes(guest.id)}
-                onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{guest.nome_visualizzato}</p>
-                  {guest.is_principale ? (
-                    <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" />
-                  ) : (
-                    <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" />
-                  )}
+        <div className="max-h-60 overflow-y-auto w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 w-full">
+            {guestList.map((guest) => (
+              <div
+                key={guest.id}
+                className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors w-full ${
+                  guest.gruppo === 'family-his'
+                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
+                    : guest.gruppo === 'family-hers'
+                    ? 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800'
+                    : 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+                }`}
+              >
+                <Checkbox
+                  checked={selectedGuests.includes(guest.id)}
+                  onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{guest.nome_visualizzato}</p>
+                    {guest.is_principale ? (
+                      <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                    ) : (
+                      <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" />
+                    )}
+                    {guest.allergies && (
+                      <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1 mt-1">
+                    {guest.gruppo && (
+                      <Badge variant="outline" className="text-xs">
+                        {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
+                      </Badge>
+                    )}
+                    {guest.fascia_eta && (
+                      <Badge variant="secondary" className="text-xs">
+                        {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
+                      </Badge>
+                    )}
+                  </div>
                   {guest.allergies && (
-                    <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
+                    <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-1">
+                      Allergie: {guest.allergies}
+                    </p>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-1 mt-1">
-                  {guest.gruppo && (
-                    <Badge variant="outline" className="text-xs">
-                      {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
-                    </Badge>
-                  )}
-                  {guest.fascia_eta && (
-                    <Badge variant="secondary" className="text-xs">
-                      {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
-                    </Badge>
-                  )}
-                </div>
-                {guest.allergies && (
-                  <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-1">
-                    Allergie: {guest.allergies}
-                  </p>
-                )}
+                {/* badge "Conf." rimosso */}
               </div>
-              <div className="flex items-center gap-1">
-                
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -162,7 +160,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             {filteredGuests.length}
           </Badge>
         </div>
-        
+
         {/* Filtro per gruppo */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Filtra per gruppo:</label>
@@ -178,7 +176,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             </SelectContent>
           </Select>
         </div>
-        
+
         <p className="text-xs text-muted-foreground">
           Seleziona gli ospiti e scegli un tavolo per l'assegnazione
         </p>
@@ -188,8 +186,8 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
           <div className="text-center py-8">
             <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
             <p className="text-muted-foreground">
-              {groupFilter === "all" 
-                ? "Tutti gli ospiti sono stati assegnati ai tavoli!" 
+              {groupFilter === "all"
+                ? "Tutti gli ospiti sono stati assegnati ai tavoli!"
                 : `Nessun ospite nel gruppo selezionato da assegnare`}
             </p>
           </div>
@@ -220,8 +218,8 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                         const availableSpots = getAvailableSpots(table);
                         const canAccommodate = availableSpots >= selectedGuests.length;
                         return (
-                          <SelectItem 
-                            key={table.id} 
+                          <SelectItem
+                            key={table.id}
                             value={table.id.toString()}
                             disabled={!canAccommodate}
                           >
@@ -231,7 +229,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                       })}
                     </SelectContent>
                   </Select>
-                  <Button 
+                  <Button
                     onClick={handleAssign}
                     disabled={!selectedTable || selectedGuests.length === 0 || isAssigning}
                     className="shrink-0"
@@ -244,16 +242,8 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             )}
             {/* Guest Lists */}
             <div className="space-y-6">
-              {renderGuestList(
-                confirmedGuests, 
-                "Confermati", 
-                "text-green-700 dark:text-green-300"
-              )}
-              {renderGuestList(
-                pendingGuests, 
-                "In Attesa", 
-                "text-muted-foreground"
-              )}
+              {renderGuestList(confirmedGuests, "Confermati", "text-green-700 dark:text-green-300")}
+              {renderGuestList(pendingGuests, "In Attesa", "text-muted-foreground")}
             </div>
           </>
         )}
