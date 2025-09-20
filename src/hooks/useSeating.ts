@@ -69,7 +69,7 @@ export const useSeating = () => {
       // Fetch guests manually
       const guestsQuery = await supabaseClient
       .from('invitati')
-      .select('id, nome_visualizzato, gruppo, note, confermato, is_principale, fascia_eta, allergies')
+      .select('id, nome_visualizzato, gruppo, note, confermato, is_principale, fascia_eta')
       .eq('user_id', user.id)
       .eq('confermato', true)  // AGGIUNTO: filtra solo gli ospiti confermati
       .order('nome_visualizzato');
@@ -99,17 +99,31 @@ export const useSeating = () => {
   const guests: SeatingGuest[] = useMemo(() => {
     if (!rawGuests || !assignments) return [];
     
-    return rawGuests.map((guest: any) => ({
-      id: guest.id,
-      nome_visualizzato: guest.nome_visualizzato,
-      gruppo: guest.gruppo,
-      note: guest.note,
-      confermato: guest.confermato,
-      is_principale: guest.is_principale,
-      fascia_eta: guest.fascia_eta,
-      allergies: guest.note, // Use note field as allergies for now
-      tableId: assignments.find((a) => a.invitato_id === guest.id)?.tavolo_id,
-    }));
+    return rawGuests.map((guest: any) => {
+      // Parse note field to extract allergies if it's JSON
+      let allergies = null;
+      try {
+        if (guest.note) {
+          const parsedNote = JSON.parse(guest.note);
+          allergies = parsedNote.allergies || null;
+        }
+      } catch (error) {
+        // If parsing fails, treat the entire note as text (no allergies)
+        allergies = null;
+      }
+
+      return {
+        id: guest.id,
+        nome_visualizzato: guest.nome_visualizzato,
+        gruppo: guest.gruppo,
+        note: guest.note,
+        confermato: guest.confermato,
+        is_principale: guest.is_principale,
+        fascia_eta: guest.fascia_eta,
+        allergies: allergies,
+        tableId: assignments.find((a) => a.invitato_id === guest.id)?.tavolo_id,
+      };
+    });
   }, [rawGuests, assignments]);
 
   // Add table
