@@ -469,7 +469,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                     )}
                     
                     {(guest.allergies || guest.companions.some(comp => comp.allergies)) && (
-                      <div className="flex items-start gap-2 text-warning">
+                      <div className="flex items-end gap-2 text-warning">
                         <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                         <div>
                           {guest.allergies && (
