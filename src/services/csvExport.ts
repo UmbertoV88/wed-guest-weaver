@@ -1,28 +1,9 @@
 import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
-  // Ordine categorie e status
-  const categoryOrder: Record<GuestCategory, number> = {
-    'family-hers': 0,
-    'family-his' : 1,
-    'friends'    : 2,
-    'colleagues' : 2,
-  };
-  const statusOrder: Record<GuestStatus, number> = {
-    'pending'  : 0,
-    'confirmed': 1,
-    'deleted'  : 2,
-  };
+  // Ordine categorie e status (se già applicato)
+  const sortedGuests = [...guests] /* …ordinamento… */;
 
-  // Ordina per categoria e poi per status
-  const sortedGuests = [...guests].sort((a, b) => {
-    const ca = categoryOrder[a.category] ?? 2;
-    const cb = categoryOrder[b.category] ?? 2;
-    if (ca !== cb) return ca - cb;
-    return (statusOrder[a.status] ?? 2) - (statusOrder[b.status] ?? 2);
-  });
-
-  // Header
   const headers = [
     "Nome",
     "Categoria",
@@ -32,24 +13,29 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Data Creazione"
   ];
 
-  // Costruisci righe principali e accompagnatori
   const rows: string[][] = [];
+
   sortedGuests.forEach(guest => {
+    // Salta i gruppi “Accompagnatori di …”
+    if (guest.name.startsWith("Accompagnatori di ")) return;
+
     // Riga principale
     rows.push([
       guest.name,
       CATEGORY_LABELS[guest.category],
-      STATUS_LABELS[guest.status],                 // Usa STATUS_LABELS qui
+      STATUS_LABELS[guest.status],
       guest.ageGroup || "",
       guest.allergies || "",
       guest.createdAt.toLocaleDateString("it-IT")
     ]);
-    // Companions
+
+    // Righe per i suoi reali accompagnatori (se presenti), che non iniziano con “Accompagnatori di ”
     guest.companions.forEach(comp => {
+      if (comp.name.startsWith("Accompagnatori di ")) return;
       rows.push([
         comp.name,
         CATEGORY_LABELS[guest.category],
-        STATUS_LABELS[comp.status],                // E qui per ciascun companion
+        STATUS_LABELS[comp.status],
         comp.ageGroup || "",
         comp.allergies || "",
         guest.createdAt.toLocaleDateString("it-IT")
@@ -57,7 +43,6 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     });
   });
 
-  // Genera e scarica
   const csvContent = [
     headers.join(","),
     ...rows.map(r => r.map(f => `"${f}"`).join(","))
@@ -71,4 +56,5 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
   link.click();
   document.body.removeChild(link);
 };
+
 
