@@ -3,8 +3,9 @@ import { useDrag } from 'react-dnd';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Crown, Users, UserPlus } from "lucide-react";
+import { X, Crown, Users, UserPlus, AlertTriangle } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
+import { CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
 
 interface DraggableGuestProps {
   guest: SeatingGuest;
@@ -55,19 +56,35 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                 {guest.nome_visualizzato}
               </p>
               {guest.is_principale ? (
-                <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" title="Ospite principale" />
+                <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" />
               ) : (
-                <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" title="Accompagnatore" />
+                <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" />
+              )}
+              {guest.allergies && (
+                <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
               )}
             </div>
             
-            {guest.gruppo && (
-              <div className="flex items-center gap-1 mt-1">
-                <Users className="h-3 w-3 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground truncate">
-                  {guest.gruppo}
-                </p>
-              </div>
+            <div className="flex flex-wrap items-center gap-1 mt-1">
+              {guest.gruppo && (
+                <>
+                  <Users className="h-3 w-3 text-muted-foreground" />
+                  <Badge variant="outline" className="text-xs">
+                    {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
+                  </Badge>
+                </>
+              )}
+              {guest.fascia_eta && (
+                <Badge variant="secondary" className="text-xs">
+                  {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
+                </Badge>
+              )}
+            </div>
+            
+            {guest.allergies && (
+              <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-1">
+                Allergie: {guest.allergies}
+              </p>
             )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">

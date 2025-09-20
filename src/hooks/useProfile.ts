@@ -8,7 +8,7 @@ export interface UserProfile {
   email: string | null;
   full_name: string | null;
   is_wedding_organizer: boolean;
-  wedding_date: string | null;
+  wedding_date?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -37,7 +37,10 @@ export const useProfile = () => {
           console.error('Error fetching profile:', error);
           setProfile(null);
         } else {
-          setProfile(data);
+          setProfile({
+            ...(data as any),
+            wedding_date: (data as any).wedding_date || null
+          });
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -70,7 +73,10 @@ export const useProfile = () => {
     
     // AGGIUNGI: Aggiorna lo stato locale immediatamente
     if (data) {
-      setProfile(data);
+      setProfile({
+        ...(data as any),
+        wedding_date: (data as any).wedding_date || null
+      });
     }
   };
 
@@ -91,7 +97,10 @@ export const useProfile = () => {
           .eq('user_id', user.id)
           .single();
         
-        if (data) setProfile(data);
+        if (data) setProfile({
+          ...(data as any),
+          wedding_date: (data as any).wedding_date || null
+        });
       }
     } catch (error) {
       console.error('Error promoting user:', error);

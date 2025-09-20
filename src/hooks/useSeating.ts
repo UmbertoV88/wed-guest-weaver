@@ -25,7 +25,9 @@ export interface SeatingGuest {
   gruppo: string | null;
   note: string | null;
   confermato: boolean | null;
-  is_principale: boolean | null; // AGGIUNTO: per distinguere principali da accompagnatori
+  is_principale: boolean | null;
+  fascia_eta: string | null;
+  allergies?: string | null;
   tableId?: number;
 }
 
@@ -67,7 +69,7 @@ export const useSeating = () => {
       // Fetch guests manually
       const guestsQuery = await supabaseClient
       .from('invitati')
-      .select('id, nome_visualizzato, gruppo, note, confermato, is_principale')
+      .select('id, nome_visualizzato, gruppo, note, confermato, is_principale, fascia_eta, allergies')
       .eq('user_id', user.id)
       .eq('confermato', true)  // AGGIUNTO: filtra solo gli ospiti confermati
       .order('nome_visualizzato');
@@ -103,7 +105,9 @@ export const useSeating = () => {
       gruppo: guest.gruppo,
       note: guest.note,
       confermato: guest.confermato,
-      is_principale: guest.is_principale, // AGGIUNTO
+      is_principale: guest.is_principale,
+      fascia_eta: guest.fascia_eta,
+      allergies: guest.note, // Use note field as allergies for now
       tableId: assignments.find((a) => a.invitato_id === guest.id)?.tavolo_id,
     }));
   }, [rawGuests, assignments]);

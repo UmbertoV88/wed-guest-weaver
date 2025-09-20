@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, AlertCircle, UserPlus } from "lucide-react";
+import { Users, AlertCircle, UserPlus, AlertTriangle, Crown } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
+import { CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
 
 interface Table {
   id: number;
@@ -109,17 +110,38 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                 onCheckedChange={(checked) => handleGuestSelect(guest.id, checked as boolean)}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{guest.nome_visualizzato}</p>
-                {guest.gruppo && (
-                  <p className="text-xs text-muted-foreground truncate">{guest.gruppo}</p>
-                )}
-                {guest.note && (
-                  <p className="text-xs text-muted-foreground/80 truncate">{guest.note}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{guest.nome_visualizzato}</p>
+                  {guest.is_principale ? (
+                    <Crown className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                  ) : (
+                    <UserPlus className="h-3 w-3 text-purple-600 flex-shrink-0" />
+                  )}
+                  {guest.allergies && (
+                    <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-1 mt-1">
+                  {guest.gruppo && (
+                    <Badge variant="outline" className="text-xs">
+                      {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
+                    </Badge>
+                  )}
+                  {guest.fascia_eta && (
+                    <Badge variant="secondary" className="text-xs">
+                      {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
+                    </Badge>
+                  )}
+                </div>
+                {guest.allergies && (
+                  <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-1">
+                    Allergie: {guest.allergies}
+                  </p>
                 )}
               </div>
               <div className="flex items-center gap-1">
                 {guest.confermato === true && (
-                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                     Conf.
                   </Badge>
                 )}
