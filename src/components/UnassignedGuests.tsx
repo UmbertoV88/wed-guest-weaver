@@ -139,6 +139,9 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                   </p>
                 )}
               </div>
+              <div className="flex items-center gap-1">
+                
+              </div>
             </div>
           ))}
         </div>
