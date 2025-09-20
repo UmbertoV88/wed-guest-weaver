@@ -352,44 +352,20 @@ export const useSeating = () => {
 
   // Export CSV
   const exportCSV = useCallback(() => {
-    const rows = ['table_group,table_name,seat_position,guest_id,guest_name,color'];
-  
-    // Ordina tavoli: sposa → sposo → altri
-    const sortedTables = [...tables].sort((a, b) => {
-      const order = (lato: string | null) =>
-        lato === 'sposa' ? 0 :
-        lato === 'sposo'  ? 1 : 2;
-      return order(a.lato) - order(b.lato);
+    const rows = ['table_id,table_name,seat_position,guest_id,guest_name'];
+    
+    tables.forEach((table) => {
+      const tableGuests = guests.filter((guest) => guest.tableId === table.id);
+      
+      if (tableGuests.length === 0) {
+        rows.push(`${table.id},"${table.nome_tavolo || 'Tavolo ' + table.id}",0,,"Tavolo vuoto"`);
+      } else {
+        tableGuests.forEach((guest, index) => {
+          rows.push(`${table.id},"${table.nome_tavolo || 'Tavolo ' + table.id}",${index + 1},${guest.id},"${guest.nome_visualizzato}"`);
+        });
+      }
     });
-  
-    sortedTables.forEach(table => {
-      // determina tableGroup e tableColor...
-      const tableGroup = table.lato === 'sposa'
-        ? 'Tavolo della sposa'
-        : table.lato === 'sposo'
-        ? 'Tavolo dello sposo'
-        : 'Amici';
-      const tableColor = table.lato === 'sposa'
-        ? '#eed4ff'
-        : table.lato === 'sposo'
-        ? '#bfdfff'
-        : '#d4f5d4';
-  
-      const tableGuests = guests.filter(g => g.tableId === table.id);
-      if (tableGuests.length === 0) return;
-  
-      tableGuests.forEach((guest, index) => {
-        rows.push(
-          `"${tableGroup}",` +
-          `"${table.nome_tavolo}",` +
-          `${index + 1},` +
-          `${guest.id},` +
-          `"${guest.nome_visualizzato}",` +
-          `${tableColor}`
-        );
-      });
-    });
-  
+
     const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -401,10 +377,12 @@ export const useSeating = () => {
       URL.revokeObjectURL(url);
       a.remove();
     }, 1000);
-  
-    toast({ title: "CSV esportato", description: "Il file della disposizione tavoli è stato scaricato." });
-  }, [tables, guests, toast]);
 
+    toast({
+      title: "CSV esportato",
+      description: "Il file della disposizione tavoli è stato scaricato.",
+    });
+  }, [tables, guests, toast]);
 
   return {
     tables,
