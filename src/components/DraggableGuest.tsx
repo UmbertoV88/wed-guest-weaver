@@ -82,9 +82,12 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
             </div>
             
             {guest.allergies && (
-              <p className="text-xs self-end text-orange-600 dark:text-orange-400 truncate mt-1">
-                Allergie: {guest.allergies}
-              </p>
+              <div className="flex items-start gap-2 text-warning mt-2">
+                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <div className="self-end text-xs">
+                  Allergie: {guest.allergies}
+                </div>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
