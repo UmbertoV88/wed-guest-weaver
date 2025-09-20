@@ -1,33 +1,24 @@
 import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
-  // Ordine categorie e status
+  // 1) Mappa per l’ordine di categoria
   const categoryOrder: Record<GuestCategory, number> = {
     'family-hers': 0,
     'family-his' : 1,
     'friends'    : 2,
     'colleagues' : 2,
   };
-  const statusOrder: Record<GuestStatus, number> = {
-    'pending'  : 0,
-    'confirmed': 1,
-    'deleted'  : 2,
-  };
 
-  // Filtra solo invitati principali (evita righe “Accompagnatori di…”)
-  const mainGuests = guests.filter(g => g.containsPrimary !== false);
-
-  // Ordina per categoria poi per status
-  const sorted = mainGuests.sort((a, b) => {
+  // 2) Ordina per categoria, poi per confermato (false prima di true)
+  const sortedGuests = [...guests].sort((a, b) => {
     const ca = categoryOrder[a.category] ?? 2;
     const cb = categoryOrder[b.category] ?? 2;
     if (ca !== cb) return ca - cb;
-    const sa = statusOrder[a.status] ?? 2;
-    const sb = statusOrder[b.status] ?? 2;
-    return sa - sb;
+    // confermato: false (0) prima di true (1)
+    return (a.confermato ? 1 : 0) - (b.confermato ? 1 : 0);
   });
 
-  // Header
+  // 3) Intestazioni
   const headers = [
     "Nome",
     "Categoria",
@@ -37,39 +28,37 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Data Creazione"
   ];
 
-  // Costruisci righe
+  // 4) Costruisci righe solo per invitati principali e poi i companions
   const rows: string[][] = [];
-
-  sorted.forEach(guest => {
-    // Riga principale
+  sortedGuests.forEach(guest => {
+    // Riga ospite principale
     rows.push([
       guest.name,
       CATEGORY_LABELS[guest.category],
-      STATUS_LABELS[guest.status],
-      guest.ageGroup || "",
+      guest.confermato ? "Confermato" : "Da confermare",
+      guest.fascia_eta || "",
       guest.allergies || "",
       guest.createdAt.toLocaleDateString("it-IT")
     ]);
-    // Righe veri accompagnatori
+    // Righe accompagnatori (se presenti)
     guest.companions.forEach(comp => {
       rows.push([
         comp.name,
         CATEGORY_LABELS[guest.category],
-        STATUS_LABELS[comp.status],
-        comp.ageGroup || "",
+        comp.confermato ? "Confermato" : "Da confermare",
+        comp.fascia_eta || "",
         comp.allergies || "",
         guest.createdAt.toLocaleDateString("it-IT")
       ]);
     });
   });
 
-  // Crea CSV
+  // 5) Genera e scarica il CSV
   const csvContent = [
     headers.join(","),
     ...rows.map(r => r.map(f => `"${f}"`).join(","))
   ].join("\n");
 
-  // Scarica
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -78,5 +67,3 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
   link.click();
   document.body.removeChild(link);
 };
-
-
