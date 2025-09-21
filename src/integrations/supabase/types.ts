@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_categories: {
+        Row: {
+          created_at: string | null
+          default_percentage: number | null
+          icon: string | null
+          id: number
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_percentage?: number | null
+          icon?: string | null
+          id?: number
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          default_percentage?: number | null
+          icon?: string | null
+          id?: number
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      budget_items: {
+        Row: {
+          actual_amount: number | null
+          budgeted_amount: number
+          category_id: number
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: number
+          notes: string | null
+          paid_amount: number | null
+          priority: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          vendor_name: string
+        }
+        Insert: {
+          actual_amount?: number | null
+          budgeted_amount?: number
+          category_id: number
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: number
+          notes?: string | null
+          paid_amount?: number | null
+          priority?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          vendor_name: string
+        }
+        Update: {
+          actual_amount?: number | null
+          budgeted_amount?: number
+          category_id?: number
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: number
+          notes?: string | null
+          paid_amount?: number | null
+          priority?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vendor_name?: string
+        }
+        Relationships: []
+      }
       invitati: {
         Row: {
           cognome: string | null
