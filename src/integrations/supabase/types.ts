@@ -73,18 +73,21 @@ export type Database = {
           id: number
           invitato_id: number
           tavolo_id: number
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: number
           invitato_id: number
           tavolo_id: number
+          user_id: string
         }
         Update: {
           created_at?: string | null
           id?: number
           invitato_id?: number
           tavolo_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -112,6 +115,7 @@ export type Database = {
           is_wedding_organizer: boolean
           updated_at: string
           user_id: string
+          wedding_date: string | null
         }
         Insert: {
           created_at?: string
@@ -121,6 +125,7 @@ export type Database = {
           is_wedding_organizer?: boolean
           updated_at?: string
           user_id: string
+          wedding_date?: string | null
         }
         Update: {
           created_at?: string
@@ -130,6 +135,7 @@ export type Database = {
           is_wedding_organizer?: boolean
           updated_at?: string
           user_id?: string
+          wedding_date?: string | null
         }
         Relationships: []
       }
@@ -176,6 +182,7 @@ export type Database = {
           id: number
           lato: string | null
           nome_tavolo: string | null
+          user_id: string
         }
         Insert: {
           capacita_max: number
@@ -183,6 +190,7 @@ export type Database = {
           id?: number
           lato?: string | null
           nome_tavolo?: string | null
+          user_id: string
         }
         Update: {
           capacita_max?: number
@@ -190,6 +198,7 @@ export type Database = {
           id?: number
           lato?: string | null
           nome_tavolo?: string | null
+          user_id?: string
         }
         Relationships: []
       }
