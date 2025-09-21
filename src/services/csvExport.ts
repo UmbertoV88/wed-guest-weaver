@@ -1,4 +1,4 @@
-import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
+import { Guest, GuestCategory, GuestStatus, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
   // Ordine categorie e status
