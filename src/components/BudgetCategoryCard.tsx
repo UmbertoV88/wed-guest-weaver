@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { BudgetCategory, BudgetItem } from "@/types/budget";
+import { IconRenderer } from "@/components/ui/icon-renderer";
 
 interface BudgetCategoryCardProps {
   category: BudgetCategory;
@@ -32,7 +33,7 @@ export const BudgetCategoryCard = ({
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-medium">{category.name}</CardTitle>
-        <span className="text-xl">{category.icon}</span>
+        <IconRenderer iconName={category.icon} className="h-5 w-5" />
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4 text-sm">

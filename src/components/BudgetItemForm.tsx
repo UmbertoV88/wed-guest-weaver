@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { BudgetCategory, BudgetItem, BudgetStatus, BudgetPriority, BUDGET_STATUS_LABELS, BUDGET_PRIORITY_LABELS } from '@/types/budget';
+import { IconRenderer } from '@/components/ui/icon-renderer';
 
 const formSchema = z.object({
   vendor_name: z.string().min(1, 'Nome fornitore richiesto'),
@@ -126,7 +127,10 @@ export const BudgetItemForm = ({ categories, onSubmit, item, trigger }: BudgetIt
                       <SelectContent>
                         {categories.map((category) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.icon} {category.name}
+                            <div className="flex items-center gap-2">
+                              <IconRenderer iconName={category.icon} className="h-4 w-4" />
+                              {category.name}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
