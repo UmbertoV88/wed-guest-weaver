@@ -5,6 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 import { useBudget } from "@/hooks/useBudget";
 
+// Assumendo che hai accesso ai dati del budget tramite useBudget()
+const { budgetSummary, isLoading } = useBudget();
+
+// Calcola la percentuale utilizzata
+const percentageUsed = budgetSummary.totalBudget > 0 
+  ? Math.min((budgetSummary.totalSpent / budgetSummary.totalBudget) * 100, 100)
+  : 0;
+
 const BudgetOverview = () => {
   const { budgetSummary, isLoading } = useBudget();
 
