@@ -6,6 +6,13 @@ import BudgetOverview from "@/components/budget/BudgetOverview";
 import BudgetCategories from "@/components/budget/BudgetCategories";
 import BudgetItems from "@/components/budget/BudgetItems";
 import BudgetAnalytics from "@/components/budget/BudgetAnalytics";
+import CommonHeader from "@/components/CommonHeader";
+import DashboardSidebar from "@/components/DashboardSidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
 const Finance = () => {
   return (
