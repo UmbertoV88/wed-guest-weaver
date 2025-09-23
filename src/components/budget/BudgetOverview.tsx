@@ -50,10 +50,10 @@ const BudgetOverview = () => {
           </div>
           <div className="mt-2">
             <Progress 
-              value={spentPercentage} 
-              className="h-2"
-              indicatorClassName={spentPercentage > 90 ? "bg-destructive" : "bg-primary"}
+              value={percentageUsed} 
+              className="w-full h-2 [&>div]:bg-red-500" 
             />
+
             <p className="text-xs text-muted-foreground mt-1">
               {spentPercentage.toFixed(1)}% del budget
             </p>
