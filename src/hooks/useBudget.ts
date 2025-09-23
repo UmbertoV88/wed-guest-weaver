@@ -4,9 +4,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const useBudget = () => {
-  const { user } = useAuth(); // Ottieni l'utente autenticato
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // AGGIUNGI QUESTA GUARD
+  if (!user) {
+    return {
+      budgetSummary: {
+        totalBudget: 0,
+        totalSpent: 0,
+        totalPaid: 0,
+        pendingPayments: 0,
+      },
+      isLoading: true, // Mantieni loading true se non c'è utente
+    };
+  }
 
   const { data: budgetSummary, isLoading } = useQuery({
     queryKey: ["budget-summary", user?.id], // Aggiungi user.id alla key
