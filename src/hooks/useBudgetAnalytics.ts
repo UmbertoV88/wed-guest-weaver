@@ -1,17 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext"; // AGGIUNGI
 
 export const useBudgetAnalytics = () => {
+  const { user } = useAuth(); // AGGIUNGI
+
   const { data: categoryData, isLoading: categoryLoading } = useQuery({
-    queryKey: ["budget-analytics-categories"],
+    queryKey: ["budget-analytics-categories", user?.id], // AGGIUNGI user?.id
     queryFn: async () => {
+      if (!user?.id) { // AGGIUNGI
+        throw new Error('Utente non autenticato');
+      }
+
       const { data, error } = await supabase
         .from("budget_categories")
         .select(`
           name,
           icon,
           budget_items(budgeted_amount, actual_amount, paid_amount)
-        `);
+        `)
+        .eq('user_id', user.id); // AGGIUNGI FILTRO
 
       if (error) throw error;
 
@@ -32,14 +40,20 @@ export const useBudgetAnalytics = () => {
         ) || 0,
       })).filter(cat => cat.budgeted > 0);
     },
+    enabled: !!user?.id, // AGGIUNGI
   });
 
   const { data: monthlyData, isLoading: monthlyLoading } = useQuery({
-    queryKey: ["budget-analytics-monthly"],
+    queryKey: ["budget-analytics-monthly", user?.id], // AGGIUNGI user?.id
     queryFn: async () => {
+      if (!user?.id) { // AGGIUNGI
+        throw new Error('Utente non autenticato');
+      }
+
       const { data, error } = await supabase
         .from("budget_items")
-        .select("created_at, actual_amount, budgeted_amount");
+        .select("created_at, actual_amount, budgeted_amount")
+        .eq('user_id', user.id); // AGGIUNGI FILTRO
 
       if (error) throw error;
 
@@ -61,6 +75,7 @@ export const useBudgetAnalytics = () => {
         .map(([month, amount]) => ({ month, amount }))
         .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
     },
+    enabled: !!user?.id, // AGGIUNGI
   });
 
   return {
