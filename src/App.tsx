@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Seating from "./pages/Seating";
-import Finance from "./pages/Finance";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
@@ -34,11 +33,6 @@ function App() {
               <Route path="/dashboard/seating" element={
                 <ProtectedRoute>
                   <Seating />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/finanza" element={
-                <ProtectedRoute>
-                  <Finance />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
