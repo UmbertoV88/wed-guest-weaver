@@ -22,7 +22,7 @@ export const useBudgetItems = () => {
           budget_categories(name, icon)
         `)
         .eq('user_id', user.id) // AGGIUNGI FILTRO
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false }) as any;
 
       if (error) throw error;
       return data;

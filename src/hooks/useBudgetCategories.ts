@@ -22,7 +22,7 @@ export const useBudgetCategories = () => {
           budget_items(budgeted_amount, actual_amount)
         `)
         .eq('user_id', user.id) // AGGIUNGI FILTRO
-        .order("name");
+        .order("name") as any;
 
       if (error) throw error;
 
