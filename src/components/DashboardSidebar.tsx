@@ -88,8 +88,8 @@ const DashboardSidebar = ({
   const menuItems = [
     { icon: Users, label: "Invitati", href: "/dashboard", isActive: window.location.pathname === "/dashboard" },
     { icon: Utensils, label: "Tavoli", href: "/dashboard/seating", isActive: window.location.pathname === "/dashboard/seating" },
-    { icon: DollarSign, label: "Finanza", href: "/dashboard/finance", isActive: window.location.pathname === "/dashboard/finance" },
     { icon: Camera, label: "Fotografo", href: "/fotografo", isActive: false },
+    { icon: DollarSign, label: "Finanza", href: "/finanza", isActive: false },
     { icon: MapPin, label: "Location", href: "/location", isActive: false },
   ];
 
@@ -175,7 +175,6 @@ const DashboardSidebar = ({
                         window.location.href = item.href;
                       }
                     }}
-                    disabled={!item.href.startsWith('/dashboard')}
                   >
                     <item.icon className="w-5 h-5" />
                     {!collapsed && <span>{item.label}</span>}

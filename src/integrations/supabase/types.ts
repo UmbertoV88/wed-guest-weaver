@@ -14,84 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      budget_categories: {
-        Row: {
-          created_at: string | null
-          default_percentage: number | null
-          icon: string | null
-          id: number
-          name: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          default_percentage?: number | null
-          icon?: string | null
-          id?: number
-          name: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          default_percentage?: number | null
-          icon?: string | null
-          id?: number
-          name?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      budget_items: {
-        Row: {
-          actual_amount: number | null
-          budgeted_amount: number
-          category_id: number
-          created_at: string | null
-          description: string | null
-          due_date: string | null
-          id: number
-          notes: string | null
-          paid_amount: number | null
-          priority: string | null
-          status: string | null
-          updated_at: string | null
-          user_id: string
-          vendor_name: string
-        }
-        Insert: {
-          actual_amount?: number | null
-          budgeted_amount?: number
-          category_id: number
-          created_at?: string | null
-          description?: string | null
-          due_date?: string | null
-          id?: number
-          notes?: string | null
-          paid_amount?: number | null
-          priority?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id: string
-          vendor_name: string
-        }
-        Update: {
-          actual_amount?: number | null
-          budgeted_amount?: number
-          category_id?: number
-          created_at?: string | null
-          description?: string | null
-          due_date?: string | null
-          id?: number
-          notes?: string | null
-          paid_amount?: number | null
-          priority?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string
-          vendor_name?: string
-        }
-        Relationships: []
-      }
       invitati: {
         Row: {
           cognome: string | null
@@ -151,21 +73,18 @@ export type Database = {
           id: number
           invitato_id: number
           tavolo_id: number
-          user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: number
           invitato_id: number
           tavolo_id: number
-          user_id: string
         }
         Update: {
           created_at?: string | null
           id?: number
           invitato_id?: number
           tavolo_id?: number
-          user_id?: string
         }
         Relationships: [
           {
@@ -193,7 +112,6 @@ export type Database = {
           is_wedding_organizer: boolean
           updated_at: string
           user_id: string
-          wedding_date: string | null
         }
         Insert: {
           created_at?: string
@@ -203,7 +121,6 @@ export type Database = {
           is_wedding_organizer?: boolean
           updated_at?: string
           user_id: string
-          wedding_date?: string | null
         }
         Update: {
           created_at?: string
@@ -213,7 +130,6 @@ export type Database = {
           is_wedding_organizer?: boolean
           updated_at?: string
           user_id?: string
-          wedding_date?: string | null
         }
         Relationships: []
       }
@@ -260,7 +176,6 @@ export type Database = {
           id: number
           lato: string | null
           nome_tavolo: string | null
-          user_id: string
         }
         Insert: {
           capacita_max: number
@@ -268,7 +183,6 @@ export type Database = {
           id?: number
           lato?: string | null
           nome_tavolo?: string | null
-          user_id: string
         }
         Update: {
           capacita_max?: number
@@ -276,7 +190,6 @@ export type Database = {
           id?: number
           lato?: string | null
           nome_tavolo?: string | null
-          user_id?: string
         }
         Relationships: []
       }
