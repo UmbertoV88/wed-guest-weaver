@@ -266,7 +266,7 @@ const FinanceLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setTempTotalBudget(totalBudgetTarget);
+                  setTempTotalBudget(totalBudgetTarget.toString()); // manteniamo come stringa
                   setIsEditingTotal(true);
                 }}
               >
@@ -279,14 +279,40 @@ const FinanceLayout = () => {
                   <Input
                     type="number"
                     value={tempTotalBudget}
-                    onChange={(e) => setTempTotalBudget(Number(e.target.value))}
+                    onChange={(e) => setTempTotalBudget(e.target.value)} // rimane stringa
                     className="text-lg font-bold"
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={updateTotalBudget}>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const parsed = parseFloat(tempTotalBudget);
+                        if (isNaN(parsed) || parsed <= 0) {
+                          toast({
+                            title: "Errore",
+                            description: "Il budget totale deve essere maggiore di zero",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+                        setTotalBudgetTarget(parsed);
+                        setIsEditingTotal(false);
+                        toast({
+                          title: "Budget aggiornato",
+                          description: `Budget totale impostato a €${parsed.toLocaleString()}`
+                        });
+                      }}
+                    >
                       Salva
                     </Button>
-                    <Button variant="outline" size="sm" onClick={cancelEditTotal}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setTempTotalBudget(totalBudgetTarget.toString());
+                        setIsEditingTotal(false);
+                      }}
+                    >
                       Annulla
                     </Button>
                   </div>
@@ -301,6 +327,7 @@ const FinanceLayout = () => {
               </p>
             </CardContent>
           </Card>
+
 
           {/* Budget Allocato */}
           <Card>
