@@ -16,45 +16,15 @@ import CommonHeader from "@/components/CommonHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useBudget } from "@/hooks/useBudget";
 
-// Types for budget management - LOGICA BUDGET-CALCULATOR
-interface BudgetCategory {
-  id: string;
-  name: string;
-  budgeted: number;
-  spent: number;
-  color: string;
-}
-
-interface BudgetItem {
-  id: string;
-  categoryId: string;
-  name: string;
-  amount: number;
-  date: string;
-  paid: boolean;
-}
-
-const INITIAL_CATEGORIES: BudgetCategory[] = [
-  { id: "1", name: "Location", budgeted: 8000, spent: 7500, color: "#E11D48" },
-  { id: "2", name: "Catering", budgeted: 12000, spent: 10500, color: "#059669" },
-  { id: "3", name: "Fotografo", budgeted: 3000, spent: 2800, color: "#7C3AED" },
-  { id: "4", name: "Fiori & Decorazioni", budgeted: 2500, spent: 1800, color: "#EA580C" },
-  { id: "5", name: "Musica", budgeted: 1500, spent: 1200, color: "#0891B2" },
-  { id: "6", name: "Abiti", budgeted: 4000, spent: 3200, color: "#DC2626" },
-  { id: "7", name: "Anelli", budgeted: 2000, spent: 1800, color: "#9333EA" },
-  { id: "8", name: "Invitazioni", budgeted: 800, spent: 650, color: "#16A34A" },
-  { id: "9", name: "Transport", budgeted: 1000, spent: 800, color: "#0369A1" },
-  { id: "10", name: "Varie", budgeted: 1200, spent: 400, color: "#CA8A04" },
-];
-
-// *** COMPONENTE PER CATEGORIA EDITABILE ***
+// *** COMPONENTE PER CATEGORIA EDITABILE (AGGIORNATO PER DATABASE) ***
 const EditableCategoryCard = ({ 
   category, 
   onUpdateBudget, 
   onDelete 
 }: { 
-  category: BudgetCategory; 
+  category: any; // Temporarily any, we'll fix this
   onUpdateBudget: (id: string, budget: number) => void;
   onDelete: (id: string) => void;
 }) => {
@@ -161,63 +131,61 @@ const FinanceLayout = () => {
   const { profile, loading: profileLoading } = useProfile();
 
   const BudgetCalculator = () => {
-    // *** NUOVA LOGICA BUDGET-CALCULATOR ***
-    const [totalBudgetTarget, setTotalBudgetTarget] = useState<number>(35000); // Budget fisso modificabile
-    const [categories, setCategories] = useState<BudgetCategory[]>(INITIAL_CATEGORIES);
-    const [items, setItems] = useState<BudgetItem[]>([]);
+    // *** NUOVA LOGICA CON DATABASE HOOK ***
+    const {
+      // State from database
+      categories,
+      items,
+      loading,
+      totalBudget,
+      totalAllocated,
+      totalSpent,
+      remainingToAllocate,
+      remainingAfterSpent,
+      spentPercentage,
+      allocatedPercentage,
+      
+      // Actions
+      updateTotalBudget,
+      addCategory,
+      updateCategory,
+      deleteCategory,
+      addItem,
+      toggleItemPaid,
+    } = useBudget();
+
+    // Local UI state
     const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
     const [newItem, setNewItem] = useState({ name: "", amount: "", categoryId: "", date: "" });
     const [isEditingTotal, setIsEditingTotal] = useState(false);
     const [tempTotalBudget, setTempTotalBudget] = useState(35000);
     const { toast } = useToast();
 
-    // DEBUG: Aggiungi questo useEffect
+    // Sync tempTotalBudget with actual totalBudget
     useEffect(() => {
-      console.log("🔍 Estado attuale:", {
-        totalBudgetTarget,
-        tempTotalBudget,
-        isEditingTotal
-      });
-    }, [totalBudgetTarget, tempTotalBudget, isEditingTotal]);
-
-    // Sincronizza tempTotalBudget quando totalBudgetTarget cambia
-    useEffect(() => {
-      setTempTotalBudget(totalBudgetTarget);
-    }, [totalBudgetTarget]);
-
-    // *** CALCOLI DERIVATI (STILE BUDGET-CALCULATOR) ***
-    const allocatedBudget = categories.reduce((sum, cat) => sum + cat.budgeted, 0);
-    const totalSpent = categories.reduce((sum, cat) => sum + cat.spent, 0);
-    const remainingToAllocate = totalBudgetTarget - allocatedBudget; // Da allocare
-    const remainingAfterSpent = totalBudgetTarget - totalSpent; // Rimanente dopo spese
-    const spentPercentage = (totalSpent / totalBudgetTarget) * 100;
-    const allocatedPercentage = (allocatedBudget / totalBudgetTarget) * 100;
+      setTempTotalBudget(totalBudget);
+    }, [totalBudget]);
 
     // *** FUNZIONE PER MODIFICARE IL BUDGET TOTALE ***
-    const updateTotalBudget = () => {
-      setTotalBudgetTarget(prev => {
-        console.log('Updating from', prev, 'to', tempTotalBudget);
-        return tempTotalBudget;
-      });
-      setIsEditingTotal(false);
+    const handleUpdateTotalBudget = async () => {
+      const success = await updateTotalBudget(tempTotalBudget);
+      if (success) {
+        setIsEditingTotal(false);
+      }
     };
 
-
-    // FUNZIONE CORRETTA per iniziare l'editing
     const startEditingTotal = () => {
-      console.log("🖊️ Iniziando editing. totalBudgetTarget:", totalBudgetTarget);
-      setTempTotalBudget(totalBudgetTarget);
+      setTempTotalBudget(totalBudget);
       setIsEditingTotal(true);
     };
 
     const cancelEditTotal = () => {
-      console.log("❌ Cancellando edit");
-      setTempTotalBudget(totalBudgetTarget);
+      setTempTotalBudget(totalBudget);
       setIsEditingTotal(false);
     };
 
-    // *** FUNZIONE PER AGGIUNGERE CATEGORIA CON VALIDAZIONE BUDGET ***
-    const addCategory = () => {
+    // *** FUNZIONE PER AGGIUNGERE CATEGORIA ***
+    const handleAddCategory = async () => {
       if (!newCategory.name || !newCategory.budget) {
         toast({
           title: "Errore",
@@ -238,11 +206,11 @@ const FinanceLayout = () => {
         return;
       }
 
-      const newAllocatedTotal = allocatedBudget + budgetAmount;
+      const newAllocatedTotal = totalAllocated + budgetAmount;
 
       // Warning se supera il budget totale
-      if (newAllocatedTotal > totalBudgetTarget) {
-        const overBudget = newAllocatedTotal - totalBudgetTarget;
+      if (newAllocatedTotal > totalBudget) {
+        const overBudget = newAllocatedTotal - totalBudget;
         const confirmed = window.confirm(
           `Attenzione! Questa categoria porterà il budget allocato a €${newAllocatedTotal.toLocaleString()}, ` +
           `superando il budget totale di €${overBudget.toLocaleString()}. Vuoi continuare?`
@@ -251,33 +219,23 @@ const FinanceLayout = () => {
         if (!confirmed) return;
       }
 
-      const category: BudgetCategory = {
-        id: Date.now().toString(),
-        name: newCategory.name,
-        budgeted: budgetAmount,
-        spent: 0,
-        color: `hsl(${Math.random() * 360}, 70%, 50%)`
-      };
-
-      setCategories([...categories, category]);
-      setNewCategory({ name: "", budget: "" });
-      toast({
-        title: "Categoria aggiunta",
-        description: `${category.name} aggiunta al budget`
-      });
+      const success = await addCategory(newCategory.name, budgetAmount);
+      if (success) {
+        setNewCategory({ name: "", budget: "" });
+      }
     };
 
     // *** FUNZIONE PER MODIFICARE BUDGET DI UNA CATEGORIA ***
-    const updateCategoryBudget = (categoryId: string, newBudget: number) => {
+    const handleUpdateCategoryBudget = async (categoryId: string, newBudget: number) => {
       const oldCategory = categories.find(cat => cat.id === categoryId);
       if (!oldCategory) return;
 
       const budgetDifference = newBudget - oldCategory.budgeted;
-      const newAllocatedTotal = allocatedBudget + budgetDifference;
+      const newAllocatedTotal = totalAllocated + budgetDifference;
 
       // Warning se supera il budget totale
-      if (newAllocatedTotal > totalBudgetTarget && budgetDifference > 0) {
-        const overBudget = newAllocatedTotal - totalBudgetTarget;
+      if (newAllocatedTotal > totalBudget && budgetDifference > 0) {
+        const overBudget = newAllocatedTotal - totalBudget;
         const confirmed = window.confirm(
           `Attenzione! Questa modifica porterà il budget allocato a €${newAllocatedTotal.toLocaleString()}, ` +
           `superando il budget totale di €${overBudget.toLocaleString()}. Vuoi continuare?`
@@ -286,22 +244,11 @@ const FinanceLayout = () => {
         if (!confirmed) return;
       }
 
-      setCategories(cats => 
-        cats.map(cat => 
-          cat.id === categoryId 
-            ? { ...cat, budgeted: newBudget }
-            : cat
-        )
-      );
-
-      toast({
-        title: "Budget aggiornato",
-        description: `Budget per ${oldCategory.name} aggiornato a €${newBudget.toLocaleString()}`
-      });
+      await updateCategory(categoryId, { budgeted: newBudget });
     };
 
-    // *** FUNZIONE PER AGGIUNGERE SPESA CON VALIDAZIONE ***
-    const addItem = () => {
+    // *** FUNZIONE PER AGGIUNGERE SPESA ***
+    const handleAddItem = async () => {
       if (!newItem.name || !newItem.amount || !newItem.categoryId) {
         toast({
           title: "Errore",
@@ -325,8 +272,8 @@ const FinanceLayout = () => {
       const newTotalSpent = totalSpent + itemAmount;
 
       // Warning se supera il budget totale
-      if (newTotalSpent > totalBudgetTarget) {
-        const overBudget = newTotalSpent - totalBudgetTarget;
+      if (newTotalSpent > totalBudget) {
+        const overBudget = newTotalSpent - totalBudget;
         const confirmed = window.confirm(
           `Attenzione! Questa spesa porterà il totale speso a €${newTotalSpent.toLocaleString()}, ` +
           `superando il budget totale di €${overBudget.toLocaleString()}. Vuoi continuare?`
@@ -335,53 +282,47 @@ const FinanceLayout = () => {
         if (!confirmed) return;
       }
 
-      const item: BudgetItem = {
-        id: Date.now().toString(),
-        categoryId: newItem.categoryId,
+      const success = await addItem({
+        category_id: newItem.categoryId,
         name: newItem.name,
         amount: itemAmount,
-        date: newItem.date || new Date().toISOString().split('T')[0],
+        expense_date: newItem.date || new Date().toISOString().split('T')[0],
         paid: false
-      };
-
-      setItems([...items, item]);
-      
-      // Update category spent amount
-      setCategories(cats => 
-        cats.map(cat => 
-          cat.id === newItem.categoryId 
-            ? { ...cat, spent: cat.spent + item.amount }
-            : cat
-        )
-      );
-
-      setNewItem({ name: "", amount: "", categoryId: "", date: "" });
-      toast({
-        title: "Spesa aggiunta",
-        description: `${item.name} aggiunta per €${item.amount.toLocaleString()}`
       });
+
+      if (success) {
+        setNewItem({ name: "", amount: "", categoryId: "", date: "" });
+      }
     };
 
-    const deleteCategory = (id: string) => {
-      setCategories(categories.filter(cat => cat.id !== id));
-      setItems(items.filter(item => item.categoryId !== id));
-      toast({
-        title: "Categoria eliminata",
-        description: "Categoria e relative spese rimosse"
-      });
+    const handleDeleteCategory = async (id: string) => {
+      await deleteCategory(id);
     };
 
-    const toggleItemPaid = (itemId: string) => {
-      setItems(items.map(item => 
-        item.id === itemId ? { ...item, paid: !item.paid } : item
-      ));
+    const handleToggleItemPaid = async (itemId: string) => {
+      await toggleItemPaid(itemId);
     };
 
+    // Chart data
     const chartData = categories.map(cat => ({
       name: cat.name,
       value: cat.spent,
       color: cat.color
     }));
+
+    // Loading state
+    if (loading) {
+      return (
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Caricamento budget...</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -391,12 +332,11 @@ const FinanceLayout = () => {
               Budget Matrimonio
             </h1>
             <p className="text-muted-foreground">
-              Gestisci il budget per il tuo giorno speciale - Approccio Budget Fisso
+              Gestisci il budget per il tuo giorno speciale - Database Integration
             </p>
           </div>
         </div>
-
-        {/* *** OVERVIEW CON NUOVA LOGICA *** */}
+                {/* *** OVERVIEW CON DATABASE DATA *** */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Budget Totale MODIFICABILE */}
           <Card className="border-2 border-blue-200">
@@ -416,14 +356,10 @@ const FinanceLayout = () => {
                   <Input
                     type="number"
                     value={tempTotalBudget}
-                    onChange={(e) => {
-                      const newValue = Number(e.target.value);
-                      console.log("Input onChange - new value:", newValue);
-                      setTempTotalBudget(newValue);
-                    }}
+                    onChange={(e) => setTempTotalBudget(Number(e.target.value))}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        updateTotalBudget();
+                        handleUpdateTotalBudget();
                       }
                       if (e.key === 'Escape') {
                         cancelEditTotal();
@@ -435,7 +371,7 @@ const FinanceLayout = () => {
                   <div className="flex gap-2">
                     <Button 
                       size="sm" 
-                      onClick={updateTotalBudget}
+                      onClick={handleUpdateTotalBudget}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       Salva
@@ -450,7 +386,7 @@ const FinanceLayout = () => {
                   className="text-2xl font-bold text-blue-600 cursor-pointer hover:text-blue-800"
                   onClick={startEditingTotal}
                 >
-                  €{totalBudgetTarget.toLocaleString()}
+                  €{totalBudget.toLocaleString()}
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-1">
@@ -467,7 +403,7 @@ const FinanceLayout = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">
-                €{allocatedBudget.toLocaleString()}
+                €{totalAllocated.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
                 {allocatedPercentage.toFixed(1)}% del budget totale
@@ -476,7 +412,7 @@ const FinanceLayout = () => {
             </CardContent>
           </Card>
 
-          {/* Da Allocare (LOGICA BUDGET-CALCULATOR) */}
+          {/* Da Allocare */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Da Allocare</CardTitle>
@@ -603,7 +539,7 @@ const FinanceLayout = () => {
                 <CardTitle>Gestione Categorie</CardTitle>
                 <CardDescription>
                   Aggiungi e gestisci le categorie del budget. 
-                  Budget totale disponibile: €{totalBudgetTarget.toLocaleString()} 
+                  Budget totale disponibile: €{totalBudget.toLocaleString()} 
                   | Da allocare: €{remainingToAllocate.toLocaleString()}
                 </CardDescription>
               </CardHeader>
@@ -629,7 +565,7 @@ const FinanceLayout = () => {
                     />
                   </div>
                   <div className="flex items-end">
-                    <Button onClick={addCategory} className="w-full">
+                    <Button onClick={handleAddCategory} className="w-full">
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Aggiungi
                     </Button>
@@ -641,8 +577,8 @@ const FinanceLayout = () => {
                     <EditableCategoryCard 
                       key={category.id} 
                       category={category} 
-                      onUpdateBudget={updateCategoryBudget}
-                      onDelete={deleteCategory}
+                      onUpdateBudget={handleUpdateCategoryBudget}
+                      onDelete={handleDeleteCategory}
                     />
                   ))}
                 </div>
@@ -656,7 +592,7 @@ const FinanceLayout = () => {
                 <CardTitle>Aggiungi Spesa</CardTitle>
                 <CardDescription>
                   Registra una nuova spesa. 
-                  Budget totale: €{totalBudgetTarget.toLocaleString()} 
+                  Budget totale: €{totalBudget.toLocaleString()} 
                   | Speso: €{totalSpent.toLocaleString()} 
                   | Rimanente: €{remainingAfterSpent.toLocaleString()}
                 </CardDescription>
@@ -706,7 +642,7 @@ const FinanceLayout = () => {
                     />
                   </div>
                   <div className="flex items-end">
-                    <Button onClick={addItem} className="w-full">
+                    <Button onClick={handleAddItem} className="w-full">
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Aggiungi
                     </Button>
@@ -728,7 +664,7 @@ const FinanceLayout = () => {
                     </p>
                   ) : (
                     items.map((item) => {
-                      const category = categories.find(cat => cat.id === item.categoryId);
+                      const category = categories.find(cat => cat.id === item.category_id);
                       return (
                         <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center gap-3">
@@ -736,7 +672,7 @@ const FinanceLayout = () => {
                             <div>
                               <div className="font-medium">{item.name}</div>
                               <div className="text-sm text-muted-foreground">
-                                {category?.name} • {item.date}
+                                {category?.name} • {item.expense_date}
                               </div>
                             </div>
                           </div>
@@ -747,7 +683,7 @@ const FinanceLayout = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => toggleItemPaid(item.id)}
+                              onClick={() => handleToggleItemPaid(item.id)}
                             >
                               {item.paid ? "Pagato" : "Da pagare"}
                             </Button>
@@ -765,7 +701,7 @@ const FinanceLayout = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Analisi del Budget</CardTitle>
-                <CardDescription>Statistiche dettagliate - Budget Totale: €{totalBudgetTarget.toLocaleString()}</CardDescription>
+                <CardDescription>Statistiche dettagliate - Budget Totale: €{totalBudget.toLocaleString()}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer
@@ -818,11 +754,11 @@ const Finance = () => {
     
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con approccio budget fisso. Imposta un budget totale e alloca le risorse nelle diverse categorie.');
+      metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con database integration. Imposta un budget totale e alloca le risorse nelle diverse categorie.');
     } else {
       const meta = document.createElement('meta');
       meta.name = 'description';
-      meta.content = 'Gestisci il budget del tuo matrimonio con approccio budget fisso. Imposta un budget totale e alloca le risorse nelle diverse categorie.';
+      meta.content = 'Gestisci il budget del tuo matrimonio con database integration. Imposta un budget totale e alloca le risorse nelle diverse categorie.';
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
   }, []);
