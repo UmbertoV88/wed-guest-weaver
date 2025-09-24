@@ -48,6 +48,113 @@ const INITIAL_CATEGORIES: BudgetCategory[] = [
   { id: "10", name: "Varie", budgeted: 1200, spent: 400, color: "#CA8A04" },
 ];
 
+// *** COMPONENTE PER CATEGORIA EDITABILE ***
+const EditableCategoryCard = ({ 
+  category, 
+  onUpdateBudget, 
+  onDelete 
+}: { 
+  category: BudgetCategory; 
+  onUpdateBudget: (id: string, budget: number) => void;
+  onDelete: (id: string) => void;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempBudget, setTempBudget] = useState(category.budgeted);
+  const { toast } = useToast();
+
+  const handleSave = () => {
+    if (isNaN(tempBudget) || tempBudget <= 0) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un budget valido",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    onUpdateBudget(category.id, tempBudget);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setTempBudget(category.budgeted);
+    setIsEditing(false);
+  };
+
+  const remaining = category.budgeted - category.spent;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-sm">{category.name}</CardTitle>
+          <div className="flex gap-1">
+            {!isEditing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setTempBudget(category.budgeted);
+                  setIsEditing(true);
+                }}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(category.id)}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span>Budget:</span>
+          {isEditing ? (
+            <div className="flex gap-1">
+              <Input
+                type="number"
+                value={tempBudget}
+                onChange={(e) => setTempBudget(Number(e.target.value))}
+                className="w-20 h-6 text-xs"
+              />
+              <Button size="sm" variant="outline" onClick={handleSave} className="h-6 px-2 text-xs">
+                ✓
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleCancel} className="h-6 px-2 text-xs">
+                ✕
+              </Button>
+            </div>
+          ) : (
+            <span className="font-medium">€{category.budgeted.toLocaleString()}</span>
+          )}
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Speso:</span>
+          <span className={`font-medium ${category.spent > category.budgeted ? 'text-destructive' : ''}`}>
+            €{category.spent.toLocaleString()}
+          </span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span>Rimanente:</span>
+          <span className={`font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            €{remaining.toLocaleString()}
+          </span>
+        </div>
+        <Progress 
+          value={(category.spent / category.budgeted) * 100} 
+          className="h-2"
+        />
+      </CardContent>
+    </Card>
+  );
+};
+
 // Layout component similar to other pages
 const FinanceLayout = () => {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -61,8 +168,22 @@ const FinanceLayout = () => {
     const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
     const [newItem, setNewItem] = useState({ name: "", amount: "", categoryId: "", date: "" });
     const [isEditingTotal, setIsEditingTotal] = useState(false);
-    const [tempTotalBudget, setTempTotalBudget] = useState(totalBudgetTarget);
+    const [tempTotalBudget, setTempTotalBudget] = useState(35000);
     const { toast } = useToast();
+
+    // DEBUG: Aggiungi questo useEffect
+    useEffect(() => {
+      console.log("🔍 Estado attuale:", {
+        totalBudgetTarget,
+        tempTotalBudget,
+        isEditingTotal
+      });
+    }, [totalBudgetTarget, tempTotalBudget, isEditingTotal]);
+
+    // Sincronizza tempTotalBudget quando totalBudgetTarget cambia
+    useEffect(() => {
+      setTempTotalBudget(totalBudgetTarget);
+    }, [totalBudgetTarget]);
 
     // *** CALCOLI DERIVATI (STILE BUDGET-CALCULATOR) ***
     const allocatedBudget = categories.reduce((sum, cat) => sum + cat.budgeted, 0);
@@ -74,7 +195,12 @@ const FinanceLayout = () => {
 
     // *** FUNZIONE PER MODIFICARE IL BUDGET TOTALE ***
     const updateTotalBudget = () => {
-      if (tempTotalBudget <= 0) {
+      console.log("🚀 updateTotalBudget chiamata");
+      console.log("📊 tempTotalBudget value:", tempTotalBudget);
+      console.log("💰 totalBudgetTarget prima:", totalBudgetTarget);
+
+      if (!tempTotalBudget || tempTotalBudget <= 0) {
+        console.log("❌ Valore non valido:", tempTotalBudget);
         toast({
           title: "Errore",
           description: "Il budget totale deve essere maggiore di zero",
@@ -85,13 +211,24 @@ const FinanceLayout = () => {
 
       setTotalBudgetTarget(tempTotalBudget);
       setIsEditingTotal(false);
+      
+      console.log("✅ Budget aggiornato a:", tempTotalBudget);
+      
       toast({
         title: "Budget aggiornato",
         description: `Budget totale impostato a €${tempTotalBudget.toLocaleString()}`
       });
     };
 
+    // FUNZIONE CORRETTA per iniziare l'editing
+    const startEditingTotal = () => {
+      console.log("🖊️ Iniziando editing. totalBudgetTarget:", totalBudgetTarget);
+      setTempTotalBudget(totalBudgetTarget);
+      setIsEditingTotal(true);
+    };
+
     const cancelEditTotal = () => {
+      console.log("❌ Cancellando edit");
       setTempTotalBudget(totalBudgetTarget);
       setIsEditingTotal(false);
     };
@@ -108,6 +245,16 @@ const FinanceLayout = () => {
       }
 
       const budgetAmount = parseFloat(newCategory.budget);
+      
+      if (isNaN(budgetAmount) || budgetAmount <= 0) {
+        toast({
+          title: "Errore",
+          description: "Inserisci un budget valido",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const newAllocatedTotal = allocatedBudget + budgetAmount;
 
       // Warning se supera il budget totale
@@ -182,6 +329,16 @@ const FinanceLayout = () => {
       }
 
       const itemAmount = parseFloat(newItem.amount);
+      
+      if (isNaN(itemAmount) || itemAmount <= 0) {
+        toast({
+          title: "Errore",
+          description: "Inserisci un importo valido",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const newTotalSpent = totalSpent + itemAmount;
 
       // Warning se supera il budget totale
@@ -265,10 +422,7 @@ const FinanceLayout = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setTempTotalBudget(totalBudgetTarget);
-                  setIsEditingTotal(true);
-                }}
+                onClick={startEditingTotal}
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -279,11 +433,28 @@ const FinanceLayout = () => {
                   <Input
                     type="number"
                     value={tempTotalBudget}
-                    onChange={(e) => setTempTotalBudget(Number(e.target.value))}
+                    onChange={(e) => {
+                      const newValue = Number(e.target.value);
+                      console.log("Input onChange - new value:", newValue);
+                      setTempTotalBudget(newValue);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateTotalBudget();
+                      }
+                      if (e.key === 'Escape') {
+                        cancelEditTotal();
+                      }
+                    }}
                     className="text-lg font-bold"
+                    autoFocus
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={updateTotalBudget}>
+                    <Button 
+                      size="sm" 
+                      onClick={updateTotalBudget}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
                       Salva
                     </Button>
                     <Button variant="outline" size="sm" onClick={cancelEditTotal}>
@@ -292,12 +463,15 @@ const FinanceLayout = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-2xl font-bold text-blue-600">
+                <div 
+                  className="text-2xl font-bold text-blue-600 cursor-pointer hover:text-blue-800"
+                  onClick={startEditingTotal}
+                >
                   €{totalBudgetTarget.toLocaleString()}
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-1">
-                Clicca per modificare
+                {isEditingTotal ? "Premi Enter per salvare, Esc per annullare" : "Clicca per modificare"}
               </p>
             </CardContent>
           </Card>
@@ -652,103 +826,6 @@ const FinanceLayout = () => {
         </main>
       </div>
     </div>
-  );
-};
-
-// *** COMPONENTE PER CATEGORIA EDITABILE ***
-const EditableCategoryCard = ({ 
-  category, 
-  onUpdateBudget, 
-  onDelete 
-}: { 
-  category: BudgetCategory; 
-  onUpdateBudget: (id: string, budget: number) => void;
-  onDelete: (id: string) => void;
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempBudget, setTempBudget] = useState(category.budgeted);
-
-  const handleSave = () => {
-    onUpdateBudget(category.id, tempBudget);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setTempBudget(category.budgeted);
-    setIsEditing(false);
-  };
-
-  const remaining = category.budgeted - category.spent;
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-sm">{category.name}</CardTitle>
-          <div className="flex gap-1">
-            {!isEditing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setTempBudget(category.budgeted);
-                  setIsEditing(true);
-                }}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(category.id)}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>Budget:</span>
-          {isEditing ? (
-            <div className="flex gap-1">
-              <Input
-                type="number"
-                value={tempBudget}
-                onChange={(e) => setTempBudget(Number(e.target.value))}
-                className="w-20 h-6 text-xs"
-              />
-              <Button size="sm" variant="outline" onClick={handleSave} className="h-6 px-2 text-xs">
-                ✓
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleCancel} className="h-6 px-2 text-xs">
-                ✕
-              </Button>
-            </div>
-          ) : (
-            <span className="font-medium">€{category.budgeted.toLocaleString()}</span>
-          )}
-        </div>
-        <div className="flex justify-between text-sm">
-          <span>Speso:</span>
-          <span className={`font-medium ${category.spent > category.budgeted ? 'text-destructive' : ''}`}>
-            €{category.spent.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span>Rimanente:</span>
-          <span className={`font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            €{remaining.toLocaleString()}
-          </span>
-        </div>
-        <Progress 
-          value={(category.spent / category.budgeted) * 100} 
-          className="h-2"
-        />
-      </CardContent>
-    </Card>
   );
 };
 
