@@ -162,10 +162,7 @@ const FinanceLayout = () => {
 
   const BudgetCalculator = () => {
     // *** NUOVA LOGICA BUDGET-CALCULATOR ***
-    const [totalBudgetTarget, setTotalBudgetTarget] = useState<number>(() => {
-      console.log("🏁 Inizializzazione totalBudgetTarget con 35000");
-      return 35000;
-    });
+    const [totalBudgetTarget, setTotalBudgetTarget] = useState<number>(35000); // Budget fisso modificabile
     const [categories, setCategories] = useState<BudgetCategory[]>(INITIAL_CATEGORIES);
     const [items, setItems] = useState<BudgetItem[]>([]);
     const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
@@ -198,10 +195,12 @@ const FinanceLayout = () => {
 
     // *** FUNZIONE PER MODIFICARE IL BUDGET TOTALE ***
     const updateTotalBudget = () => {
-      console.log("🚀 updateTotalBudget chiamata con tempTotalBudget:", tempTotalBudget);
-      
-      if (!tempTotalBudget || tempTotalBudget <= 0 || isNaN(tempTotalBudget)) {
-        console.log("❌ Validazione fallita:", tempTotalBudget);
+      console.log("🚀 updateTotalBudget chiamata");
+      console.log("📊 tempTotalBudget value:", tempTotalBudget);
+      console.log("💰 totalBudgetTarget prima:", totalBudgetTarget);
+
+      if (!tempTotalBudget || tempTotalBudget <= 0) {
+        console.log("❌ Valore non valido:", tempTotalBudget);
         toast({
           title: "Errore",
           description: "Il budget totale deve essere maggiore di zero",
@@ -209,22 +208,15 @@ const FinanceLayout = () => {
         });
         return;
       }
-    
-      const newBudget = Number(tempTotalBudget);
-      console.log("✅ Aggiornando totalBudgetTarget a:", newBudget);
+
+      setTotalBudgetTarget(tempTotalBudget);
+      setIsEditingTotal(false);
       
-      // Force re-render con key change
-      setTotalBudgetTarget(newBudget);
+      console.log("✅ Budget aggiornato a:", tempTotalBudget);
       
-      // Forza re-render ritardato
-      setTimeout(() => {
-        setIsEditingTotal(false);
-        console.log("🔄 Editing chiuso, totalBudgetTarget ora è:", newBudget);
-      }, 100);
-    
       toast({
-        title: "Budget aggiornato", 
-        description: `Budget totale impostato a €${newBudget.toLocaleString()}`
+        title: "Budget aggiornato",
+        description: `Budget totale impostato a €${tempTotalBudget.toLocaleString()}`
       });
     };
 
