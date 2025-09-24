@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart as RechartsPieChart, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
+import CommonHeader from "@/components/CommonHeader";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 
 // Types for budget management
 interface BudgetCategory {
@@ -42,7 +47,12 @@ const INITIAL_CATEGORIES: BudgetCategory[] = [
   { id: "10", name: "Varie", budgeted: 1200, spent: 400, color: "#CA8A04" },
 ];
 
-const Finance = () => {
+// Layout component similar to other pages
+const FinanceLayout = () => {
+  const { user, signOut, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
+
+  const BudgetCalculator = () => {
   const [categories, setCategories] = useState<BudgetCategory[]>(INITIAL_CATEGORIES);
   const [items, setItems] = useState<BudgetItem[]>([]);
   const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
@@ -464,6 +474,49 @@ const Finance = () => {
         </TabsContent>
       </Tabs>
     </div>
+  );
+};
+
+  return (
+    <div className="min-h-screen flex w-full bg-background">
+      <DashboardSidebar 
+        user={user}
+        profile={profile}
+        isWeddingOrganizer={true}
+        onSignOut={signOut}
+        signingOut={authLoading}
+      />
+      
+      <div className="flex-1 flex flex-col min-h-screen">
+        <CommonHeader />
+        
+        <main className="flex-1 overflow-auto">
+          <BudgetCalculator />
+        </main>
+      </div>
+    </div>
+  );
+};
+
+const Finance = () => {
+  useEffect(() => {
+    document.title = "Budget Matrimonio - Gestisci le finanze del tuo matrimonio";
+    
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con il nostro calcolatore completo. Monitora spese, categorie e rimani nel budget.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Gestisci il budget del tuo matrimonio con il nostro calcolatore completo. Monitora spese, categorie e rimani nel budget.';
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+  }, []);
+
+  return (
+    <SidebarProvider>
+      <FinanceLayout />
+    </SidebarProvider>
   );
 };
 
