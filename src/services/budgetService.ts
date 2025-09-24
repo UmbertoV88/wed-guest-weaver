@@ -1,25 +1,14 @@
-// =====================================================
-// BUDGET SERVICE - Supabase API Functions
-// Per Wed Guest Weaver - Sezione Finanza
-// =====================================================
-
 import { supabase } from '@/integrations/supabase/client';
-import { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget';
-
-// =====================================================
-// BUDGET SETTINGS API
-// =====================================================
 
 export const budgetSettingsApi = {
-  // Ottieni impostazioni budget per utente
-  async get(): Promise<BudgetSettings | null> {
+  async get() {
     try {
       const { data, error } = await supabase
         .from('budget_settings')
         .select('*')
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching budget settings:', error);
         throw error;
       }
@@ -31,82 +20,68 @@ export const budgetSettingsApi = {
     }
   },
 
-  // Crea o aggiorna impostazioni budget
-  // Fix per budgetSettingsApi.upsert nella sezione BUDGET SETTINGS API
-// Sostituisci la funzione upsert esistente con questa:
+  async upsert(data) {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
 
-async upsert(data: { total_budget: number; wedding_date?: string }): Promise<BudgetSettings | null> {
-  try {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('User not authenticated');
-
-    // Prima verifica se esiste già un record
-    const { data: existing, error: fetchError } = await supabase
-      .from('budget_settings')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Error checking existing budget settings:', fetchError);
-      throw fetchError;
-    }
-
-    let result;
-    
-    if (existing) {
-      // UPDATE se esiste
-      const { data: updateResult, error: updateError } = await supabase
+      const { data: existing, error: fetchError } = await supabase
         .from('budget_settings')
-        .update({
-          total_budget: data.total_budget,
-          wedding_date: data.wedding_date,
-          updated_at: new Date().toISOString()
-        })
+        .select('*')
         .eq('user_id', user.id)
-        .select()
         .single();
 
-      if (updateError) {
-        console.error('Error updating budget settings:', updateError);
-        throw updateError;
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error checking existing budget settings:', fetchError);
+        throw fetchError;
       }
 
-      result = updateResult;
-    } else {
-      // INSERT se non esiste
-      const { data: insertResult, error: insertError } = await supabase
-        .from('budget_settings')
-        .insert({
-          user_id: user.id,
-          total_budget: data.total_budget,
-          wedding_date: data.wedding_date
-        })
-        .select()
-        .single();
+      let result;
+      
+      if (existing) {
+        const { data: updateResult, error: updateError } = await supabase
+          .from('budget_settings')
+          .update({
+            total_budget: data.total_budget,
+            wedding_date: data.wedding_date
+          })
+          .eq('user_id', user.id)
+          .select()
+          .single();
 
-      if (insertError) {
-        console.error('Error inserting budget settings:', insertError);
-        throw insertError;
+        if (updateError) {
+          console.error('Error updating budget settings:', updateError);
+          throw updateError;
+        }
+        result = updateResult;
+      } else {
+        const { data: insertResult, error: insertError } = await supabase
+          .from('budget_settings')
+          .insert({
+            user_id: user.id,
+            total_budget: data.total_budget,
+            wedding_date: data.wedding_date
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error inserting budget settings:', insertError);
+          throw insertError;
+        }
+        result = insertResult;
       }
 
-      result = insertResult;
+      return result;
+    } catch (error) {
+      console.error('Budget settings upsert error:', error);
+      return null;
     }
-
-    return result;
-  } catch (error) {
-    console.error('Budget settings upsert error:', error);
-    return null;
   }
-},
-
-// =====================================================
-// BUDGET CATEGORIES API
-// =====================================================
+};
 
 export const budgetCategoriesApi = {
-  // Ottieni tutte le categorie per utente
-  async getAll(): Promise<BudgetCategory[]> {
+  async getAll() {
     try {
       const { data, error } = await supabase
         .from('budget_categories')
@@ -126,13 +101,7 @@ export const budgetCategoriesApi = {
     }
   },
 
-  // Crea nuova categoria
-  async create(data: {
-    name: string;
-    budgeted: number;
-    color?: string;
-    sort_order?: number;
-  }): Promise<BudgetCategory | null> {
+  async create(data) {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
@@ -161,13 +130,7 @@ export const budgetCategoriesApi = {
     }
   },
 
-  // Aggiorna categoria esistente
-  async update(id: string, data: {
-    name?: string;
-    budgeted?: number;
-    color?: string;
-    sort_order?: number;
-  }): Promise<BudgetCategory | null> {
+  async update(id, data) {
     try {
       const { data: result, error } = await supabase
         .from('budget_categories')
@@ -188,8 +151,7 @@ export const budgetCategoriesApi = {
     }
   },
 
-  // Elimina categoria (soft delete)
-  async delete(id: string): Promise<boolean> {
+  async delete(id) {
     try {
       const { error } = await supabase
         .from('budget_categories')
@@ -208,13 +170,11 @@ export const budgetCategoriesApi = {
     }
   },
 
-  // Inizializza categorie predefinite per nuovo utente
-  async initializeDefaults(): Promise<boolean> {
+  async initializeDefaults() {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      // Chiama la funzione SQL per creare categorie predefinite
       const { error } = await supabase.rpc('create_default_budget_categories', {
         p_user_id: user.id
       });
@@ -229,26 +189,15 @@ export const budgetCategoriesApi = {
       console.error('Default categories init error:', error);
       return false;
     }
-  },
+  }
 };
 
-// =====================================================
-// BUDGET ITEMS API
-// =====================================================
-
 export const budgetItemsApi = {
-  // Ottieni tutti gli items per utente
-  async getAll(): Promise<BudgetItem[]> {
+  async getAll() {
     try {
       const { data, error } = await supabase
         .from('budget_items')
-        .select(`
-          *,
-          budget_categories (
-            name,
-            color
-          )
-        `)
+        .select('*')
         .order('expense_date', { ascending: false });
 
       if (error) {
@@ -263,37 +212,7 @@ export const budgetItemsApi = {
     }
   },
 
-  // Ottieni items per categoria specifica
-  async getByCategory(categoryId: string): Promise<BudgetItem[]> {
-    try {
-      const { data, error } = await supabase
-        .from('budget_items')
-        .select('*')
-        .eq('category_id', categoryId)
-        .order('expense_date', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching budget items by category:', error);
-        throw error;
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Budget items by category fetch error:', error);
-      return [];
-    }
-  },
-
-  // Crea nuovo item
-  async create(data: {
-    category_id: string;
-    name: string;
-    amount: number;
-    expense_date?: string;
-    due_date?: string;
-    paid?: boolean;
-    notes?: string;
-  }): Promise<BudgetItem | null> {
+  async create(data) {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
@@ -325,59 +244,8 @@ export const budgetItemsApi = {
     }
   },
 
-  // Aggiorna item esistente
-  async update(id: string, data: {
-    name?: string;
-    amount?: number;
-    expense_date?: string;
-    due_date?: string;
-    paid?: boolean;
-    notes?: string;
-  }): Promise<BudgetItem | null> {
+  async togglePaid(id) {
     try {
-      const { data: result, error } = await supabase
-        .from('budget_items')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating budget item:', error);
-        throw error;
-      }
-
-      return result;
-    } catch (error) {
-      console.error('Budget item update error:', error);
-      return null;
-    }
-  },
-
-  // Elimina item
-  async delete(id: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('budget_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting budget item:', error);
-        throw error;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Budget item delete error:', error);
-      return false;
-    }
-  },
-
-  // Toggle stato pagamento
-  async togglePaid(id: string): Promise<BudgetItem | null> {
-    try {
-      // Prima ottieni il valore attuale
       const { data: current, error: fetchError } = await supabase
         .from('budget_items')
         .select('paid')
@@ -386,7 +254,6 @@ export const budgetItemsApi = {
 
       if (fetchError) throw fetchError;
 
-      // Poi aggiorna con il valore opposto
       const { data: result, error } = await supabase
         .from('budget_items')
         .update({ paid: !current.paid })
@@ -404,74 +271,27 @@ export const budgetItemsApi = {
       console.error('Budget item toggle paid error:', error);
       return null;
     }
-  },
+  }
 };
-
-// =====================================================
-// BUDGET STATISTICS API
-// =====================================================
-
-export const budgetStatsApi = {
-  // Ottieni statistiche complete
-  async get(): Promise<{
-    total_budget: number;
-    total_allocated: number;
-    total_spent: number;
-    remaining_budget: number;
-    spent_percentage: number;
-    categories_count: number;
-  } | null> {
-    try {
-      const { data, error } = await supabase
-        .from('budget_statistics')
-        .select('*')
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching budget statistics:', error);
-        throw error;
-      }
-
-      return data || {
-        total_budget: 0,
-        total_allocated: 0,
-        total_spent: 0,
-        remaining_budget: 0,
-        spent_percentage: 0,
-        categories_count: 0,
-      };
-    } catch (error) {
-      console.error('Budget statistics fetch error:', error);
-      return null;
-    }
-  },
-};
-
-// =====================================================
-// UTILITY FUNCTIONS
-// =====================================================
 
 export const budgetUtils = {
-  // Formatta valuta
-  formatCurrency: (amount: number): string => {
+  formatCurrency: (amount) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
   },
 
-  // Calcola percentuale
-  calculatePercentage: (value: number, total: number): number => {
+  calculatePercentage: (value, total) => {
     if (total === 0) return 0;
     return Math.round((value / total) * 100);
   },
 
-  // Genera colore random per categoria
-  generateRandomColor: (): string => {
+  generateRandomColor: () => {
     const colors = [
       '#E11D48', '#059669', '#7C3AED', '#EA580C', '#0891B2',
       '#DC2626', '#9333EA', '#16A34A', '#0369A1', '#CA8A04'
     ];
     return colors[Math.floor(Math.random() * colors.length)];
-  },
+  }
 };
