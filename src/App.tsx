@@ -10,6 +10,7 @@ import Seating from "./pages/Seating";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
+import Finance from "./pages/Finance";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,11 @@ function App() {
               <Route path="/dashboard/seating" element={
                 <ProtectedRoute>
                   <Seating />
+                </ProtectedRoute>
+              } />
+              <Route path="/finanza" element={
+                <ProtectedRoute>
+                  <Finance />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
