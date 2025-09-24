@@ -440,7 +440,7 @@ const FinanceLayout = () => {
                 <div className="space-y-2">
                   <Input
                     type="number"
-                    value={tempTotalBudget}
+                    value={newValue}
                     onChange={(e) => {
                       const newValue = Number(e.target.value);
                       console.log("Input onChange - new value:", newValue);
