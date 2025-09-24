@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Calendar, ChevronDown, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart, Utensils } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
 import { it } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ const DashboardSidebar = ({
   signingOut = false
 }: DashboardSidebarProps) => {
   const { state } = useSidebar();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed";
   const [countdown, setCountdown] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -170,11 +172,7 @@ const DashboardSidebar = ({
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 h-10"
-                    onClick={() => {
-                      if (item.href.startsWith('/dashboard')) {
-                        window.location.href = item.href;
-                      }
-                    }}
+                    onClick={() => navigate(item.href)}
                   >
                     <item.icon className="w-5 h-5" />
                     {!collapsed && <span>{item.label}</span>}
