@@ -32,29 +32,73 @@ export const budgetSettingsApi = {
   },
 
   // Crea o aggiorna impostazioni budget
-  async upsert(data: { total_budget: number; wedding_date?: string }): Promise<BudgetSettings | null> {
-    try {
-      const { data: result, error } = await supabase
+  // Fix per budgetSettingsApi.upsert nella sezione BUDGET SETTINGS API
+// Sostituisci la funzione upsert esistente con questa:
+
+async upsert(data: { total_budget: number; wedding_date?: string }): Promise<BudgetSettings | null> {
+  try {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) throw new Error('User not authenticated');
+
+    // Prima verifica se esiste già un record
+    const { data: existing, error: fetchError } = await supabase
+      .from('budget_settings')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error checking existing budget settings:', fetchError);
+      throw fetchError;
+    }
+
+    let result;
+    
+    if (existing) {
+      // UPDATE se esiste
+      const { data: updateResult, error: updateError } = await supabase
         .from('budget_settings')
-        .upsert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-          ...data,
+        .update({
+          total_budget: data.total_budget,
+          wedding_date: data.wedding_date,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('Error updating budget settings:', updateError);
+        throw updateError;
+      }
+
+      result = updateResult;
+    } else {
+      // INSERT se non esiste
+      const { data: insertResult, error: insertError } = await supabase
+        .from('budget_settings')
+        .insert({
+          user_id: user.id,
+          total_budget: data.total_budget,
+          wedding_date: data.wedding_date
         })
         .select()
         .single();
 
-      if (error) {
-        console.error('Error upserting budget settings:', error);
-        throw error;
+      if (insertError) {
+        console.error('Error inserting budget settings:', insertError);
+        throw insertError;
       }
 
-      return result;
-    } catch (error) {
-      console.error('Budget settings upsert error:', error);
-      return null;
+      result = insertResult;
     }
-  },
-};
+
+    return result;
+  } catch (error) {
+    console.error('Budget settings upsert error:', error);
+    return null;
+  }
+},
 
 // =====================================================
 // BUDGET CATEGORIES API
