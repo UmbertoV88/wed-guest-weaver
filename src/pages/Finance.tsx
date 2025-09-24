@@ -195,30 +195,13 @@ const FinanceLayout = () => {
 
     // *** FUNZIONE PER MODIFICARE IL BUDGET TOTALE ***
     const updateTotalBudget = () => {
-      console.log("🚀 updateTotalBudget chiamata");
-      console.log("📊 tempTotalBudget value:", tempTotalBudget);
-      console.log("💰 totalBudgetTarget prima:", totalBudgetTarget);
-
-      if (!tempTotalBudget || tempTotalBudget <= 0) {
-        console.log("❌ Valore non valido:", tempTotalBudget);
-        toast({
-          title: "Errore",
-          description: "Il budget totale deve essere maggiore di zero",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setTotalBudgetTarget(tempTotalBudget);
-      setIsEditingTotal(false);
-      
-      console.log("✅ Budget aggiornato a:", tempTotalBudget);
-      
-      toast({
-        title: "Budget aggiornato",
-        description: `Budget totale impostato a €${tempTotalBudget.toLocaleString()}`
+      setTotalBudgetTarget(prev => {
+        console.log('Updating from', prev, 'to', tempTotalBudget);
+        return tempTotalBudget;
       });
+      setIsEditingTotal(false);
     };
+
 
     // FUNZIONE CORRETTA per iniziare l'editing
     const startEditingTotal = () => {
