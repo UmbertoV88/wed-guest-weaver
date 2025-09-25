@@ -4,13 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Trash2, Calculator, PieChart, DollarSign, TrendingUp, Edit, AlertTriangle, Calendar } from "lucide-react";
+import { PlusCircle, Trash2, Calculator, PieChart, DollarSign, TrendingUp, Edit, AlertTriangle, Calendar, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart as RechartsPieChart, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Pie } from "recharts";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import CommonHeader from "@/components/CommonHeader";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +22,7 @@ import { useBudget } from "@/hooks/useBudget";
 import BudgetChart from '@/components/budget/BudgetChart';
 import BudgetOverview from '@/components/budget/BudgetOverview';
 import CategoryManager from '@/components/budget/CategoryManager';
+import VendorManager from '@/components/budget/VendorManager';
 
 // Layout component similar to other pages
 const FinanceLayout = () => {
@@ -278,9 +281,10 @@ const FinanceLayout = () => {
 
         {/* *** TABS - SOTTO LE CARDS *** */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Panoramica</TabsTrigger>
             <TabsTrigger value="categories">Categorie</TabsTrigger>
+            <TabsTrigger value="vendors">Fornitori</TabsTrigger>
             <TabsTrigger value="expenses">Spese</TabsTrigger>
             <TabsTrigger value="analytics">Analisi</TabsTrigger>
           </TabsList>
@@ -366,6 +370,13 @@ const FinanceLayout = () => {
               }}
             />
           </TabsContent>
+          
+          <TabsContent value="vendors" className="space-y-4">
+            <VendorManager
+              categories={categories}
+            />
+          </TabsContent>
+
 
 
           <TabsContent value="expenses" className="space-y-4">
