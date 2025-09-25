@@ -322,19 +322,19 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                         <div className="flex gap-2">
                         <Button 
                             onClick={async () => {
-                            await onUpdateCategory(category.id, {
-                                name: editForm.name,
-                                budgeted: editForm.budgeted,
-                                spent: editForm.spent || 0  // ← AGGIUNGI ANCHE SPENT
-                            });
-                            setEditingCategory(null);
-                            setEditForm({});
+                                await onUpdateCategory(category.id, {
+                                    name: editForm.name,
+                                    budgeted: editForm.budgeted
+                                });
+                                setEditingCategory(null);
+                                setEditForm({});
                             }}
                             className="flex-1 bg-green-600 hover:bg-green-700"
-                        >
-                            <Check className="w-4 h-4 mr-2" />
-                            Salva
+                          > 
+                          <Check className="w-4 h-4 mr-2" />
+                          Salva
                         </Button>
+
                         <Button 
                             variant="outline" 
                             onClick={() => {

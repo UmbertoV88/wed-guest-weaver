@@ -9,8 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   budgetSettingsApi, 
   budgetCategoriesApi, 
-  budgetItemsApi, 
-  budgetStatsApi 
+  budgetItemsApi
 } from '@/services/budgetService';
 import { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget';
 
@@ -40,16 +39,14 @@ export const useBudget = () => {
     setError(null);
 
     try {
-      // Load in parallelo per performance
-      const [settingsData, categoriesData, itemsData] = await Promise.all([
-        budgetSettingsApi.get(),
-        budgetCategoriesApi.getAll(),
-        budgetItemsApi.getAll(),
-      ]);
+      // Load sequenzialmente per evitare type conflicts
+      const settingsData = await budgetSettingsApi.get();
+      const categoriesData = await budgetCategoriesApi.getAll();
+      const itemsData = await budgetItemsApi.getAll();
 
-      setSettings(settingsData);
-      setCategories(categoriesData);
-      setItems(itemsData);
+      setSettings(settingsData || null);
+      setCategories(categoriesData || []);
+      setItems(itemsData || []);
 
       // Se non ci sono categorie, inizializza defaults
       if (!categoriesData || categoriesData.length === 0) {
@@ -68,6 +65,7 @@ export const useBudget = () => {
       setLoading(false);
     }
   };
+
 
   // =====================================================
   // BUDGET SETTINGS
@@ -102,10 +100,25 @@ export const useBudget = () => {
   // =====================================================
   // CATEGORIES MANAGEMENT
   // =====================================================
+  const calculateDaysToWedding = (weddingDate: string | undefined) => {
+    if (!weddingDate) return 120; // fallback default
+    
+    // Parse solo la DATA, ignora l'orario per calcolo preciso
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Midnight di oggi
+    
+    const wedding = new Date(weddingDate);
+    wedding.setHours(0, 0, 0, 0); // Midnight del matrimonio
+    
+    // Calcolo preciso in millisecondi
+    const diffTime = wedding.getTime() - today.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  };
+
   const weddingDate = settings?.wedding_date;
-  const daysToWedding = weddingDate ? 
-    Math.ceil((new Date(weddingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 
-    120;
+  const daysToWedding = calculateDaysToWedding(weddingDate);
 
     
   const addCategory = async (name: string, budgeted: number, color?: string) => {
@@ -210,15 +223,22 @@ export const useBudget = () => {
     paid?: boolean;
     notes?: string;
   }) => {
+    // ⭐ SPOSTA tempItem DECLARATION FUORI dal try block
+    const tempItem: BudgetItem = {
+      id: `temp-${Date.now()}`, // Temporary ID
+      user_id: user?.id || '',
+      category_id: data.category_id,
+      name: data.name,
+      amount: data.amount,
+      expense_date: data.expense_date || new Date().toISOString().split('T')[0],
+      paid: data.paid || false,
+      notes: data.notes || '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
     try {
       // 1. UPDATE UI IMMEDIATELY (Optimistic)
-      const tempItem = {
-        id: `temp-${Date.now()}`, // Temporary ID
-        ...data,
-        expense_date: data.expense_date || new Date().toISOString().split('T')[0],
-        paid: data.paid || false
-      };
-      
       setItems(prev => [...prev, tempItem]);
       
       // UPDATE CATEGORY SPENT (Optimistic)
@@ -253,7 +273,7 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error adding item:', err);
-      // REVERT ON ERROR - NO loadData()!
+      // ✅ ORA tempItem è accessibile nel catch!
       setItems(prev => prev.filter(item => item.id !== tempItem.id));
       setCategories(prev => 
         prev.map(cat => 
@@ -270,6 +290,8 @@ export const useBudget = () => {
       return null;
     }
   };
+
+
 
 
   const toggleItemPaid = async (id: string) => {
