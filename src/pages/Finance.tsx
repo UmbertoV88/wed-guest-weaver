@@ -18,6 +18,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useBudget } from "@/hooks/useBudget";
 
+
 // *** COMPONENTE PER CATEGORIA EDITABILE (AGGIORNATO PER DATABASE) ***
 const EditableCategoryCard = ({ 
   category, 
@@ -314,6 +315,10 @@ const FinanceLayout = () => {
     }));
 
     const chartData = enhancedChartData;
+    // Subito dopo la definizione di enhancedChartData
+    console.log("🔍 Enhanced Chart Data:", enhancedChartData);
+    console.log("📊 Total Budget:", totalBudget);
+    console.log("📈 Total Allocated:", totalAllocated);
 
     // Loading state
     if (loading) {
@@ -486,65 +491,18 @@ const FinanceLayout = () => {
                 <CardContent>
                   <ChartContainer
                     config={{}}
-                    className="h-[350px]"
+                    className="h-[300px]"
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsPieChart>
-                        <ChartTooltip 
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <div 
-                                      className="w-3 h-3 rounded-full" 
-                                      style={{ backgroundColor: data.color }}
-                                    />
-                                    <span className="font-medium">{data.name}</span>
-                                  </div>
-                                  <div className="space-y-1 text-sm">
-                                    <div className="flex justify-between">
-                                      <span>Budget:</span>
-                                      <span className="font-medium">€{data.budgeted?.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span>Speso:</span>
-                                      <span className="font-medium">€{data.spent?.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span>Percentuale:</span>
-                                      <span className="font-medium">{data.percentage}%</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <RechartsPieChart 
-                          data={enhancedChartData} 
-                          cx="50%" 
-                          cy="50%" 
-                          outerRadius={100}
-                          innerRadius={40}
-                          paddingAngle={2}
-                        >
-                          {enhancedChartData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={entry.color}
-                              stroke="white"
-                              strokeWidth={2}
-                            />
-                          ))}
-                        </RechartsPieChart>
+                      <RechartsPieChart data={enhancedChartData} cx="50%" cy="50%" outerRadius={80}>
+                        {enhancedChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
                       </RechartsPieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                   
-                  {/* Legenda interattiva */}
+                  {/* Legenda sotto il chart */}
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     {enhancedChartData.map((entry, index) => (
                       <div key={index} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
@@ -563,6 +521,7 @@ const FinanceLayout = () => {
                   </div>
                 </CardContent>
               </Card>
+
 
 
               <Card>
