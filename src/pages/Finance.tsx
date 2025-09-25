@@ -55,9 +55,13 @@ const FinanceLayout = () => {
     const [newItem, setNewItem] = useState({ name: "", amount: "", categoryId: "", date: "" });
     const [isEditingTotal, setIsEditingTotal] = useState(false);
     const [tempTotalBudget, setTempTotalBudget] = useState(35000);
-    const [activeTab, setActiveTab] = useState("overview");
+    const [activeTab, setActiveTab] = useState(() => {
+      return localStorage.getItem('finance-active-tab') || "overview";
+    });
     const { toast } = useToast();
-
+    useEffect(() => {
+      localStorage.setItem('finance-active-tab', activeTab);
+    }, [activeTab]);
     // Sync tempTotalBudget with actual totalBudget
     useEffect(() => {
       setTempTotalBudget(totalBudget);
