@@ -1,0 +1,295 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Euro, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+// Mock payments data dal Budget-calculator
+const mockUpcomingPayments = [
+  {
+    id: 1,
+    vendor: "Catering Il Convivio",
+    amount: 5800,
+    dueDate: "2024-05-20",
+    category: "Catering"
+  },
+  {
+    id: 2,
+    vendor: "Villa San Martino (saldo)",
+    amount: 5000,
+    dueDate: "2024-06-15", 
+    category: "Location"
+  },
+  {
+    id: 3,
+    vendor: "Studio Fotografico Luce",
+    amount: 2400,
+    dueDate: "2024-07-01",
+    category: "Fotografia"
+  }
+];
+
+interface PaymentTrackerProps {
+  payments?: any[];
+}
+
+const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcomingPayments }) => {
+  const [completedPayments, setCompletedPayments] = useState(new Set());
+  const { toast } = useToast();
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const getDaysUntilDue = (dateString: string) => {
+    const today = new Date();
+    const dueDate = new Date(dateString);
+    const diffTime = dueDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getUrgencyBadge = (daysUntilDue: number) => {
+    if (daysUntilDue < 0) {
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertTriangle className="w-3 h-3" />
+        Scaduto
+      </Badge>;
+    } else if (daysUntilDue <= 7) {
+      return <Badge className="bg-orange-100 text-orange-800 flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        Urgente
+      </Badge>;
+    } else if (daysUntilDue <= 30) {
+      return <Badge className="bg-yellow-100 text-yellow-800 flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        Prossimo
+      </Badge>;
+    } else {
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Calendar className="w-3 h-3" />
+        Pianificato
+      </Badge>;
+    }
+  };
+
+  const handleMarkAsPaid = (paymentId: number) => {
+    setCompletedPayments(prev => new Set([...prev, paymentId]));
+    toast({
+      title: "Successo",
+      description: "Pagamento contrassegnato come completato!"
+    });
+  };
+
+  const handleSetReminder = (payment: any) => {
+    toast({
+      title: "Promemoria impostato",
+      description: `Ti ricorderemo 3 giorni prima della scadenza per ${payment.vendor}`
+    });
+  };
+
+  const sortedPayments = [...payments].sort((a, b) => 
+    new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+  );
+
+  const totalUpcoming = payments
+    .filter(p => !completedPayments.has(p.id))
+    .reduce((sum, p) => sum + p.amount, 0);
+
+  const overduePayments = payments.filter(p => 
+    getDaysUntilDue(p.dueDate) < 0 && !completedPayments.has(p.id)
+  );
+
+  const urgentPayments = payments.filter(p => {
+    const days = getDaysUntilDue(p.dueDate);
+    return days >= 0 && days <= 7 && !completedPayments.has(p.id);
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Pagamenti in Scadenza</h2>
+        <p className="text-gray-600">Monitora e gestisci i tuoi pagamenti programmati</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-blue-700">Totale da Pagare</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-blue-900">
+              {formatCurrency(totalUpcoming)}
+            </div>
+            <p className="text-sm text-blue-600 mt-1">
+              {payments.filter(p => !completedPayments.has(p.id)).length} pagamenti rimanenti
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-red-500">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-red-700">Pagamenti Scaduti</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-red-900">
+              {overduePayments.length}
+            </div>
+            <p className="text-sm text-red-600 mt-1">
+              {overduePayments.length > 0 
+                ? `${formatCurrency(overduePayments.reduce((sum, p) => sum + p.amount, 0))} totali`
+                : "Nessun pagamento scaduto"
+              }
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-orange-500">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-orange-700">Urgenti (7 giorni)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-orange-900">
+              {urgentPayments.length}
+            </div>
+            <p className="text-sm text-orange-600 mt-1">
+              {urgentPayments.length > 0
+                ? `${formatCurrency(urgentPayments.reduce((sum, p) => sum + p.amount, 0))} totali`
+                : "Nessun pagamento urgente"
+              }
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Payments Timeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5" />
+            Cronologia Pagamenti
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {sortedPayments.map((payment) => {
+              const daysUntilDue = getDaysUntilDue(payment.dueDate);
+              const isCompleted = completedPayments.has(payment.id);
+              const isOverdue = daysUntilDue < 0;
+              const isUrgent = daysUntilDue >= 0 && daysUntilDue <= 7;
+
+              return (
+                <div 
+                  key={payment.id}
+                  className={`p-4 rounded-lg border transition-all duration-300 ${
+                    isCompleted 
+                      ? 'bg-green-50 border-green-200 opacity-75' 
+                      : isOverdue 
+                        ? 'bg-red-50 border-red-200' 
+                        : isUrgent 
+                          ? 'bg-orange-50 border-orange-200' 
+                          : 'bg-white border-gray-200 hover:shadow-md'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className={`font-semibold ${isCompleted ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                          {payment.vendor}
+                        </h4>
+                        {getUrgencyBadge(daysUntilDue)}
+                        {isCompleted && (
+                          <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Pagato
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Euro className="w-4 h-4" />
+                          {formatCurrency(payment.amount)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {formatDate(payment.dueDate)}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {payment.category}
+                        </Badge>
+                      </div>
+
+                      {daysUntilDue >= 0 && !isCompleted && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {daysUntilDue === 0 
+                            ? "Scade oggi" 
+                            : daysUntilDue === 1 
+                              ? "Scade domani"
+                              : `Scade tra ${daysUntilDue} giorni`
+                          }
+                        </p>
+                      )}
+                      
+                      {isOverdue && !isCompleted && (
+                        <p className="text-xs text-red-500 mt-1 font-medium">
+                          Scaduto da {Math.abs(daysUntilDue)} giorni
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {!isCompleted && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleSetReminder(payment)}
+                          >
+                            <Clock className="w-4 h-4 mr-1" />
+                            Promemoria
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleMarkAsPaid(payment.id)}
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            Segna Come Pagato
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {sortedPayments.length === 0 && (
+            <div className="text-center py-8">
+              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">Nessun pagamento programmato</p>
+              <p className="text-gray-400">I tuoi pagamenti futuri appariranno qui</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default PaymentTracker;

@@ -23,6 +23,7 @@ import BudgetChart from '@/components/budget/BudgetChart';
 import BudgetOverview from '@/components/budget/BudgetOverview';
 import CategoryManager from '@/components/budget/CategoryManager';
 import VendorManager from '@/components/budget/VendorManager';
+import PaymentTracker from '@/components/budget/PaymentTracker';
 
 // Layout component similar to other pages
 const FinanceLayout = () => {
@@ -285,7 +286,7 @@ const FinanceLayout = () => {
             <TabsTrigger value="overview">Panoramica</TabsTrigger>
             <TabsTrigger value="categories">Categorie</TabsTrigger>
             <TabsTrigger value="vendors">Fornitori</TabsTrigger>
-            <TabsTrigger value="expenses">Spese</TabsTrigger>
+            <TabsTrigger value="payments">Pagamenti</TabsTrigger>
             <TabsTrigger value="analytics">Analisi</TabsTrigger>
           </TabsList>
 
@@ -377,117 +378,8 @@ const FinanceLayout = () => {
             />
           </TabsContent>
 
-
-
-          <TabsContent value="expenses" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Aggiungi Spesa</CardTitle>
-                <CardDescription>
-                  Registra una nuova spesa. 
-                  Budget totale: €{totalBudget.toLocaleString()} 
-                  | Speso: €{totalSpent.toLocaleString()} 
-                  | Rimanente: €{remainingAfterSpent.toLocaleString()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  <div>
-                    <Label htmlFor="item-name">Descrizione</Label>
-                    <Input
-                      id="item-name"
-                      value={newItem.name}
-                      onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                      placeholder="es. Acconto fotografo"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="item-amount">Importo (€)</Label>
-                    <Input
-                      id="item-amount"
-                      type="number"
-                      value={newItem.amount}
-                      onChange={(e) => setNewItem({...newItem, amount: e.target.value})}
-                      placeholder="1500"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="item-category">Categoria</Label>
-                    <select
-                      id="item-category"
-                      value={newItem.categoryId}
-                      onChange={(e) => setNewItem({...newItem, categoryId: e.target.value})}
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background"
-                    >
-                      <option value="">Seleziona categoria</option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Label htmlFor="item-date">Data</Label>
-                    <Input
-                      id="item-date"
-                      type="date"
-                      value={newItem.date}
-                      onChange={(e) => setNewItem({...newItem, date: e.target.value})}
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button onClick={handleAddItem} className="w-full">
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Aggiungi
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Lista Spese</CardTitle>
-                <CardDescription>Tutte le spese registrate</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {items.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Nessuna spesa registrata ancora
-                    </p>
-                  ) : (
-                    items.map((item) => {
-                      const category = categories.find(cat => cat.id === item.category_id);
-                      return (
-                        <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: category?.color }} />
-                            <div>
-                              <div className="font-medium">{item.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {category?.name} • {item.expense_date}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge variant={item.paid ? "default" : "secondary"}>
-                              €{item.amount.toLocaleString()}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleToggleItemPaid(item.id)}
-                            >
-                              {item.paid ? "Pagato" : "Da pagare"}
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="payments" className="space-y-4">
+            <PaymentTracker />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
