@@ -44,6 +44,8 @@ const FinanceLayout = () => {
       remainingAfterSpent,
       spentPercentage,
       allocatedPercentage,
+      weddingDate,        
+      daysToWedding,
       
       // Actions
       updateTotalBudget,
@@ -272,7 +274,7 @@ const FinanceLayout = () => {
           totalSpent={totalSpent}
           remainingBudget={remainingAfterSpent}
           percentageSpent={spentPercentage}
-          daysToWedding={120}
+          daysToWedding={daysToWedding}
           vendorsPaid={3}
           vendorsTotal={categories.length}
           onBudgetChange={async (newBudget) => {
@@ -353,16 +355,18 @@ const FinanceLayout = () => {
               totalBudget={totalBudget}
               remainingToAllocate={remainingToAllocate}
               onAddCategory={async (name: string, budget: number, color?: string, icon?: string) => {
-                const success = await addCategory(name, budget);
-                if (success && color && icon) {
-                  // Update category with color and icon after creation
-                  const newCategory = categories[categories.length - 1];
-                  if (newCategory) {
+                try {
+                  const newCategory = await addCategory(name, budget);  // addCategory should return the created category
+                  if (newCategory && color && icon) {
                     await updateCategory(newCategory.id, { color, icon });
                   }
+                  return !!newCategory;
+                } catch (err) {
+                  console.error('Error in onAddCategory:', err);
+                  return false;
                 }
-                return success;
               }}
+
               onUpdateCategory={async (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string }) => {
                 await updateCategory(id, updates);
               }}

@@ -102,7 +102,12 @@ export const useBudget = () => {
   // =====================================================
   // CATEGORIES MANAGEMENT
   // =====================================================
+  const weddingDate = settings?.wedding_date;
+  const daysToWedding = weddingDate ? 
+    Math.ceil((new Date(weddingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 
+    120;
 
+    
   const addCategory = async (name: string, budgeted: number, color?: string) => {
     try {
       const result = await budgetCategoriesApi.create({
@@ -113,11 +118,7 @@ export const useBudget = () => {
 
       if (result) {
         setCategories(prev => [...prev, result]);
-        toast({
-          title: 'Categoria aggiunta',
-          description: `${result.name} aggiunta al budget`,
-        });
-        return result;
+        return result;  // ← Return the category object, not boolean
       }
       return null;
     } catch (err) {
@@ -367,5 +368,8 @@ export const useBudget = () => {
     remainingAfterSpent,
     spentPercentage,
     allocatedPercentage,
+
+    weddingDate,        
+    daysToWedding,
   };
 };
