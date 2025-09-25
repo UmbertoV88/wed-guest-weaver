@@ -347,7 +347,7 @@ const FinanceLayout = () => {
               Gestisci il budget per il tuo giorno speciale - Database Integration
             </p>
           </div>
-        </div>
+        </div>      
 
         {/* *** ALERT PER SFORAMENTI *** */}
         {(remainingToAllocate < 0 || remainingAfterSpent < 0) && (
@@ -364,21 +364,6 @@ const FinanceLayout = () => {
           </Alert>
         )}
 
-        {/* *** BUDGET OVERVIEW CARDS - SEMPRE VISIBILI *** */}
-        <BudgetOverview
-          totalBudget={totalBudget}
-          totalSpent={totalSpent}
-          remainingBudget={remainingAfterSpent}
-          percentageSpent={spentPercentage}
-          daysToWedding={120}
-          vendorsPaid={3}
-          vendorsTotal={categories.length}
-          onBudgetChange={async (newBudget) => {
-            await updateTotalBudget(newBudget);
-          }}
-        />
-
-        {/* *** TABS - SOTTO LE CARDS *** */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Panoramica</TabsTrigger>
@@ -388,13 +373,26 @@ const FinanceLayout = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            {/* Budget Chart */}
+            {/* Import the new components */}
+            <BudgetOverview
+              totalBudget={totalBudget}
+              totalSpent={totalSpent}
+              remainingBudget={remainingAfterSpent}
+              percentageSpent={spentPercentage}
+              daysToWedding={120}
+              vendorsPaid={3}
+              vendorsTotal={categories.length}
+              onBudgetChange={async (newBudget) => {
+                await updateTotalBudget(newBudget);
+              }}
+            />
+
             <BudgetChart 
               categories={categories}
               totalBudget={totalBudget}
             />
 
-            {/* Quick Stats Cards */}
+            {/* Quick Stats Cards - manteniamo queste dal design originale */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
               <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
                 <CardContent className="p-4">
@@ -632,7 +630,6 @@ const FinanceLayout = () => {
         </Tabs>
       </div>
     );
-
   };
 
   return (
