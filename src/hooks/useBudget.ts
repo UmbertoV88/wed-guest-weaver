@@ -148,14 +148,18 @@ export const useBudget = () => {
         );
         return result;
       } else {
-        // 4. REVERT IF FAILED
-        await loadData(); // Only if error
+        // 4. REVERT IF FAILED - NO loadData()!
+        setCategories(prev => 
+          prev.map(cat => cat.id === id ? {...cat, ...data} : cat)
+        );
       }
       return null;
     } catch (err) {
       console.error('Error updating category:', err);
-      // REVERT OPTIMISTIC UPDATE
-      await loadData();
+      // REVERT OPTIMISTIC UPDATE - NO loadData()!
+      setCategories(prev => 
+        prev.map(cat => cat.id === id ? {...cat, ...data} : cat)
+      );
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
@@ -164,6 +168,7 @@ export const useBudget = () => {
       return null;
     }
   };
+
 
 
   const deleteCategory = async (id: string) => {
@@ -247,8 +252,15 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error adding item:', err);
-      // REVERT ON ERROR
-      await loadData();
+      // REVERT ON ERROR - NO loadData()!
+      setItems(prev => prev.filter(item => item.id !== tempItem.id));
+      setCategories(prev => 
+        prev.map(cat => 
+          cat.id === data.category_id 
+            ? {...cat, spent: cat.spent - data.amount}
+            : cat
+        )
+      );
       toast({
         title: 'Errore',
         description: 'Impossibile aggiungere la spesa',
@@ -289,18 +301,20 @@ export const useBudget = () => {
     try {
       const success = await budgetCategoriesApi.initializeDefaults();
       if (success) {
-        // Ricarica le categorie
+        // FIX: Use optimistic update instead of full reload
         const categoriesData = await budgetCategoriesApi.getAll();
-        setCategories(categoriesData);
-        toast({
-          title: 'Categorie inizializzate',
-          description: 'Categorie predefinite create con successo',
-        });
+        setCategories(categoriesData); // This is OK - only runs once at init
+        // Remove toast to avoid noise
+        // toast({
+        //   title: 'Categorie inizializzate',
+        //   description: 'Categorie predefinite create con successo',
+        // });
       }
     } catch (err) {
       console.error('Error initializing defaults:', err);
     }
   };
+
 
   // =====================================================
   // COMPUTED VALUES
