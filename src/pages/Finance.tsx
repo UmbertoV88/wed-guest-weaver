@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Trash2, Calculator, PieChart, DollarSign, TrendingUp, Edit, AlertTriangle } from "lucide-react";
+import { PlusCircle, Trash2, Calculator, PieChart, DollarSign, TrendingUp, Edit, AlertTriangle, Calendar } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useBudget } from "@/hooks/useBudget";
+import BudgetChart from '@/components/budget/BudgetChart';
+import BudgetOverview from '@/components/budget/BudgetOverview';
 
 
 // *** COMPONENTE PER CATEGORIA EDITABILE (AGGIORNATO PER DATABASE) ***
@@ -482,91 +484,74 @@ const FinanceLayout = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Distribuzione Budget per Categoria</CardTitle>
-                  <CardDescription>Ripartizione del budget allocato per ogni categoria</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{}}
-                    className="h-[300px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RechartsPieChart>
-                        <Pie 
-                          data={enhancedChartData}
-                          cx="50%"
-                          cy="50%" 
-                          outerRadius={80}
-                        >
-                          {enhancedChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </RechartsPieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+            {/* Import the new components */}
+            <BudgetOverview
+              totalBudget={totalBudget}
+              totalSpent={totalSpent}
+              remainingBudget={remainingAfterSpent}
+              percentageSpent={spentPercentage}
+              daysToWedding={120}
+              vendorsPaid={3}
+              vendorsTotal={categories.length}
+              onBudgetChange={async (newBudget) => {
+                await updateTotalBudget(newBudget);
+              }}
+            />
 
-                  
-                  {/* Legenda sotto il chart */}
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    {enhancedChartData.map((entry, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div 
-                          className="w-3 h-3 rounded-full flex-shrink-0" 
-                          style={{ backgroundColor: entry.color }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{entry.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {entry.percentage}% • €{entry.budgeted.toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+            <BudgetChart 
+              categories={categories}
+              totalBudget={totalBudget}
+            />
+
+            {/* Quick Stats Cards - manteniamo queste dal design originale */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-700">Categoria più costosa</p>
+                      <p className="text-2xl font-bold text-blue-900">
+                        {categories.length > 0 ? categories.reduce((max, cat) => cat.budgeted > max.budgeted ? cat : max).name : 'N/A'}
+                      </p>
+                      <p className="text-sm text-blue-600">
+                        €{categories.length > 0 ? categories.reduce((max, cat) => cat.budgeted > max.budgeted ? cat : max).budgeted.toLocaleString() : '0'} stimati
+                      </p>
+                    </div>
+                    <DollarSign className="h-8 w-8 text-blue-600" />
                   </div>
                 </CardContent>
               </Card>
 
+              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-700">Prossimo pagamento</p>
+                      <p className="text-2xl font-bold text-green-900">20 Mag</p>
+                      <p className="text-sm text-green-600">Catering - €5.800</p>
+                    </div>
+                    <Calendar className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
 
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Status Budget per Categoria</CardTitle>
-                  <CardDescription>Allocato vs Speso vs Rimanente</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {categories.slice(0, 5).map((category) => {
-                    const categoryRemaining = category.budgeted - category.spent;
-                    return (
-                      <div key={category.id} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{category.name}</span>
-                          <div className="flex gap-2">
-                            <Badge variant="outline">
-                              Budget: €{category.budgeted.toLocaleString()}
-                            </Badge>
-                            <Badge variant={category.spent > category.budgeted ? "destructive" : "secondary"}>
-                              Speso: €{category.spent.toLocaleString()}
-                            </Badge>
-                            <Badge variant={categoryRemaining >= 0 ? "default" : "destructive"}>
-                              Rimanente: €{categoryRemaining.toLocaleString()}
-                            </Badge>
-                          </div>
-                        </div>
-                        <Progress 
-                          value={(category.spent / category.budgeted) * 100} 
-                          className="h-2"
-                        />
-                      </div>
-                    );
-                  })}
+              <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-700">Risparmio potenziale</p>
+                      <p className="text-2xl font-bold text-purple-900">
+                        €{remainingAfterSpent.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-purple-600">Budget rimanente</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-purple-600" />
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
+
 
           <TabsContent value="categories" className="space-y-4">
             <Card>
@@ -746,11 +731,7 @@ const FinanceLayout = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categories}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="budgeted" fill="#3B82F6" name="Budget Allocato" />
-                      <Bar dataKey="spent" fill="#EF4444" name="Speso" />
+                      
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
