@@ -281,53 +281,64 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
               
               <CardContent className="space-y-4">
                 {isEditing ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor={`name-${category.id}`}>Nome Categoria</Label>
-                      <Input
-                        id={`name-${category.id}`}
-                        value={editForm.name}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                      />
+                    <div className="space-y-4">
+                        <div>
+                        <Label htmlFor={`name-${category.id}`}>Nome Categoria</Label>
+                        <Input
+                            id={`name-${category.id}`}
+                            value={editForm.name}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                        />
+                        </div>
+                        <div>
+                        <Label htmlFor={`budget-${category.id}`}>Budget Stimato</Label>
+                        <Input
+                            id={`budget-${category.id}`}
+                            type="number"
+                            value={editForm.budgeted}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, budgeted: Number(e.target.value) }))}
+                        />
+                        </div>
+                        <div>
+                        <Label htmlFor={`spent-${category.id}`}>Spesa Effettiva</Label>
+                        <Input
+                            id={`spent-${category.id}`}
+                            type="number"
+                            value={editForm.spent || 0}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, spent: Number(e.target.value) }))}
+                        />
+                        </div>
+                        <div className="flex gap-2">
+                        <Button 
+                            onClick={async () => {
+                            await onUpdateCategory(category.id, {
+                                name: editForm.name,
+                                budgeted: editForm.budgeted,
+                                spent: editForm.spent || 0  // ← AGGIUNGI ANCHE SPENT
+                            });
+                            setEditingCategory(null);
+                            setEditForm({});
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                        >
+                            <Check className="w-4 h-4 mr-2" />
+                            Salva
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => {
+                            setEditingCategory(null);
+                            setEditForm({});
+                            }}
+                            className="flex-1"
+                        >
+                            <X className="w-4 h-4 mr-2" />
+                            Annulla
+                        </Button>
+                        </div>
                     </div>
-                    <div>
-                      <Label htmlFor={`budget-${category.id}`}>Budget Stimato</Label>
-                      <Input
-                        id={`budget-${category.id}`}
-                        type="number"
-                        value={editForm.budgeted}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, budgeted: Number(e.target.value) }))}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={async () => {
-                          await onUpdateCategory(category.id, {
-                            name: editForm.name,
-                            budgeted: editForm.budgeted
-                          });
-                          setEditingCategory(null);
-                          setEditForm({});
-                        }}
-                        className="flex-1 bg-green-600 hover:bg-green-700"
-                      >
-                        <Check className="w-4 h-4 mr-2" />
-                        Salva
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          setEditingCategory(null);
-                          setEditForm({});
-                        }}
-                        className="flex-1"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Annulla
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
+                    ) : (
+
                   <>
                     {/* Budget Progress */}
                     <div className="space-y-2">
@@ -369,7 +380,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           setEditingCategory(category.id);
                           setEditForm({
                             name: category.name,
-                            budgeted: category.budgeted
+                            budgeted: category.budgeted,
+                            spent: category.spent
                           });
                         }}
                         className="flex-1"
