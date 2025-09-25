@@ -58,7 +58,7 @@ const DashboardSidebar = ({
       const wedding = new Date(weddingDate.getFullYear(), weddingDate.getMonth(), weddingDate.getDate());
       
       const diffTime = wedding.getTime() - today.getTime();
-      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       
       if (days < 0) {
         setCountdown("Matrimonio celebrato! 💕");
