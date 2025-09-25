@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart as RechartsPieChart, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { PieChart as RechartsPieChart, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Pie } from "recharts";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import CommonHeader from "@/components/CommonHeader";
@@ -494,13 +494,21 @@ const FinanceLayout = () => {
                     className="h-[300px]"
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsPieChart data={enhancedChartData} cx="50%" cy="50%" outerRadius={80}>
-                        {enhancedChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
+                      <RechartsPieChart>
+                        <Pie 
+                          data={enhancedChartData}
+                          cx="50%"
+                          cy="50%" 
+                          outerRadius={80}
+                        >
+                          {enhancedChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
                       </RechartsPieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
+
                   
                   {/* Legenda sotto il chart */}
                   <div className="mt-4 grid grid-cols-2 gap-2">
