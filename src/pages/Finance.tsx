@@ -19,114 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useBudget } from "@/hooks/useBudget";
 import BudgetChart from '@/components/budget/BudgetChart';
 import BudgetOverview from '@/components/budget/BudgetOverview';
-
-
-// *** COMPONENTE PER CATEGORIA EDITABILE (AGGIORNATO PER DATABASE) ***
-const EditableCategoryCard = ({ 
-  category, 
-  onUpdateBudget, 
-  onDelete 
-}: { 
-  category: any; // Temporarily any, we'll fix this
-  onUpdateBudget: (id: string, budget: number) => void;
-  onDelete: (id: string) => void;
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempBudget, setTempBudget] = useState(category.budgeted);
-  const { toast } = useToast();
-
-  const handleSave = () => {
-    if (isNaN(tempBudget) || tempBudget <= 0) {
-      toast({
-        title: "Errore",
-        description: "Inserisci un budget valido",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    onUpdateBudget(category.id, tempBudget);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setTempBudget(category.budgeted);
-    setIsEditing(false);
-  };
-
-  const remaining = category.budgeted - category.spent;
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-sm">{category.name}</CardTitle>
-          <div className="flex gap-1">
-            {!isEditing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setTempBudget(category.budgeted);
-                  setIsEditing(true);
-                }}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(category.id)}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>Budget:</span>
-          {isEditing ? (
-            <div className="flex gap-1">
-              <Input
-                type="number"
-                value={tempBudget}
-                onChange={(e) => setTempBudget(Number(e.target.value))}
-                className="w-20 h-6 text-xs"
-              />
-              <Button size="sm" variant="outline" onClick={handleSave} className="h-6 px-2 text-xs">
-                ✓
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleCancel} className="h-6 px-2 text-xs">
-                ✕
-              </Button>
-            </div>
-          ) : (
-            <span className="font-medium">€{category.budgeted.toLocaleString()}</span>
-          )}
-        </div>
-        <div className="flex justify-between text-sm">
-          <span>Speso:</span>
-          <span className={`font-medium ${category.spent > category.budgeted ? 'text-destructive' : ''}`}>
-            €{category.spent.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span>Rimanente:</span>
-          <span className={`font-medium ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            €{remaining.toLocaleString()}
-          </span>
-        </div>
-        <Progress 
-          value={(category.spent / category.budgeted) * 100} 
-          className="h-2"
-        />
-      </CardContent>
-    </Card>
-  );
-};
+import CategoryManager from '@/components/budget/CategoryManager';
 
 // Layout component similar to other pages
 const FinanceLayout = () => {
@@ -445,57 +338,30 @@ const FinanceLayout = () => {
 
 
           <TabsContent value="categories" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestione Categorie</CardTitle>
-                <CardDescription>
-                  Aggiungi e gestisci le categorie del budget. 
-                  Budget totale disponibile: €{totalBudget.toLocaleString()} 
-                  | Da allocare: €{remainingToAllocate.toLocaleString()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="category-name">Nome Categoria</Label>
-                    <Input
-                      id="category-name"
-                      value={newCategory.name}
-                      onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
-                      placeholder="es. Fotografo"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="category-budget">Budget (€)</Label>
-                    <Input
-                      id="category-budget"
-                      type="number"
-                      value={newCategory.budget}
-                      onChange={(e) => setNewCategory({...newCategory, budget: e.target.value})}
-                      placeholder={remainingToAllocate > 0 ? remainingToAllocate.toString() : "3000"}
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button onClick={handleAddCategory} className="w-full">
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Aggiungi
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categories.map((category) => (
-                    <EditableCategoryCard 
-                      key={category.id} 
-                      category={category} 
-                      onUpdateBudget={handleUpdateCategoryBudget}
-                      onDelete={handleDeleteCategory}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <CategoryManager
+              categories={categories}
+              totalBudget={totalBudget}
+              remainingToAllocate={remainingToAllocate}
+              onAddCategory={async (name: string, budget: number, color?: string, icon?: string) => {
+                const success = await addCategory(name, budget);
+                if (success && color && icon) {
+                  // Update category with color and icon after creation
+                  const newCategory = categories[categories.length - 1];
+                  if (newCategory) {
+                    await updateCategory(newCategory.id, { color, icon });
+                  }
+                }
+                return success;
+              }}
+              onUpdateCategory={async (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string }) => {
+                await updateCategory(id, updates);
+              }}
+              onDeleteCategory={async (id: string) => {
+                await deleteCategory(id);
+              }}
+            />
           </TabsContent>
+
 
           <TabsContent value="expenses" className="space-y-4">
             <Card>
