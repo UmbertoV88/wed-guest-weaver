@@ -131,31 +131,40 @@ export const useBudget = () => {
     }
   };
 
-  const updateCategory = async (id: string, data: { budgeted?: number; name?: string; color?: string }) => {
+  const updateCategory = async (id: string, data: { budgeted?: number; name?: string; color?: string; icon?: string; spent?: number }) => {
     try {
+      // 1. UPDATE UI IMMEDIATELY (Optimistic)
+      setCategories(prev => 
+        prev.map(cat => cat.id === id ? {...cat, ...data} : cat)
+      );
+
+      // 2. UPDATE DATABASE IN BACKGROUND
       const result = await budgetCategoriesApi.update(id, data);
 
       if (result) {
+        // 3. SYNC WITH REAL DATA (no visual impact)
         setCategories(prev => 
           prev.map(cat => cat.id === id ? result : cat)
         );
-        toast({
-          title: 'Categoria aggiornata',
-          description: `Budget aggiornato con successo`,
-        });
         return result;
+      } else {
+        // 4. REVERT IF FAILED
+        await loadData(); // Only if error
       }
       return null;
     } catch (err) {
       console.error('Error updating category:', err);
-      /*toast({
+      // REVERT OPTIMISTIC UPDATE
+      await loadData();
+      toast({
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
         variant: 'destructive',
-      });*/
+      });
       return null;
     }
   };
+
 
   const deleteCategory = async (id: string) => {
     try {
@@ -196,23 +205,50 @@ export const useBudget = () => {
     notes?: string;
   }) => {
     try {
+      // 1. UPDATE UI IMMEDIATELY (Optimistic)
+      const tempItem = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        ...data,
+        expense_date: data.expense_date || new Date().toISOString().split('T')[0],
+        paid: data.paid || false
+      };
+      
+      setItems(prev => [...prev, tempItem]);
+      
+      // UPDATE CATEGORY SPENT (Optimistic)
+      setCategories(prev => 
+        prev.map(cat => 
+          cat.id === data.category_id 
+            ? {...cat, spent: cat.spent + data.amount}
+            : cat
+        )
+      );
+
+      // 2. CREATE IN DATABASE
       const result = await budgetItemsApi.create(data);
 
       if (result) {
-        setItems(prev => [...prev, result]);
-        // Ricarica le categorie per aggiornare i totali "spent"
-        const updatedCategories = await budgetCategoriesApi.getAll();
-        setCategories(updatedCategories);
-
-        /*toast({
-          title: 'Spesa aggiunta',
-          description: `${result.name} aggiunta per €${result.amount.toLocaleString()}`,
-        });*/
+        // 3. REPLACE TEMP WITH REAL DATA
+        setItems(prev => 
+          prev.map(item => item.id === tempItem.id ? result : item)
+        );
         return result;
+      } else {
+        // 4. REVERT IF FAILED
+        setItems(prev => prev.filter(item => item.id !== tempItem.id));
+        setCategories(prev => 
+          prev.map(cat => 
+            cat.id === data.category_id 
+              ? {...cat, spent: cat.spent - data.amount}
+              : cat
+          )
+        );
       }
       return null;
     } catch (err) {
       console.error('Error adding item:', err);
+      // REVERT ON ERROR
+      await loadData();
       toast({
         title: 'Errore',
         description: 'Impossibile aggiungere la spesa',
@@ -221,6 +257,7 @@ export const useBudget = () => {
       return null;
     }
   };
+
 
   const toggleItemPaid = async (id: string) => {
     try {
