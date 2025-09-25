@@ -96,11 +96,22 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
 
   const getStatusBadge = (spent: number, budgeted: number) => {
     const percentage = (spent / budgeted) * 100;
-    if (percentage === 0) return <Badge variant="secondary">Non iniziato</Badge>;
-    if (percentage <= 50) return <Badge className="bg-blue-500 hover:bg-blue-600">In corso</Badge>;
-    if (percentage <= 100) return <Badge className="bg-yellow-500 hover:bg-yellow-600">Quasi completato</Badge>;
+    
+    if (percentage === 0) {
+        return <Badge variant="secondary">Non iniziato</Badge>;
+    }
+    if (percentage < 50) {
+        return <Badge className="bg-blue-500 hover:bg-blue-600">In corso</Badge>;
+    }
+    if (percentage < 100) {
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Quasi completato</Badge>;
+    }
+    if (percentage === 100) {
+        return <Badge className="bg-green-500 hover:bg-green-600">Completato</Badge>;
+    }
     return <Badge variant="destructive">Budget superato</Badge>;
-  };
+    };
+
 
   return (
     <div className="space-y-6">
