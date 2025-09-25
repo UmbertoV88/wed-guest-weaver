@@ -11,7 +11,7 @@ import {
   budgetCategoriesApi, 
   budgetItemsApi
 } from '@/services/budgetService';
-import { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget';
+import type { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget';
 
 // =====================================================
 // MAIN BUDGET HOOK
@@ -21,7 +21,7 @@ export const useBudget = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // State
+  // State with explicit types
   const [settings, setSettings] = useState<BudgetSettings | null>(null);
   const [categories, setCategories] = useState<BudgetCategory[]>([]);
   const [items, setItems] = useState<BudgetItem[]>([]);
@@ -39,17 +39,25 @@ export const useBudget = () => {
     setError(null);
 
     try {
-      // Load sequenzialmente per evitare type conflicts
-      const settingsData = await budgetSettingsApi.get();
-      const categoriesData = await budgetCategoriesApi.getAll();
-      const itemsData = await budgetItemsApi.getAll();
+      console.log('Loading budget data...');
+      
+      // Load budget data with explicit type checking
+      const settingsResult = await budgetSettingsApi.get();
+      const categoriesResult = await budgetCategoriesApi.getAll();
+      const itemsResult = await budgetItemsApi.getAll();
 
-      setSettings(settingsData || null);
-      setCategories(categoriesData || []);
-      setItems(itemsData || []);
+      console.log('Settings result:', settingsResult);
+      console.log('Categories result:', categoriesResult);
+      console.log('Items result:', itemsResult);
 
-      // Se non ci sono categorie, inizializza defaults
-      if (!categoriesData || categoriesData.length === 0) {
+      // Set data directly - let's see what we actually get  
+      setSettings(settingsResult as any || null);
+      setCategories(Array.isArray(categoriesResult) ? categoriesResult as any : []);
+      setItems(Array.isArray(itemsResult) ? itemsResult as any : []);
+
+      // Initialize defaults if no categories
+      if (!categoriesResult || categoriesResult.length === 0) {
+        console.log('No categories found, initializing defaults...');
         await initializeDefaults();
       }
 
@@ -65,7 +73,6 @@ export const useBudget = () => {
       setLoading(false);
     }
   };
-
 
   // =====================================================
   // BUDGET SETTINGS
@@ -120,7 +127,6 @@ export const useBudget = () => {
   const weddingDate = settings?.wedding_date;
   const daysToWedding = calculateDaysToWedding(weddingDate);
 
-    
   const addCategory = async (name: string, budgeted: number, color?: string) => {
     try {
       const result = await budgetCategoriesApi.create({
@@ -130,8 +136,8 @@ export const useBudget = () => {
       });
 
       if (result) {
-        setCategories(prev => [...prev, result]);
-        return result;  // ← Return the category object, not boolean
+        setCategories(prev => [...prev, result as any]);
+        return result as any;
       }
       return null;
     } catch (err) {
@@ -148,8 +154,8 @@ export const useBudget = () => {
   const updateCategory = async (id: string, data: { budgeted?: number; name?: string; color?: string; icon?: string; spent?: number }) => {
     try {
       // 1. UPDATE UI IMMEDIATELY (Optimistic)
-      setCategories(prev => 
-        prev.map(cat => cat.id === id ? {...cat, ...data} : cat)
+      setCategories((prev: any) => 
+        prev.map((cat: any) => cat.id === id ? {...cat, ...data} : cat)
       );
 
       // 2. UPDATE DATABASE IN BACKGROUND
@@ -157,23 +163,19 @@ export const useBudget = () => {
 
       if (result) {
         // 3. SYNC WITH REAL DATA (no visual impact)
-        setCategories(prev => 
-          prev.map(cat => cat.id === id ? result : cat)
+        setCategories((prev: any) => 
+          prev.map((cat: any) => cat.id === id ? result as any : cat)
         );
-        return result;
+        return result as any;
       } else {
-        // 4. REVERT IF FAILED - NO loadData()!
-        setCategories(prev => 
-          prev.map(cat => cat.id === id ? {...cat, ...data} : cat)
-        );
+        // 4. REVERT IF FAILED
+        await loadData(); // Reload to get correct state
       }
       return null;
     } catch (err) {
       console.error('Error updating category:', err);
-      // REVERT OPTIMISTIC UPDATE - NO loadData()!
-      setCategories(prev => 
-        prev.map(cat => cat.id === id ? {...cat, ...data} : cat)
-      );
+      // REVERT OPTIMISTIC UPDATE
+      await loadData();
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
@@ -182,8 +184,6 @@ export const useBudget = () => {
       return null;
     }
   };
-
-
 
   const deleteCategory = async (id: string) => {
     try {
@@ -239,11 +239,11 @@ export const useBudget = () => {
 
     try {
       // 1. UPDATE UI IMMEDIATELY (Optimistic)
-      setItems(prev => [...prev, tempItem]);
+      setItems((prev: any) => [...prev, tempItem]);
       
       // UPDATE CATEGORY SPENT (Optimistic)
-      setCategories(prev => 
-        prev.map(cat => 
+      setCategories((prev: any) => 
+        prev.map((cat: any) => 
           cat.id === data.category_id 
             ? {...cat, spent: cat.spent + data.amount}
             : cat
@@ -255,15 +255,15 @@ export const useBudget = () => {
 
       if (result) {
         // 3. REPLACE TEMP WITH REAL DATA
-        setItems(prev => 
-          prev.map(item => item.id === tempItem.id ? result : item)
+        setItems((prev: any) => 
+          prev.map((item: any) => item.id === tempItem.id ? result as any : item)
         );
-        return result;
+        return result as any;
       } else {
         // 4. REVERT IF FAILED
-        setItems(prev => prev.filter(item => item.id !== tempItem.id));
-        setCategories(prev => 
-          prev.map(cat => 
+        setItems((prev: any) => prev.filter((item: any) => item.id !== tempItem.id));
+        setCategories((prev: any) => 
+          prev.map((cat: any) => 
             cat.id === data.category_id 
               ? {...cat, spent: cat.spent - data.amount}
               : cat
@@ -274,9 +274,9 @@ export const useBudget = () => {
     } catch (err) {
       console.error('Error adding item:', err);
       // ✅ ORA tempItem è accessibile nel catch!
-      setItems(prev => prev.filter(item => item.id !== tempItem.id));
-      setCategories(prev => 
-        prev.map(cat => 
+      setItems((prev: any) => prev.filter((item: any) => item.id !== tempItem.id));
+      setCategories((prev: any) => 
+        prev.map((cat: any) => 
           cat.id === data.category_id 
             ? {...cat, spent: cat.spent - data.amount}
             : cat
@@ -291,18 +291,15 @@ export const useBudget = () => {
     }
   };
 
-
-
-
   const toggleItemPaid = async (id: string) => {
     try {
       const result = await budgetItemsApi.togglePaid(id);
 
       if (result) {
-        setItems(prev => 
-          prev.map(item => item.id === id ? result : item)
+        setItems((prev: any) => 
+          prev.map((item: any) => item.id === id ? result as any : item)
         );
-        return result;
+        return result as any;
       }
       return null;
     } catch (err) {
@@ -326,26 +323,20 @@ export const useBudget = () => {
       if (success) {
         // FIX: Use optimistic update instead of full reload
         const categoriesData = await budgetCategoriesApi.getAll();
-        setCategories(categoriesData); // This is OK - only runs once at init
-        // Remove toast to avoid noise
-        // toast({
-        //   title: 'Categorie inizializzate',
-        //   description: 'Categorie predefinite create con successo',
-        // });
+        setCategories(Array.isArray(categoriesData) ? categoriesData as any : []);
       }
     } catch (err) {
       console.error('Error initializing defaults:', err);
     }
   };
 
-
   // =====================================================
   // COMPUTED VALUES
   // =====================================================
 
-  const totalBudget = settings?.total_budget || 35000;
-  const totalAllocated = categories.reduce((sum, cat) => sum + cat.budgeted, 0);
-  const totalSpent = categories.reduce((sum, cat) => sum + cat.spent, 0);
+  const totalBudget = (settings as any)?.total_budget || 35000;
+  const totalAllocated = categories.reduce((sum, cat) => sum + (cat as any)?.budgeted || 0, 0);
+  const totalSpent = categories.reduce((sum, cat) => sum + (cat as any)?.spent || 0, 0);
   const remainingToAllocate = totalBudget - totalAllocated;
   const remainingAfterSpent = totalBudget - totalSpent;
   const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;

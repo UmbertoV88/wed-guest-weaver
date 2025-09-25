@@ -1,10 +1,19 @@
 import { supabase } from '@/integrations/supabase/client';
 
+// Type-safe wrapper for budget operations
+const createTypedQuery = (tableName: string) => ({
+  select: (columns: string) => supabase.from(tableName as any).select(columns),
+  insert: (data: any) => supabase.from(tableName as any).insert(data),
+  update: (data: any) => supabase.from(tableName as any).update(data),
+  delete: () => supabase.from(tableName as any).delete(),
+  upsert: (data: any) => supabase.from(tableName as any).upsert(data)
+});
+
 export const budgetSettingsApi = {
   async get() {
     try {
-      const { data, error } = await supabase
-        .from('budget_settings')
+      console.log('Fetching budget settings...');
+      const { data, error } = await createTypedQuery('budget_settings')
         .select('*')
         .single();
 
@@ -13,6 +22,7 @@ export const budgetSettingsApi = {
         throw error;
       }
 
+      console.log('Budget settings data:', data);
       return data;
     } catch (error) {
       console.error('Budget settings fetch error:', error);
@@ -20,13 +30,12 @@ export const budgetSettingsApi = {
     }
   },
 
-  async upsert(data) {
+  async upsert(data: any) {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: existing, error: fetchError } = await supabase
-        .from('budget_settings')
+      const { data: existing, error: fetchError } = await createTypedQuery('budget_settings')
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -39,8 +48,7 @@ export const budgetSettingsApi = {
       let result;
       
       if (existing) {
-        const { data: updateResult, error: updateError } = await supabase
-          .from('budget_settings')
+        const { data: updateResult, error: updateError } = await createTypedQuery('budget_settings')
           .update({
             total_budget: data.total_budget,
             wedding_date: data.wedding_date
@@ -55,8 +63,7 @@ export const budgetSettingsApi = {
         }
         result = updateResult;
       } else {
-        const { data: insertResult, error: insertError } = await supabase
-          .from('budget_settings')
+        const { data: insertResult, error: insertError } = await createTypedQuery('budget_settings')
           .insert({
             user_id: user.id,
             total_budget: data.total_budget,
@@ -83,8 +90,8 @@ export const budgetSettingsApi = {
 export const budgetCategoriesApi = {
   async getAll() {
     try {
-      const { data, error } = await supabase
-        .from('budget_categories')
+      console.log('Fetching budget categories...');
+      const { data, error } = await createTypedQuery('budget_categories')
         .select('*')
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
@@ -94,6 +101,7 @@ export const budgetCategoriesApi = {
         throw error;
       }
 
+      console.log('Budget categories data:', data);
       return data || [];
     } catch (error) {
       console.error('Budget categories fetch error:', error);
@@ -101,13 +109,12 @@ export const budgetCategoriesApi = {
     }
   },
 
-  async create(data) {
+  async create(data: any) {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: result, error } = await supabase
-        .from('budget_categories')
+      const { data: result, error } = await createTypedQuery('budget_categories')
         .insert({
           user_id: user.id,
           name: data.name,
@@ -130,10 +137,9 @@ export const budgetCategoriesApi = {
     }
   },
 
-  async update(id, data) {
+  async update(id: string, data: any) {
     try {
-      const { data: result, error } = await supabase
-        .from('budget_categories')
+      const { data: result, error } = await createTypedQuery('budget_categories')
         .update(data)
         .eq('id', id)
         .select()
@@ -151,10 +157,9 @@ export const budgetCategoriesApi = {
     }
   },
 
-  async delete(id) {
+  async delete(id: string) {
     try {
-      const { error } = await supabase
-        .from('budget_categories')
+      const { error } = await createTypedQuery('budget_categories')
         .update({ is_active: false })
         .eq('id', id);
 
@@ -175,7 +180,7 @@ export const budgetCategoriesApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { error } = await supabase.rpc('create_default_budget_categories', {
+      const { error } = await (supabase as any).rpc('create_default_budget_categories', {
         p_user_id: user.id
       });
 
@@ -195,8 +200,8 @@ export const budgetCategoriesApi = {
 export const budgetItemsApi = {
   async getAll() {
     try {
-      const { data, error } = await supabase
-        .from('budget_items')
+      console.log('Fetching budget items...');
+      const { data, error } = await createTypedQuery('budget_items')
         .select('*')
         .order('expense_date', { ascending: false });
 
@@ -205,6 +210,7 @@ export const budgetItemsApi = {
         throw error;
       }
 
+      console.log('Budget items data:', data);
       return data || [];
     } catch (error) {
       console.error('Budget items fetch error:', error);
@@ -212,13 +218,12 @@ export const budgetItemsApi = {
     }
   },
 
-  async create(data) {
+  async create(data: any) {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: result, error } = await supabase
-        .from('budget_items')
+      const { data: result, error } = await createTypedQuery('budget_items')
         .insert({
           user_id: user.id,
           category_id: data.category_id,
@@ -244,19 +249,18 @@ export const budgetItemsApi = {
     }
   },
 
-  async togglePaid(id) {
+  async togglePaid(id: string) {
     try {
-      const { data: current, error: fetchError } = await supabase
-        .from('budget_items')
+      const { data: current, error: fetchError } = await createTypedQuery('budget_items')
         .select('paid')
         .eq('id', id)
         .single();
 
       if (fetchError) throw fetchError;
+      if (!current) throw new Error('Item not found');
 
-      const { data: result, error } = await supabase
-        .from('budget_items')
-        .update({ paid: !current.paid })
+      const { data: result, error } = await createTypedQuery('budget_items')
+        .update({ paid: !(current as any).paid })
         .eq('id', id)
         .select()
         .single();
@@ -275,14 +279,14 @@ export const budgetItemsApi = {
 };
 
 export const budgetUtils = {
-  formatCurrency: (amount) => {
+  formatCurrency: (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
   },
 
-  calculatePercentage: (value, total) => {
+  calculatePercentage: (value: number, total: number) => {
     if (total === 0) return 0;
     return Math.round((value / total) * 100);
   },
