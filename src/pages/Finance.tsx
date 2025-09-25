@@ -55,6 +55,7 @@ const FinanceLayout = () => {
     const [newItem, setNewItem] = useState({ name: "", amount: "", categoryId: "", date: "" });
     const [isEditingTotal, setIsEditingTotal] = useState(false);
     const [tempTotalBudget, setTempTotalBudget] = useState(35000);
+    const [activeTab, setActiveTab] = useState("overview");
     const { toast } = useToast();
 
     // Sync tempTotalBudget with actual totalBudget
@@ -272,7 +273,7 @@ const FinanceLayout = () => {
         />
 
         {/* *** TABS - SOTTO LE CARDS *** */}
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Panoramica</TabsTrigger>
             <TabsTrigger value="categories">Categorie</TabsTrigger>
