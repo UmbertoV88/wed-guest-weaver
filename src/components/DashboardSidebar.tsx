@@ -88,8 +88,8 @@ const DashboardSidebar = ({
   const menuItems = [
     { icon: Users, label: "Invitati", href: "/dashboard", isActive: window.location.pathname === "/dashboard" },
     { icon: Utensils, label: "Tavoli", href: "/dashboard/seating", isActive: window.location.pathname === "/dashboard/seating" },
+    { icon: DollarSign, label: "Finanze", href: "/dashboard/finance", isActive: window.location.pathname === "/dashboard/finance" },
     { icon: Camera, label: "Fotografo", href: "/fotografo", isActive: false },
-    { icon: DollarSign, label: "Finanza", href: "/finanza", isActive: false },
     { icon: MapPin, label: "Location", href: "/location", isActive: false },
   ];
 
