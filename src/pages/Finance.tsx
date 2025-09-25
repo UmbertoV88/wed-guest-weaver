@@ -304,11 +304,16 @@ const FinanceLayout = () => {
     };
 
     // Chart data
-    const chartData = categories.map(cat => ({
+    const enhancedChartData = categories.map(cat => ({
       name: cat.name,
-      value: cat.spent,
+      value: cat.budgeted,      // Mostra budget allocato
+      budgeted: cat.budgeted,
+      spent: cat.spent,
+      percentage: totalBudget > 0 ? ((cat.budgeted / totalBudget) * 100).toFixed(1) : 0,
       color: cat.color
     }));
+
+    const chartData = enhancedChartData;
 
     // Loading state
     if (loading) {
@@ -475,27 +480,90 @@ const FinanceLayout = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Distribuzione Spese</CardTitle>
-                  <CardDescription>Panoramica delle spese per categoria</CardDescription>
+                  <CardTitle>Distribuzione Budget per Categoria</CardTitle>
+                  <CardDescription>Ripartizione del budget allocato per ogni categoria</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
                     config={{}}
-                    className="h-[300px]"
+                    className="h-[350px]"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <RechartsPieChart data={chartData} cx="50%" cy="50%" outerRadius={80}>
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                        <ChartTooltip 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <div 
+                                      className="w-3 h-3 rounded-full" 
+                                      style={{ backgroundColor: data.color }}
+                                    />
+                                    <span className="font-medium">{data.name}</span>
+                                  </div>
+                                  <div className="space-y-1 text-sm">
+                                    <div className="flex justify-between">
+                                      <span>Budget:</span>
+                                      <span className="font-medium">€{data.budgeted?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Speso:</span>
+                                      <span className="font-medium">€{data.spent?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Percentuale:</span>
+                                      <span className="font-medium">{data.percentage}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <RechartsPieChart 
+                          data={enhancedChartData} 
+                          cx="50%" 
+                          cy="50%" 
+                          outerRadius={100}
+                          innerRadius={40}
+                          paddingAngle={2}
+                        >
+                          {enhancedChartData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.color}
+                              stroke="white"
+                              strokeWidth={2}
+                            />
                           ))}
                         </RechartsPieChart>
                       </RechartsPieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
+                  
+                  {/* Legenda interattiva */}
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {enhancedChartData.map((entry, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: entry.color }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{entry.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {entry.percentage}% • €{entry.budgeted.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
+
 
               <Card>
                 <CardHeader>
