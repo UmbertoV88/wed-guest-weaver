@@ -148,11 +148,11 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error updating category:', err);
-      toast({
+      /*toast({
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
         variant: 'destructive',
-      });
+      });*/
       return null;
     }
   };
@@ -204,10 +204,10 @@ export const useBudget = () => {
         const updatedCategories = await budgetCategoriesApi.getAll();
         setCategories(updatedCategories);
 
-        toast({
+        /*toast({
           title: 'Spesa aggiunta',
           description: `${result.name} aggiunta per €${result.amount.toLocaleString()}`,
-        });
+        });*/
         return result;
       }
       return null;
