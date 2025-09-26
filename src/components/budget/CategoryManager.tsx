@@ -22,7 +22,9 @@ import {
   Edit3,
   X,
   Check,
-  Euro
+  Trash2,
+  Euro,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -77,6 +79,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [showAddForm, setShowAddForm] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState({
     name: '',
     nameit: '',
@@ -98,20 +101,75 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     const percentage = (spent / budgeted) * 100;
     
     if (percentage === 0) {
-        return <Badge variant="secondary">Non iniziato</Badge>;
+      return <Badge variant="secondary">Non iniziato</Badge>;
     }
     if (percentage < 50) {
-        return <Badge className="bg-blue-500 hover:bg-blue-600">In corso</Badge>;
+      return <Badge className="bg-blue-500 hover:bg-blue-600">In corso</Badge>;
     }
     if (percentage < 100) {
-        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Quasi completato</Badge>;
+      return <Badge className="bg-yellow-500 hover:bg-yellow-600">Quasi completato</Badge>;
     }
     if (percentage === 100) {
-        return <Badge className="bg-green-500 hover:bg-green-600">Completato</Badge>;
+      return <Badge className="bg-green-500 hover:bg-green-600">Completato</Badge>;
     }
     return <Badge variant="destructive">Budget superato</Badge>;
-    };
+  };
 
+  // ✅ FUNZIONE CORRETTA - DENTRO IL COMPONENTE CON GESTIONE ERRORI
+  const handleDeleteCategory = async (categoryId: string) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (!category) {
+      toast({
+        title: "Errore",
+        description: "Categoria non trovata",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Controllo se ci sono spese associate
+      if (category.spent > 0) {
+        const confirmed = window.confirm(
+          `Attenzione! La categoria "${category.name}" ha spese registrate di €${category.spent.toLocaleString()}. 
+Eliminandola perderai tutti i dati associati. Vuoi continuare?`
+        );
+        if (!confirmed) return;
+      }
+
+      // Conferma finale
+      const finalConfirm = window.confirm(
+        `Sei sicuro di voler eliminare la categoria "${category.name}"? 
+Questa operazione non può essere annullata.`
+      );
+      
+      if (!finalConfirm) return;
+
+      // Imposta loading state
+      setDeletingCategory(categoryId);
+
+      // ✅ CHIAMATA CORRETTA - onDeleteCategory ritorna Promise<void>
+      await onDeleteCategory(categoryId);
+      
+      // Se arriviamo qui, l'operazione è riuscita
+      toast({
+        title: "Categoria eliminata",
+        description: `La categoria "${category.name}" è stata eliminata con successo`,
+      });
+
+    } catch (error) {
+      // ✅ GESTIONE ERRORI APPROPRIATA
+      console.error('Errore durante l\'eliminazione della categoria:', error);
+      toast({
+        title: "Errore durante l'eliminazione",
+        description: "Si è verificato un errore durante l'eliminazione della categoria. Riprova più tardi.",
+        variant: "destructive"
+      });
+    } finally {
+      // Rimuovi loading state
+      setDeletingCategory(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -264,6 +322,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
         {categories.map((category) => {
           const IconComponent = ICON_OPTIONS[category.icon as keyof typeof ICON_OPTIONS] || Package;
           const isEditing = editingCategory === category.id;
+          const isDeleting = deletingCategory === category.id;
           const progressPercentage = category.budgeted > 0 ? (category.spent / category.budgeted) * 100 : 0;
           const categoryPercentage = totalBudget > 0 ? ((category.budgeted / totalBudget) * 100).toFixed(1) : 0;
 
@@ -292,64 +351,62 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
               
               <CardContent className="space-y-4">
                 {isEditing ? (
-                    <div className="space-y-4">
-                        <div>
-                        <Label htmlFor={`name-${category.id}`}>Nome Categoria</Label>
-                        <Input
-                            id={`name-${category.id}`}
-                            value={editForm.name}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                        />
-                        </div>
-                        <div>
-                        <Label htmlFor={`budget-${category.id}`}>Budget Stimato</Label>
-                        <Input
-                            id={`budget-${category.id}`}
-                            type="number"
-                            value={editForm.budgeted}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, budgeted: Number(e.target.value) }))}
-                        />
-                        </div>
-                        <div>
-                        <Label htmlFor={`spent-${category.id}`}>Spesa Effettiva</Label>
-                        <Input
-                            id={`spent-${category.id}`}
-                            type="number"
-                            value={editForm.spent || 0}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, spent: Number(e.target.value) }))}
-                        />
-                        </div>
-                        <div className="flex gap-2">
-                        <Button 
-                            onClick={async () => {
-                                await onUpdateCategory(category.id, {
-                                    name: editForm.name,
-                                    budgeted: editForm.budgeted
-                                });
-                                setEditingCategory(null);
-                                setEditForm({});
-                            }}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                          > 
-                          <Check className="w-4 h-4 mr-2" />
-                          Salva
-                        </Button>
-
-                        <Button 
-                            variant="outline" 
-                            onClick={() => {
-                            setEditingCategory(null);
-                            setEditForm({});
-                            }}
-                            className="flex-1"
-                        >
-                            <X className="w-4 h-4 mr-2" />
-                            Annulla
-                        </Button>
-                        </div>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor={`name-${category.id}`}>Nome Categoria</Label>
+                      <Input
+                        id={`name-${category.id}`}
+                        value={editForm.name}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                      />
                     </div>
-                    ) : (
-
+                    <div>
+                      <Label htmlFor={`budget-${category.id}`}>Budget Stimato</Label>
+                      <Input
+                        id={`budget-${category.id}`}
+                        type="number"
+                        value={editForm.budgeted}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, budgeted: Number(e.target.value) }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`spent-${category.id}`}>Spesa Effettiva</Label>
+                      <Input
+                        id={`spent-${category.id}`}
+                        type="number"
+                        value={editForm.spent || 0}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, spent: Number(e.target.value) }))}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={async () => {
+                          await onUpdateCategory(category.id, {
+                            name: editForm.name,
+                            budgeted: editForm.budgeted
+                          });
+                          setEditingCategory(null);
+                          setEditForm({});
+                        }}
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                      > 
+                        <Check className="w-4 h-4 mr-2" />
+                        Salva
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setEditingCategory(null);
+                          setEditForm({});
+                        }}
+                        className="flex-1"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Annulla
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
                   <>
                     {/* Budget Progress */}
                     <div className="space-y-2">
@@ -396,6 +453,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           });
                         }}
                         className="flex-1"
+                        disabled={isDeleting}
                       >
                         <Edit3 className="w-4 h-4 mr-2" />
                         Modifica
@@ -404,9 +462,24 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                         variant="outline" 
                         size="sm"
                         className="flex-1"
+                        disabled={isDeleting}
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Aggiungi Spesa
+                      </Button>
+                      {/* ✅ PULSANTE ELIMINAZIONE CORRETTO CON LOADING STATE */}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteCategory(category.id)}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4 mr-1" />
+                        )}
+                        {isDeleting ? 'Eliminando...' : 'Elimina'}
                       </Button>
                     </div>
                   </>
