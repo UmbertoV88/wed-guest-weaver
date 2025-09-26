@@ -21,67 +21,39 @@ import {
   Users
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock vendors data (adapta dal Budget-calculator)
-const mockVendors = [
-  {
-    id: 1,
-    categoryId: "1", // Adjust to string IDs
-    name: "Villa San Martino",
-    cost: 8000,
-    paid: 3000,
-    remaining: 5000,
-    dueDate: "2024-06-15",
-    status: "partial",
-    notes: "Pagato acconto del 30%",
-    contact: "+39 333 123 4567"
-  },
-  {
-    id: 2,
-    categoryId: "2",
-    name: "Catering Il Convivio",
-    cost: 5800,
-    paid: 0,
-    remaining: 5800,
-    dueDate: "2024-05-20",
-    status: "pending",
-    notes: "Confermare menu definitivo",
-    contact: "+39 334 987 6543"
-  },
-  {
-    id: 3,
-    categoryId: "3",
-    name: "Studio Fotografico Luce",
-    cost: 3200,
-    paid: 800,
-    remaining: 2400,
-    dueDate: "2024-07-01",
-    status: "partial",
-    notes: "Pagato 25% di acconto",
-    contact: "+39 335 456 7890"
-  }
-];
+import { useBudget } from '@/hooks/useBudget';
 
 interface VendorManagerProps {
   categories: any[];
 }
 
 const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
-  const [vendors, setVendors] = useState(mockVendors);
+  const { vendors, addVendor, updateVendor, deleteVendor, loading } = useBudget();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingVendor, setEditingVendor] = useState(null);
+  const [editingVendor, setEditingVendor] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newVendor, setNewVendor] = useState({
     name: '',
-    categoryId: '',
-    cost: '',
-    paid: 0,
-    dueDate: '',
-    notes: '',
-    contact: ''
+    category_id: '',
+    contact_email: '',
+    contact_phone: '',
+    address: '',
+    website: '',
+    notes: ''
   });
   
   const { toast } = useToast();
+
+  // Calcola le spese per categoria per determinare i pagamenti ai fornitori
+  const getVendorPayments = (vendorId: string, categoryId: string) => {
+    // Questa logica può essere espansa per tracciare i pagamenti specifici
+    // Per ora, mostriamo tutti i vendor come "in attesa" finché non aggiungiamo pagamenti
+    return {
+      paid: 0,
+      remaining: 0,
+      status: 'pending' as const
+    };
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -129,8 +101,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     });
   };
 
-  const handleAddVendor = () => {
-    if (!newVendor.name || !newVendor.categoryId || !newVendor.cost) {
+  const handleAddVendor = async () => {
+    if (!newVendor.name || !newVendor.category_id) {
       toast({
         title: "Errore",
         description: "Compila tutti i campi obbligatori",
@@ -139,60 +111,31 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       return;
     }
 
-    const vendor = {
-      ...newVendor,
-      id: Date.now(),
-      cost: parseFloat(newVendor.cost),
-      remaining: parseFloat(newVendor.cost) - newVendor.paid,
-      status: newVendor.paid === 0 ? 'pending' : 
-               newVendor.paid >= parseFloat(newVendor.cost) ? 'paid' : 'partial'
-    };
-
-    setVendors([...vendors, vendor]);
-    setNewVendor({
-      name: '',
-      categoryId: '',
-      cost: '',
-      paid: 0,
-      dueDate: '',
-      notes: '',
-      contact: ''
-    });
-    setShowAddForm(false);
-    toast({
-      title: "Successo",
-      description: "Fornitore aggiunto con successo!"
-    });
+    const result = await addVendor(newVendor);
+    
+    if (result) {
+      setNewVendor({
+        name: '',
+        category_id: '',
+        contact_email: '',
+        contact_phone: '',
+        address: '',
+        website: '',
+        notes: ''
+      });
+      setShowAddForm(false);
+    }
   };
 
-  const handlePayment = (vendorId: number, paymentAmount: number) => {
-    setVendors(prev => 
-      prev.map(vendor => {
-        if (vendor.id === vendorId) {
-          const newPaid = vendor.paid + paymentAmount;
-          const newRemaining = vendor.cost - newPaid;
-          const newStatus = newRemaining <= 0 ? 'paid' : 
-                           newPaid > 0 ? 'partial' : 'pending';
-          
-          return {
-            ...vendor,
-            paid: newPaid,
-            remaining: Math.max(0, newRemaining),
-            status: newStatus
-          };
-        }
-        return vendor;
-      })
-    );
-    toast({
-      title: "Successo",
-      description: "Pagamento registrato con successo!"
-    });
+  const handleDeleteVendor = async (vendorId: string) => {
+    if (window.confirm('Sei sicuro di voler eliminare questo fornitore? Questa azione non può essere annullata.')) {
+      await deleteVendor(vendorId);
+    }
   };
 
   const filteredVendors = vendors.filter(vendor =>
     vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getCategoryName(vendor.categoryId).toLowerCase().includes(searchTerm.toLowerCase())
+    getCategoryName(vendor.category_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -242,15 +185,15 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
               <div>
                 <Label>Categoria *</Label>
                 <Select 
-                  value={newVendor.categoryId} 
-                  onValueChange={(value) => setNewVendor(prev => ({ ...prev, categoryId: value }))}
+                  value={newVendor.category_id} 
+                  onValueChange={(value) => setNewVendor(prev => ({ ...prev, category_id: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona categoria" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
+                      <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
                     ))}
@@ -258,37 +201,42 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="vendor-cost">Costo Totale *</Label>
-                <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="vendor-cost"
-                    type="number"
-                    value={newVendor.cost}
-                    onChange={(e) => setNewVendor(prev => ({ ...prev, cost: e.target.value }))}
-                    placeholder="0"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="vendor-contact">Contatto</Label>
+                <Label htmlFor="vendor-email">Email</Label>
                 <Input
-                  id="vendor-contact"
-                  value={newVendor.contact}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, contact: e.target.value }))}
-                  placeholder="Telefono o email"
+                  id="vendor-email"
+                  type="email"
+                  value={newVendor.contact_email}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, contact_email: e.target.value }))}
+                  placeholder="email@example.com"
                 />
               </div>
               <div>
-                <Label htmlFor="vendor-duedate">Data Scadenza</Label>
+                <Label htmlFor="vendor-phone">Telefono</Label>
                 <Input
-                  id="vendor-duedate"
-                  type="date"
-                  value={newVendor.dueDate}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, dueDate: e.target.value }))}
+                  id="vendor-phone"
+                  value={newVendor.contact_phone}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, contact_phone: e.target.value }))}
+                  placeholder="+39 333 123 4567"
                 />
               </div>
+              <div>
+                <Label htmlFor="vendor-website">Sito Web</Label>
+                <Input
+                  id="vendor-website"
+                  value={newVendor.website}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="https://example.com"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="vendor-address">Indirizzo</Label>
+              <Input
+                id="vendor-address"
+                value={newVendor.address}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Via Roma 123, Milano"
+              />
             </div>
             <div>
               <Label htmlFor="vendor-notes">Note</Label>
@@ -318,95 +266,94 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       )}
 
       {/* Vendors List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredVendors.map((vendor) => (
-          <Card key={vendor.id} className="shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {getStatusIcon(vendor.status)}
-                    {vendor.name}
-                  </CardTitle>
-                  <p className="text-sm text-gray-600">{getCategoryName(vendor.categoryId)}</p>
-                </div>
-                {getStatusBadge(vendor.status)}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Cost Information */}
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-sm text-gray-600">Costo Totale</p>
-                  <p className="font-semibold">{formatCurrency(vendor.cost)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Pagato</p>
-                  <p className="font-semibold text-green-600">{formatCurrency(vendor.paid)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Rimanente</p>
-                  <p className="font-semibold text-red-600">{formatCurrency(vendor.remaining)}</p>
-                </div>
-              </div>
+      {loading ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <p className="text-muted-foreground">Caricamento fornitori...</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredVendors.map((vendor) => {
+            const payments = getVendorPayments(vendor.id, vendor.category_id);
+            return (
+              <Card key={vendor.id} className="shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {getStatusIcon(payments.status)}
+                        {vendor.name}
+                      </CardTitle>
+                      <p className="text-sm text-gray-600">{getCategoryName(vendor.category_id)}</p>
+                    </div>
+                    {getStatusBadge(payments.status)}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Contact Information */}
+                  <div className="space-y-2">
+                    {vendor.contact_email && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Mail className="w-4 h-4" />
+                        <span>{vendor.contact_email}</span>
+                      </div>
+                    )}
+                    {vendor.contact_phone && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <span>{vendor.contact_phone}</span>
+                      </div>
+                    )}
+                    {vendor.website && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 truncate">
+                        <span>🌐</span>
+                        <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
+                          {vendor.website}
+                        </a>
+                      </div>
+                    )}
+                    {vendor.address && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span>📍</span>
+                        <span>{vendor.address}</span>
+                      </div>
+                    )}
+                  </div>
 
-              {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(vendor.paid / vendor.cost) * 100}%` }}
-                />
-              </div>
+                  {/* Notes */}
+                  {vendor.notes && (
+                    <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                      {vendor.notes}
+                    </div>
+                  )}
 
-              {/* Due Date */}
-              {vendor.dueDate && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  <span>Scadenza: {formatDate(vendor.dueDate)}</span>
-                </div>
-              )}
-
-              {/* Contact */}
-              {vendor.contact && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span>{vendor.contact}</span>
-                </div>
-              )}
-
-              {/* Notes */}
-              {vendor.notes && (
-                <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                  {vendor.notes}
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-4 border-t">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    const amount = prompt("Inserisci importo pagamento:");
-                    if (amount && !isNaN(parseFloat(amount))) {
-                      handlePayment(vendor.id, parseFloat(amount));
-                    }
-                  }}
-                  disabled={vendor.status === 'paid'}
-                >
-                  <Euro className="w-4 h-4 mr-2" />
-                  Registra Pagamento
-                </Button>
-                <Button size="sm" variant="outline">
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Modifica
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setEditingVendor(vendor)}
+                    >
+                      <Edit3 className="w-4 h-4 mr-2" />
+                      Modifica
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDeleteVendor(vendor.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Elimina
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {filteredVendors.length === 0 && (
         <Card className="text-center py-12">

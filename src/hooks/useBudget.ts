@@ -9,7 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   budgetSettingsApi, 
   budgetCategoriesApi, 
-  budgetItemsApi
+  budgetItemsApi,
+  budgetVendorsApi
 } from '@/services/budgetService';
 import type { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget';
 
@@ -25,6 +26,7 @@ export const useBudget = () => {
   const [settings, setSettings] = useState<BudgetSettings | null>(null);
   const [categories, setCategories] = useState<BudgetCategory[]>([]);
   const [items, setItems] = useState<BudgetItem[]>([]);
+  const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,15 +47,18 @@ export const useBudget = () => {
       const settingsResult = await budgetSettingsApi.get();
       const categoriesResult = await budgetCategoriesApi.getAll();
       const itemsResult = await budgetItemsApi.getAll();
+      const vendorsResult = await budgetVendorsApi.getAll();
 
       console.log('Settings result:', settingsResult);
       console.log('Categories result:', categoriesResult);
       console.log('Items result:', itemsResult);
+      console.log('Vendors result:', vendorsResult);
 
       // Set data directly - let's see what we actually get  
       setSettings(settingsResult as any || null);
       setCategories(Array.isArray(categoriesResult) ? categoriesResult as any : []);
       setItems(Array.isArray(itemsResult) ? itemsResult as any : []);
+      setVendors(Array.isArray(vendorsResult) ? vendorsResult as any : []);
 
       // Initialize defaults if no categories
       if (!categoriesResult || categoriesResult.length === 0) {
@@ -314,6 +319,126 @@ export const useBudget = () => {
   };
 
   // =====================================================
+  // VENDORS MANAGEMENT
+  // =====================================================
+
+  const addVendor = async (data: {
+    name: string;
+    category_id: string;
+    contact_email?: string;
+    contact_phone?: string;
+    address?: string;
+    website?: string;
+    notes?: string;
+  }) => {
+    try {
+      const result = await budgetVendorsApi.create(data);
+
+      if (result) {
+        setVendors(prev => [...prev, result as any]);
+        toast({
+          title: 'Fornitore aggiunto',
+          description: `${data.name} aggiunto con successo`,
+        });
+        return result as any;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error adding vendor:', err);
+      toast({
+        title: 'Errore',
+        description: 'Impossibile aggiungere il fornitore',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const updateVendor = async (id: string, data: any) => {
+    try {
+      // Optimistic update
+      setVendors(prev => 
+        prev.map(vendor => vendor.id === id ? {...vendor, ...data} : vendor)
+      );
+
+      const result = await budgetVendorsApi.update(id, data);
+
+      if (result) {
+        setVendors(prev => 
+          prev.map(vendor => vendor.id === id ? result as any : vendor)
+        );
+        toast({
+          title: 'Fornitore aggiornato',
+          description: 'Informazioni aggiornate con successo',
+        });
+        return result as any;
+      } else {
+        // Revert optimistic update
+        await loadData();
+      }
+      return null;
+    } catch (err) {
+      console.error('Error updating vendor:', err);
+      await loadData(); // Revert optimistic update
+      toast({
+        title: 'Errore',
+        description: 'Impossibile aggiornare il fornitore',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const deleteVendor = async (id: string) => {
+    try {
+      const success = await budgetVendorsApi.delete(id);
+
+      if (success) {
+        setVendors(prev => prev.filter(vendor => vendor.id !== id));
+        toast({
+          title: 'Fornitore eliminato',
+          description: 'Fornitore rimosso completamente dal database',
+        });
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error deleting vendor:', err);
+      toast({
+        title: 'Errore',
+        description: 'Impossibile eliminare il fornitore',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  const addVendorPayment = async (vendorId: string, amount: number, categoryId: string, notes?: string) => {
+    try {
+      const result = await budgetVendorsApi.addPayment(vendorId, amount, categoryId, notes);
+
+      if (result) {
+        // Refresh data to sync with budget items
+        await loadData();
+        toast({
+          title: 'Pagamento registrato',
+          description: `Pagamento di €${amount.toLocaleString()} registrato`,
+        });
+        return result as any;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error adding vendor payment:', err);
+      toast({
+        title: 'Errore',
+        description: 'Impossibile registrare il pagamento',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  // =====================================================
   // UTILITY FUNCTIONS
   // =====================================================
 
@@ -361,6 +486,7 @@ export const useBudget = () => {
     settings,
     categories,
     items,
+    vendors,
     loading,
     error,
 
@@ -371,6 +497,10 @@ export const useBudget = () => {
     deleteCategory,
     addItem,
     toggleItemPaid,
+    addVendor,
+    updateVendor,
+    deleteVendor,
+    addVendorPayment,
     loadData,
 
     // Computed values

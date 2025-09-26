@@ -278,6 +278,130 @@ export const budgetItemsApi = {
   }
 };
 
+export const budgetVendorsApi = {
+  async getAll() {
+    try {
+      console.log('Fetching budget vendors...');
+      const { data, error } = await createTypedQuery('budget_vendors')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching budget vendors:', error);
+        throw error;
+      }
+
+      console.log('Budget vendors data:', data);
+      return data || [];
+    } catch (error) {
+      console.error('Budget vendors fetch error:', error);
+      return [];
+    }
+  },
+
+  async create(data: any) {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: result, error } = await createTypedQuery('budget_vendors')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          category_id: data.category_id,
+          contact_email: data.contact_email,
+          contact_phone: data.contact_phone,
+          address: data.address,
+          website: data.website,
+          notes: data.notes,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating budget vendor:', error);
+        throw error;
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Budget vendor create error:', error);
+      return null;
+    }
+  },
+
+  async update(id: string, data: any) {
+    try {
+      const { data: result, error } = await createTypedQuery('budget_vendors')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating budget vendor:', error);
+        throw error;
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Budget vendor update error:', error);
+      return null;
+    }
+  },
+
+  async delete(id: string) {
+    try {
+      // HARD DELETE - rimuove completamente dal database
+      const { error } = await createTypedQuery('budget_vendors')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting budget vendor:', error);
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Budget vendor delete error:', error);
+      return false;
+    }
+  },
+
+  async addPayment(vendorId: string, amount: number, categoryId: string, notes?: string) {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
+
+      // Crea un budget_item per tracciare il pagamento
+      const { data: result, error } = await createTypedQuery('budget_items')
+        .insert({
+          user_id: user.id,
+          category_id: categoryId,
+          name: `Pagamento fornitore`,
+          amount: amount,
+          expense_date: new Date().toISOString().split('T')[0],
+          paid: true,
+          notes: notes || `Pagamento per fornitore ID: ${vendorId}`,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating vendor payment:', error);
+        throw error;
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Vendor payment error:', error);
+      return null;
+    }
+  }
+};
+
 export const budgetUtils = {
   formatCurrency: (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
