@@ -36,6 +36,7 @@ const FinanceLayout = () => {
       // State from database
       categories,
       items,
+      vendors,
       loading,
       totalBudget,
       totalAllocated,
