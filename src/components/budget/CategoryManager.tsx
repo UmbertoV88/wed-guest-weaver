@@ -95,6 +95,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
 
   const { vendors: forceVendors } = useBudget(); // ← AGGIUNGI QUESTA
   console.log('🔥 FORCE CategoryManager - Vendors diretti dal hook:', forceVendors);
+  console.log('Vendors result:', forceVendors); // ← ⭐ AGGIUNTO IL LOG RICHIESTO!
 
   const getCategoryVendors = (categoryId: string) => {
     // 🔥 USA I VENDORS FORZATI INVECE DI QUELLI DALLE PROPS
