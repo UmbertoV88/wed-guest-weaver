@@ -92,11 +92,17 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   
   const { toast } = useToast();
 
-  // ✅ SPOSTATO: funzione helper all'interno del componente
   const getCategoryVendors = (categoryId: string) => {
-    return vendors.filter(vendor => vendor.category_id === categoryId);
+    const filtered = vendors.filter(vendor => vendor.category_id === categoryId);
+    
+    // 🔍 DEBUG - Rimuovi dopo aver risolto
+    console.log('🎯 DEBUG getCategoryVendors:');
+    console.log('📋 CategoryId cercato:', categoryId);
+    console.log('👥 Tutti i vendors:', vendors);
+    console.log('🎯 Vendors filtrati:', filtered);
+    
+    return filtered;
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
@@ -450,7 +456,7 @@ Questa operazione non può essere annullata.`
                                 )}
                               </div>
                               <div className="text-right">
-                                {vendor.default_cost ? (
+                                {vendor.default_cost && vendor.default_cost > 0 ? (
                                   <p className="font-medium text-sm text-gray-900">
                                     {formatCurrency(vendor.default_cost)}
                                   </p>
@@ -461,17 +467,19 @@ Questa operazione non può essere annullata.`
                             </div>
                           ))}
                           
-                          {/* Totale fornitori */}
-                          <div className="flex justify-between items-center p-2 bg-gradient-to-r from-gray-100 to-gray-50 rounded-md border-t">
-                            <p className="font-medium text-sm text-gray-900">Totale fornitori:</p>
-                            <p className="font-bold text-sm text-gray-900">
-                              {formatCurrency(
-                                getCategoryVendors(category.id)
-                                  .filter(v => v.default_cost)
-                                  .reduce((sum, v) => sum + v.default_cost, 0)
-                              )}
-                            </p>
-                          </div>
+                          {/* Totale fornitori - solo quelli con costo */}
+                          {getCategoryVendors(category.id).some(v => v.default_cost && v.default_cost > 0) && (
+                            <div className="flex justify-between items-center p-2 bg-gradient-to-r from-gray-100 to-gray-50 rounded-md border-t">
+                              <p className="font-medium text-sm text-gray-900">Totale fornitori:</p>
+                              <p className="font-bold text-sm text-gray-900">
+                                {formatCurrency(
+                                  getCategoryVendors(category.id)
+                                    .filter(v => v.default_cost && v.default_cost > 0)
+                                    .reduce((sum, v) => sum + v.default_cost, 0)
+                                )}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-4">
