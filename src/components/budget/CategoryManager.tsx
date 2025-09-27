@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBudget } from '@/hooks/useBudget';
+import { budgetVendorsApi } from '@/services/budgetService';
 
 // Icon mapping
 const ICON_OPTIONS = {
@@ -70,6 +71,27 @@ interface CategoryManagerProps {
   onDeleteCategory: (id: string) => Promise<void>;
 }
 
+const [apiVendors, setApiVendors] = useState([]);
+const [loadingApiVendors, setLoadingApiVendors] = useState(false);
+
+// Funzione per caricare vendors con API diretta
+const loadVendorsFromApi = async () => {
+  try {
+    setLoadingApiVendors(true);
+    const result = await budgetVendorsApi.getAllVendors();
+    console.log('Vendors result:', result); // ⭐ ECCO IL LOG CHE VOLEVI!
+    setApiVendors(result);
+  } catch (error) {
+    console.error('Errore caricamento vendors API:', error);
+  } finally {
+    setLoadingApiVendors(false);
+  }
+};
+
+React.useEffect(() => {
+  loadVendorsFromApi();
+}, []);
+
 const CategoryManager: React.FC<CategoryManagerProps> = ({
   categories,
   vendors, // ← AGGIUNTO: destrutturazione della prop vendors
@@ -95,23 +117,28 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
 
   const { vendors: forceVendors } = useBudget(); // ← AGGIUNGI QUESTA
   console.log('🔥 FORCE CategoryManager - Vendors diretti dal hook:', forceVendors);
-  console.log('Vendors result:', forceVendors); // ← ⭐ AGGIUNTO IL LOG RICHIESTO!
+  console.log('Vendors result:', forceVendors);
 
   const getCategoryVendors = (categoryId: string) => {
-    // 🔥 USA I VENDORS FORZATI INVECE DI QUELLI DALLE PROPS
-    const vendorsToUse = forceVendors && forceVendors.length > 0 ? forceVendors : vendors;
+    // 🔥 USA PRIORITARIAMENTE I VENDORS DALL'API DIRETTA
+    const vendorsToUse = apiVendors && apiVendors.length > 0 ? apiVendors : 
+                        forceVendors && forceVendors.length > 0 ? forceVendors : 
+                        vendors;
+    
     const filtered = vendorsToUse.filter(vendor => vendor.category_id === categoryId);
     
     console.log('🔥 FORCE getCategoryVendors:');
     console.log('📋 CategoryId cercato:', categoryId);
     console.log('👥 Vendors dalle props:', vendors);
-    console.log('👥 Vendors forzati:', forceVendors);
+    console.log('👥 Vendors forzati hook:', forceVendors);
+    console.log('🚀 Vendors API diretta:', apiVendors); // ⭐ NUOVO LOG
     console.log('👥 Vendors usati:', vendorsToUse);
     console.log('🎯 Vendors filtrati:', filtered);
     
     return filtered;
   };
-  
+
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
