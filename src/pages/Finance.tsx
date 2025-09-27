@@ -352,6 +352,7 @@ const FinanceLayout = () => {
           <TabsContent value="categories" className="space-y-4">
             <CategoryManager
               categories={categories}
+              vendors={vendors}
               totalBudget={totalBudget}
               remainingToAllocate={remainingToAllocate}
               onAddCategory={async (name: string, budget: number, color?: string, icon?: string) => {
