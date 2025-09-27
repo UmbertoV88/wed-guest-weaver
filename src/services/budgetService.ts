@@ -281,24 +281,33 @@ export const budgetItemsApi = {
 export const budgetVendorsApi = {
   async getAll() {
     try {
-      console.log('Fetching budget vendors...');
+      console.log('🔄 Fetching budget vendors...');
+      
       const { data, error } = await createTypedQuery('budget_vendors')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
+      console.log('📊 RAW database response:');
+      console.log('🔍 Data:', data);
+      console.log('🔍 Error:', error);
+
       if (error) {
-        console.error('Error fetching budget vendors:', error);
+        console.error('❌ Error fetching budget vendors:', error);
         throw error;
       }
 
-      console.log('Budget vendors data:', data);
+      console.log('✅ Budget vendors data successful:', data);
+      console.log('📋 Data length:', data?.length);
+      console.log('📋 Data type:', typeof data);
+      
       return data || [];
     } catch (error) {
-      console.error('Budget vendors fetch error:', error);
+      console.error('❌ Budget vendors fetch error:', error);
       return [];
     }
   },
+
 
   async create(data: any) {
     try {

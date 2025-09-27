@@ -57,6 +57,18 @@ const FinanceLayout = () => {
       toggleItemPaid,
     } = useBudget();
 
+    console.log('🏠 Finance component - Budget data:');
+    console.log('📋 Categories:', categories);
+    console.log('👥 Vendors:', vendors);
+    console.log('🔢 Vendors length:', vendors?.length);
+    console.log('📊 Loading state:', loading);
+
+    useEffect(() => {
+      console.log('🔄 Finance useEffect - Data changed:');
+      console.log('👥 Vendors aggiornato:', vendors);
+      console.log('📋 Categories aggiornato:', categories);
+    }, [vendors, categories]);
+
     // Local UI state
     const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
     const [newItem, setNewItem] = useState({ name: "", amount: "", categoryId: "", date: "" });
