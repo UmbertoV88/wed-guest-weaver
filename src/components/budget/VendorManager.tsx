@@ -25,6 +25,10 @@ import { useBudget } from '@/hooks/useBudget';
 
 interface VendorManagerProps {
   categories: any[];
+  vendors: any[];
+  onAddVendor: (data: any) => Promise<any>;
+  onUpdateVendor: (id: string, data: any) => Promise<any>;
+  onDeleteVendor: (id: string) => Promise<boolean>;
 }
 
 const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
