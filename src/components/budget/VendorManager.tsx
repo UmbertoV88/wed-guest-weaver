@@ -39,7 +39,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     contact_phone: '',
     address: '',
     website: '',
-    notes: ''
+    notes: '',
+    default_cost: ''
   });
   
   const { toast } = useToast();
@@ -111,7 +112,12 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       return;
     }
 
-    const result = await addVendor(newVendor);
+    const vendorData = {
+      ...newVendor,
+      default_cost: newVendor.default_cost ? parseFloat(newVendor.default_cost) : null
+    };
+
+    const result = await addVendor(vendorData);
     
     if (result) {
       setNewVendor({
@@ -121,7 +127,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
         contact_phone: '',
         address: '',
         website: '',
-        notes: ''
+        notes: '',
+        default_cost: ''
       });
       setShowAddForm(false);
     }
@@ -199,6 +206,18 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <Label htmlFor="vendor-cost">Costo</Label>
+                <Input
+                  id="vendor-cost"
+                  type="number"
+                  value={newVendor.default_cost}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, default_cost: e.target.value }))}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
               </div>
               <div>
                 <Label htmlFor="vendor-email">Email</Label>
@@ -286,6 +305,11 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                         {vendor.name}
                       </CardTitle>
                       <p className="text-sm text-gray-600">{getCategoryName(vendor.category_id)}</p>
+                      {vendor.default_cost && (
+                        <p className="text-sm font-medium text-primary">
+                          {formatCurrency(vendor.default_cost)}
+                        </p>
+                      )}
                     </div>
                     {getStatusBadge(payments.status)}
                   </div>

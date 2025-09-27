@@ -14,6 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_categories: {
+        Row: {
+          budgeted: number
+          color: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budgeted?: number
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budgeted?: number
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      budget_items: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string
+          due_date: string | null
+          expense_date: string
+          id: string
+          name: string
+          notes: string | null
+          paid: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string
+          due_date?: string | null
+          expense_date?: string
+          id?: string
+          name: string
+          notes?: string | null
+          paid?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string
+          due_date?: string | null
+          expense_date?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          paid?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_settings: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          total_budget: number
+          updated_at: string
+          user_id: string
+          wedding_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          total_budget?: number
+          updated_at?: string
+          user_id: string
+          wedding_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          total_budget?: number
+          updated_at?: string
+          user_id?: string
+          wedding_date?: string | null
+        }
+        Relationships: []
+      }
+      budget_vendors: {
+        Row: {
+          address: string | null
+          category_id: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          default_cost: number | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          category_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          default_cost?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          category_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          default_cost?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_vendors_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitati: {
         Row: {
           cognome: string | null
@@ -73,18 +248,21 @@ export type Database = {
           id: number
           invitato_id: number
           tavolo_id: number
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: number
           invitato_id: number
           tavolo_id: number
+          user_id: string
         }
         Update: {
           created_at?: string | null
           id?: number
           invitato_id?: number
           tavolo_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -112,6 +290,7 @@ export type Database = {
           is_wedding_organizer: boolean
           updated_at: string
           user_id: string
+          wedding_date: string | null
         }
         Insert: {
           created_at?: string
@@ -121,6 +300,7 @@ export type Database = {
           is_wedding_organizer?: boolean
           updated_at?: string
           user_id: string
+          wedding_date?: string | null
         }
         Update: {
           created_at?: string
@@ -130,6 +310,7 @@ export type Database = {
           is_wedding_organizer?: boolean
           updated_at?: string
           user_id?: string
+          wedding_date?: string | null
         }
         Relationships: []
       }
@@ -176,6 +357,7 @@ export type Database = {
           id: number
           lato: string | null
           nome_tavolo: string | null
+          user_id: string
         }
         Insert: {
           capacita_max: number
@@ -183,6 +365,7 @@ export type Database = {
           id?: number
           lato?: string | null
           nome_tavolo?: string | null
+          user_id: string
         }
         Update: {
           capacita_max?: number
@@ -190,6 +373,7 @@ export type Database = {
           id?: number
           lato?: string | null
           nome_tavolo?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -213,9 +397,25 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      budget_statistics: {
+        Row: {
+          categories_count: number | null
+          remaining_budget: number | null
+          spent_percentage: number | null
+          total_allocated: number | null
+          total_budget: number | null
+          total_spent: number | null
+          user_id: string | null
+          wedding_date: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      create_default_budget_categories: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       is_wedding_organizer: {
         Args: { user_id: string }
         Returns: boolean

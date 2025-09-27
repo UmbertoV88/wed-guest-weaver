@@ -330,15 +330,30 @@ export const useBudget = () => {
     address?: string;
     website?: string;
     notes?: string;
+    default_cost?: number | null;
   }) => {
     try {
       const result = await budgetVendorsApi.create(data);
 
       if (result) {
         setVendors(prev => [...prev, result as any]);
+        
+        // If vendor has a cost, create a budget item automatically
+        if (data.default_cost && data.default_cost > 0) {
+          const itemData = {
+            name: `Fornitore: ${data.name}`,
+            amount: data.default_cost,
+            category_id: data.category_id,
+            expense_date: new Date().toISOString().split('T')[0],
+            notes: `Costo fornitore - ${data.name}`
+          };
+          
+          await addItem(itemData);
+        }
+        
         toast({
           title: 'Fornitore aggiunto',
-          description: `${data.name} aggiunto con successo`,
+          description: `${data.name} aggiunto con successo${data.default_cost ? ` (costo: €${data.default_cost.toLocaleString()})` : ''}`,
         });
         return result as any;
       }
