@@ -27,8 +27,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useBudget } from '@/hooks/useBudget';
-import { budgetVendorsApi } from '@/services/budgetService';
 
 // Icon mapping
 const ICON_OPTIONS = {
@@ -63,7 +61,6 @@ interface BudgetCategory {
 
 interface CategoryManagerProps {
   categories: BudgetCategory[];
-  vendors: any[]; // ← Prop aggiunta
   totalBudget: number;
   remainingToAllocate: number;
   onAddCategory: (name: string, budget: number, color?: string, icon?: string) => Promise<boolean>;
@@ -71,30 +68,8 @@ interface CategoryManagerProps {
   onDeleteCategory: (id: string) => Promise<void>;
 }
 
-const [apiVendors, setApiVendors] = useState([]);
-const [loadingApiVendors, setLoadingApiVendors] = useState(false);
-
-// Funzione per caricare vendors con API diretta
-const loadVendorsFromApi = async () => {
-  try {
-    setLoadingApiVendors(true);
-    const result = await budgetVendorsApi.getAllVendors();
-    console.log('Vendors result:', result); // ⭐ ECCO IL LOG CHE VOLEVI!
-    setApiVendors(result);
-  } catch (error) {
-    console.error('Errore caricamento vendors API:', error);
-  } finally {
-    setLoadingApiVendors(false);
-  }
-};
-
-React.useEffect(() => {
-  loadVendorsFromApi();
-}, []);
-
 const CategoryManager: React.FC<CategoryManagerProps> = ({
   categories,
-  vendors, // ← AGGIUNTO: destrutturazione della prop vendors
   totalBudget,
   remainingToAllocate,
   onAddCategory,
@@ -114,30 +89,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   });
   
   const { toast } = useToast();
-
-  const { vendors: forceVendors } = useBudget(); // ← AGGIUNGI QUESTA
-  console.log('🔥 FORCE CategoryManager - Vendors diretti dal hook:', forceVendors);
-  console.log('Vendors result:', forceVendors);
-
-  const getCategoryVendors = (categoryId: string) => {
-    // 🔥 USA PRIORITARIAMENTE I VENDORS DALL'API DIRETTA
-    const vendorsToUse = apiVendors && apiVendors.length > 0 ? apiVendors : 
-                        forceVendors && forceVendors.length > 0 ? forceVendors : 
-                        vendors;
-    
-    const filtered = vendorsToUse.filter(vendor => vendor.category_id === categoryId);
-    
-    console.log('🔥 FORCE getCategoryVendors:');
-    console.log('📋 CategoryId cercato:', categoryId);
-    console.log('👥 Vendors dalle props:', vendors);
-    console.log('👥 Vendors forzati hook:', forceVendors);
-    console.log('🚀 Vendors API diretta:', apiVendors); // ⭐ NUOVO LOG
-    console.log('👥 Vendors usati:', vendorsToUse);
-    console.log('🎯 Vendors filtrati:', filtered);
-    
-    return filtered;
-  };
-
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -164,6 +115,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     return <Badge variant="destructive">Budget superato</Badge>;
   };
 
+  // ✅ FUNZIONE CORRETTA - DENTRO IL COMPONENTE CON GESTIONE ERRORI
   const handleDeleteCategory = async (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
     if (!category) {
@@ -176,6 +128,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     }
 
     try {
+      // Controllo se ci sono spese associate
       if (category.spent > 0) {
         const confirmed = window.confirm(
           `Attenzione! La categoria "${category.name}" ha spese registrate di €${category.spent.toLocaleString()}. 
@@ -184,6 +137,7 @@ Eliminandola perderai tutti i dati associati. Vuoi continuare?`
         if (!confirmed) return;
       }
 
+      // Conferma finale
       const finalConfirm = window.confirm(
         `Sei sicuro di voler eliminare la categoria "${category.name}"? 
 Questa operazione non può essere annullata.`
@@ -191,15 +145,20 @@ Questa operazione non può essere annullata.`
       
       if (!finalConfirm) return;
 
+      // Imposta loading state
       setDeletingCategory(categoryId);
+
+      // ✅ CHIAMATA CORRETTA - onDeleteCategory ritorna Promise<void>
       await onDeleteCategory(categoryId);
       
+      // Se arriviamo qui, l'operazione è riuscita
       toast({
         title: "Categoria eliminata",
         description: `La categoria "${category.name}" è stata eliminata con successo`,
       });
 
     } catch (error) {
+      // ✅ GESTIONE ERRORI APPROPRIATA
       console.error('Errore durante l\'eliminazione della categoria:', error);
       toast({
         title: "Errore durante l'eliminazione",
@@ -207,6 +166,7 @@ Questa operazione non può essere annullata.`
         variant: "destructive"
       });
     } finally {
+      // Rimuovi loading state
       setDeletingCategory(null);
     }
   };
@@ -471,61 +431,13 @@ Questa operazione non può essere annullata.`
                         </span>
                       </div>
                     </div>
-                    
-                    {/* Dettaglio spese con fornitori */}
+
+                    {/* Dettaglio spese placeholder */}
                     <div className="border-t pt-4">
-                      <h4 className="font-medium text-gray-900 mb-2 flex items-center justify-between">
-                        Dettaglio spese
-                        <Badge variant="outline" className="text-xs">
-                          {getCategoryVendors(category.id).length} fornitori
-                        </Badge>
-                      </h4>
-                      
-                      {getCategoryVendors(category.id).length > 0 ? (
-                        <div className="space-y-2">
-                          {getCategoryVendors(category.id).map((vendor) => (
-                            <div key={vendor.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                              <div className="flex-1">
-                                <p className="font-medium text-sm text-gray-900">{vendor.name}</p>
-                                {vendor.contact_email && (
-                                  <p className="text-xs text-gray-500">{vendor.contact_email}</p>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                {vendor.default_cost && vendor.default_cost > 0 ? (
-                                  <p className="font-medium text-sm text-gray-900">
-                                    {formatCurrency(vendor.default_cost)}
-                                  </p>
-                                ) : (
-                                  <p className="text-xs text-gray-500">Costo da definire</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                          
-                          {/* Totale fornitori - solo quelli con costo */}
-                          {getCategoryVendors(category.id).some(v => v.default_cost && v.default_cost > 0) && (
-                            <div className="flex justify-between items-center p-2 bg-gradient-to-r from-gray-100 to-gray-50 rounded-md border-t">
-                              <p className="font-medium text-sm text-gray-900">Totale fornitori:</p>
-                              <p className="font-bold text-sm text-gray-900">
-                                {formatCurrency(
-                                  getCategoryVendors(category.id)
-                                    .filter(v => v.default_cost && v.default_cost > 0)
-                                    .reduce((sum, v) => sum + v.default_cost, 0)
-                                )}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-4">
-                          <p className="text-sm text-gray-500 mb-2">Nessun fornitore in questa categoria</p>
-                          <Button variant="outline" size="sm" className="text-xs">
-                            <Plus className="w-3 h-3 mr-1" />
-                            Aggiungi primo fornitore
-                          </Button>
-                        </div>
-                      )}
+                      <h4 className="font-medium text-gray-900 mb-2">Dettaglio spese</h4>
+                      <div className="space-y-2 text-sm text-gray-500">
+                        <p>Nessun dettaglio disponibile</p>
+                      </div>
                     </div>
 
                     {/* Action Buttons */}
@@ -556,6 +468,7 @@ Questa operazione non può essere annullata.`
                         <Plus className="w-4 h-4 mr-2" />
                         Aggiungi Spesa
                       </Button>
+                      {/* ✅ PULSANTE ELIMINAZIONE CORRETTO CON LOADING STATE */}
                       <Button
                         variant="destructive"
                         size="sm"

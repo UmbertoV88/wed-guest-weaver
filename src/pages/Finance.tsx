@@ -36,7 +36,6 @@ const FinanceLayout = () => {
       // State from database
       categories,
       items,
-      vendors,
       loading,
       totalBudget,
       totalAllocated,
@@ -55,22 +54,7 @@ const FinanceLayout = () => {
       deleteCategory,
       addItem,
       toggleItemPaid,
-      addVendor,
-      updateVendor,
-      deleteVendor,
     } = useBudget();
-
-    console.log('🏠 Finance component - Budget data:');
-    console.log('📋 Categories:', categories);
-    console.log('👥 Vendors:', vendors);
-    console.log('🔢 Vendors length:', vendors?.length);
-    console.log('📊 Loading state:', loading);
-
-    useEffect(() => {
-      console.log('🔄 Finance useEffect - Data changed:');
-      console.log('👥 Vendors aggiornato:', vendors);
-      console.log('📋 Categories aggiornato:', categories);
-    }, [vendors, categories]);
 
     // Local UI state
     const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
@@ -368,7 +352,6 @@ const FinanceLayout = () => {
           <TabsContent value="categories" className="space-y-4">
             <CategoryManager
               categories={categories}
-              vendors={vendors}
               totalBudget={totalBudget}
               remainingToAllocate={remainingToAllocate}
               onAddCategory={async (name: string, budget: number, color?: string, icon?: string) => {
@@ -396,10 +379,6 @@ const FinanceLayout = () => {
           <TabsContent value="vendors" className="space-y-4">
             <VendorManager
               categories={categories}
-              vendors={vendors} // ← PASSA I VENDORS
-              onAddVendor={async (data) => await addVendor(data)}
-              onUpdateVendor={async (id, data) => await updateVendor(id, data)}
-              onDeleteVendor={async (id) => await deleteVendor(id)}
             />
           </TabsContent>
 
