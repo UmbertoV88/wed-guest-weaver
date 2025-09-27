@@ -27,6 +27,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useBudget } from '@/hooks/useBudget';
 
 // Icon mapping
 const ICON_OPTIONS = {
@@ -92,17 +93,24 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   
   const { toast } = useToast();
 
+  const { vendors: forceVendors } = useBudget(); // ← AGGIUNGI QUESTA
+  console.log('🔥 FORCE CategoryManager - Vendors diretti dal hook:', forceVendors);
+
   const getCategoryVendors = (categoryId: string) => {
-    const filtered = vendors.filter(vendor => vendor.category_id === categoryId);
+    // 🔥 USA I VENDORS FORZATI INVECE DI QUELLI DALLE PROPS
+    const vendorsToUse = forceVendors && forceVendors.length > 0 ? forceVendors : vendors;
+    const filtered = vendorsToUse.filter(vendor => vendor.category_id === categoryId);
     
-    // 🔍 DEBUG - Rimuovi dopo aver risolto
-    console.log('🎯 DEBUG getCategoryVendors:');
+    console.log('🔥 FORCE getCategoryVendors:');
     console.log('📋 CategoryId cercato:', categoryId);
-    console.log('👥 Tutti i vendors:', vendors);
+    console.log('👥 Vendors dalle props:', vendors);
+    console.log('👥 Vendors forzati:', forceVendors);
+    console.log('👥 Vendors usati:', vendorsToUse);
     console.log('🎯 Vendors filtrati:', filtered);
     
     return filtered;
   };
+  
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
