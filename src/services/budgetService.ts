@@ -249,6 +249,24 @@ export const budgetItemsApi = {
     }
   },
 
+  async delete(id: string) {
+    try {
+      const { error } = await createTypedQuery('budget_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting budget item:', error);
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Budget item delete error:', error);
+      return false;
+    }
+  },
+
   async togglePaid(id: string) {
     try {
       const { data: current, error: fetchError } = await createTypedQuery('budget_items')
