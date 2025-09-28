@@ -296,6 +296,44 @@ export const useBudget = () => {
     }
   };
 
+  const deleteItem = async (itemId: string) => {
+    try {
+      // Trova l'item per ottenere l'amount e category_id
+      const item = items.find(i => i.id === itemId);
+      if (!item) {
+        console.error('Item not found:', itemId);
+        return false;
+      }
+
+      const success = await budgetItemsApi.delete(itemId);
+
+      if (success) {
+        // Rimuovi l'item dallo state
+        setItems(prev => prev.filter(i => i.id !== itemId));
+        
+        // Aggiorna il totale speso della categoria
+        setCategories((prev: any) => 
+          prev.map((cat: any) => 
+            cat.id === item.category_id 
+              ? {...cat, spent: Math.max(0, cat.spent - item.amount)}
+              : cat
+          )
+        );
+        
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error deleting item:', err);
+      toast({
+        title: 'Errore',
+        description: 'Impossibile eliminare la spesa',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   const toggleItemPaid = async (id: string) => {
     try {
       const result = await budgetItemsApi.togglePaid(id);
@@ -406,16 +444,71 @@ export const useBudget = () => {
 
   const deleteVendor = async (id: string) => {
     try {
+      // 🔥 NUOVA LOGICA: Trova il fornitore per ottenere informazioni
+      const vendor = vendors.find(v => v.id === id);
+      if (!vendor) {
+        toast({
+          title: 'Errore',
+          description: 'Fornitore non trovato',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // 🔍 Trova eventuali spese associate al fornitore
+      const relatedItems = items.filter(item => 
+        item.notes?.includes(`Costo fornitore - ${vendor.name}`) ||
+        item.name === `Fornitore: ${vendor.name}` ||
+        item.notes?.includes(`Pagamento per fornitore ID: ${id}`)
+      );
+
+      console.log('🗑️ Vendor to delete:', vendor);
+      console.log('📝 Related items found:', relatedItems);
+
+      // 💡 Chiedi conferma se ci sono spese associate
+      if (relatedItems.length > 0) {
+        const totalAmount = relatedItems.reduce((sum, item) => sum + item.amount, 0);
+        const confirmed = window.confirm(
+          `Il fornitore "${vendor.name}" ha ${relatedItems.length} spese associate per un totale di €${totalAmount.toLocaleString()}.\n\n` +
+          `Eliminando il fornitore verranno rimosse anche tutte le spese associate.\n\n` +
+          `Vuoi continuare?`
+        );
+        
+        if (!confirmed) return false;
+      }
+
+      // ✅ ELIMINA LE SPESE ASSOCIATE PRIMA DEL FORNITORE
+      const itemDeletionPromises = relatedItems.map(async (item) => {
+        const success = await deleteItem(item.id);
+        if (!success) {
+          console.error('Failed to delete related item:', item.id);
+        }
+        return success;
+      });
+
+      // Aspetta che tutte le spese siano eliminate
+      await Promise.all(itemDeletionPromises);
+
+      // 🗑️ ELIMINA IL FORNITORE DAL DATABASE
       const success = await budgetVendorsApi.delete(id);
 
       if (success) {
+        // ✅ AGGIORNA LO STATE
         setVendors(prev => prev.filter(vendor => vendor.id !== id));
+        
+        // ✅ MESSAGGIO DI SUCCESSO
+        const deletedItemsText = relatedItems.length > 0 
+          ? ` e ${relatedItems.length} spese associate`
+          : '';
+        
         toast({
           title: 'Fornitore eliminato',
-          description: 'Fornitore rimosso completamente dal database',
+          description: `"${vendor.name}" è stato eliminato${deletedItemsText}`,
         });
+        
         return true;
       }
+      
       return false;
     } catch (err) {
       console.error('Error deleting vendor:', err);
@@ -523,10 +616,11 @@ export const useBudget = () => {
     updateCategory,
     deleteCategory,
     addItem,
+    deleteItem, // 🔥 NUOVO METODO ESPOSTO
     toggleItemPaid,
     addVendor,
     updateVendor,
-    deleteVendor,
+    deleteVendor, // 🔥 METODO AGGIORNATO
     addVendorPayment,
     loadData,
 
