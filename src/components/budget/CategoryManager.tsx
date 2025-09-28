@@ -64,7 +64,7 @@ interface CategoryManagerProps {
   totalBudget: number;
   remainingToAllocate: number;
   onAddCategory: (name: string, budget: number, color?: string, icon?: string) => Promise<boolean>;
-  onUpdateCategory: (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string; spent?: number; }) => Promise<void>;
+  onUpdateCategory: (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string; }) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
 }
 
@@ -369,22 +369,12 @@ Questa operazione non può essere annullata.`
                         onChange={(e) => setEditForm(prev => ({ ...prev, budgeted: Number(e.target.value) }))}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`spent-${category.id}`}>Spesa Effettiva</Label>
-                      <Input
-                        id={`spent-${category.id}`}
-                        type="number"
-                        value={editForm.spent || 0}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, spent: Number(e.target.value) }))}
-                      />
-                    </div>
                     <div className="flex gap-2">
                       <Button 
                         onClick={async () => {
                           await onUpdateCategory(category.id, {
                             name: editForm.name,
-                            budgeted: editForm.budgeted,
-                            spent: editForm.spent
+                            budgeted: editForm.budgeted
                           });
                           setEditingCategory(null);
                           setEditForm({});
@@ -449,8 +439,7 @@ Questa operazione non può essere annullata.`
                           setEditingCategory(category.id);
                           setEditForm({
                             name: category.name,
-                            budgeted: category.budgeted,
-                            spent: category.spent
+                            budgeted: category.budgeted
                           });
                         }}
                         className="flex-1"
