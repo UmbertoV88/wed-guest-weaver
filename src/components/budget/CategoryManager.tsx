@@ -61,20 +61,28 @@ interface BudgetCategory {
 
 interface CategoryManagerProps {
   categories: BudgetCategory[];
+  items?: any[];
+  vendors?: any[];
   totalBudget: number;
   remainingToAllocate: number;
   onAddCategory: (name: string, budget: number, color?: string, icon?: string) => Promise<boolean>;
   onUpdateCategory: (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string; }) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
+  getItemsByCategory?: (categoryId: string) => any[];
+  getVendorsByCategory?: (categoryId: string) => any[];
 }
 
 const CategoryManager: React.FC<CategoryManagerProps> = ({
   categories,
+  items = [],
+  vendors = [],
   totalBudget,
   remainingToAllocate,
   onAddCategory,
   onUpdateCategory,
-  onDeleteCategory
+  onDeleteCategory,
+  getItemsByCategory = () => [],
+  getVendorsByCategory = () => []
 }) => {
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
@@ -422,11 +430,69 @@ Questa operazione non può essere annullata.`
                       </div>
                     </div>
 
-                    {/* Dettaglio spese placeholder */}
+                    {/* Dettaglio spese */}
                     <div className="border-t pt-4">
                       <h4 className="font-medium text-gray-900 mb-2">Dettaglio spese</h4>
-                      <div className="space-y-2 text-sm text-gray-500">
-                        <p>Nessun dettaglio disponibile</p>
+                      <div className="space-y-2 text-sm">
+                        {(() => {
+                          const categoryVendors = getVendorsByCategory(category.id);
+                          const categoryItems = getItemsByCategory(category.id);
+                          const hasData = categoryVendors.length > 0 || categoryItems.length > 0;
+
+                          if (!hasData) {
+                            return <p className="text-gray-500">Nessuna spesa registrata</p>;
+                          }
+
+                          return (
+                            <div className="space-y-3">
+                              {/* Fornitori */}
+                              {categoryVendors.length > 0 && (
+                                <div>
+                                  <p className="font-medium text-gray-700 mb-1">Fornitori:</p>
+                                  <div className="space-y-1">
+                                    {categoryVendors.map((vendor: any) => (
+                                      <div key={vendor.id} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                                        <span className="text-gray-800">{vendor.name}</span>
+                                        {vendor.default_cost && (
+                                          <span className="font-medium text-primary">
+                                            {formatCurrency(vendor.default_cost)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Spese specifiche */}
+                              {categoryItems.length > 0 && (
+                                <div>
+                                  <p className="font-medium text-gray-700 mb-1">Spese:</p>
+                                  <div className="space-y-1">
+                                    {categoryItems.map((item: any) => (
+                                      <div key={item.id} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                                        <div>
+                                          <span className="text-gray-800">{item.name}</span>
+                                          {item.notes && (
+                                            <p className="text-xs text-gray-500">{item.notes}</p>
+                                          )}
+                                        </div>
+                                        <div className="text-right">
+                                          <span className={`font-medium ${item.paid ? 'text-green-600' : 'text-orange-600'}`}>
+                                            {formatCurrency(item.amount)}
+                                          </span>
+                                          {item.paid && (
+                                            <p className="text-xs text-green-600">✓ Pagato</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 

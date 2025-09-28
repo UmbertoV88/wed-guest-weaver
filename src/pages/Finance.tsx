@@ -36,6 +36,7 @@ const FinanceLayout = () => {
       // State from database
       categories,
       items,
+      vendors,
       loading,
       totalBudget,
       totalAllocated,
@@ -54,6 +55,10 @@ const FinanceLayout = () => {
       deleteCategory,
       addItem,
       toggleItemPaid,
+
+      // Helper functions
+      getItemsByCategory,
+      getVendorsByCategory,
     } = useBudget();
 
     // Local UI state
@@ -352,8 +357,12 @@ const FinanceLayout = () => {
           <TabsContent value="categories" className="space-y-4">
             <CategoryManager
               categories={categories}
+              items={items}
+              vendors={vendors}
               totalBudget={totalBudget}
               remainingToAllocate={remainingToAllocate}
+              getItemsByCategory={getItemsByCategory}
+              getVendorsByCategory={getVendorsByCategory}
               onAddCategory={async (name: string, budget: number, color?: string, icon?: string) => {
                 try {
                   const newCategory = await addCategory(name, budget);  // addCategory should return the created category

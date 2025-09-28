@@ -493,6 +493,18 @@ export const useBudget = () => {
   }, [user]);
 
   // =====================================================
+  // HELPER FUNCTIONS
+  // =====================================================
+
+  const getItemsByCategory = (categoryId: string) => {
+    return items.filter(item => item.category_id === categoryId);
+  };
+
+  const getVendorsByCategory = (categoryId: string) => {
+    return vendors.filter(vendor => vendor.category_id === categoryId);
+  };
+
+  // =====================================================
   // RETURN HOOK DATA
   // =====================================================
 
@@ -517,6 +529,10 @@ export const useBudget = () => {
     deleteVendor,
     addVendorPayment,
     loadData,
+
+    // Helper functions
+    getItemsByCategory,
+    getVendorsByCategory,
 
     // Computed values
     totalBudget,
