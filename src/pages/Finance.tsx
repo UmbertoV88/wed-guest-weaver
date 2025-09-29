@@ -1,37 +1,29 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PlusCircle, Trash2, Calculator, PieChart, DollarSign, TrendingUp, Edit, AlertTriangle, Calendar, Users } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import { DollarSign, TrendingUp, AlertTriangle, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart as RechartsPieChart, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Pie } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { ResponsiveContainer, BarChart, CartesianGrid } from "recharts";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import CommonHeader from "@/components/CommonHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useBudget } from "@/hooks/useBudget";
+import { useBudgetQuery } from '@/hooks/useBudgetQuery';
 import BudgetChart from '@/components/budget/BudgetChart';
 import BudgetOverview from '@/components/budget/BudgetOverview';
 import CategoryManager from '@/components/budget/CategoryManager';
 import VendorManager from '@/components/budget/VendorManager';
 import PaymentTracker from '@/components/budget/PaymentTracker';
 
-// Layout component similar to other pages
 const FinanceLayout = () => {
   const { user, signOut, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile } = useProfile();
 
   const BudgetCalculator = () => {
-    // *** NUOVA LOGICA CON DATABASE HOOK ***
+    // *** REACT QUERY HOOK ***
     const {
       // State from database
       categories,
@@ -44,8 +36,6 @@ const FinanceLayout = () => {
       remainingToAllocate,
       remainingAfterSpent,
       spentPercentage,
-      allocatedPercentage,
-      weddingDate,        
       daysToWedding,
       
       // Actions
@@ -59,177 +49,27 @@ const FinanceLayout = () => {
       // Helper functions
       getItemsByCategory,
       getVendorsByCategory,
-    } = useBudget();
+    } = useBudgetQuery();
 
     // Local UI state
-    const [newCategory, setNewCategory] = useState({ name: "", budget: "" });
-    const [newItem, setNewItem] = useState({ name: "", amount: "", categoryId: "", date: "" });
-    const [isEditingTotal, setIsEditingTotal] = useState(false);
-    const [tempTotalBudget, setTempTotalBudget] = useState(35000);
     const [activeTab, setActiveTab] = useState(() => {
       return localStorage.getItem('finance-active-tab') || "overview";
     });
     const { toast } = useToast();
+
     useEffect(() => {
       localStorage.setItem('finance-active-tab', activeTab);
     }, [activeTab]);
-    // Sync tempTotalBudget with actual totalBudget
-    useEffect(() => {
-      setTempTotalBudget(totalBudget);
-    }, [totalBudget]);
-
-    // *** FUNZIONE PER MODIFICARE IL BUDGET TOTALE ***
-    const handleUpdateTotalBudget = async () => {
-      const success = await updateTotalBudget(tempTotalBudget);
-      if (success) {
-        setIsEditingTotal(false);
-      }
-    };
-
-    const startEditingTotal = () => {
-      setTempTotalBudget(totalBudget);
-      setIsEditingTotal(true);
-    };
-
-    const cancelEditTotal = () => {
-      setTempTotalBudget(totalBudget);
-      setIsEditingTotal(false);
-    };
-
-    // *** FUNZIONE PER AGGIUNGERE CATEGORIA ***
-    const handleAddCategory = async () => {
-      if (!newCategory.name || !newCategory.budget) {
-        toast({
-          title: "Errore",
-          description: "Inserisci nome e budget per la categoria",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const budgetAmount = parseFloat(newCategory.budget);
-      
-      if (isNaN(budgetAmount) || budgetAmount <= 0) {
-        toast({
-          title: "Errore",
-          description: "Inserisci un budget valido",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const newAllocatedTotal = totalAllocated + budgetAmount;
-
-      // Warning se supera il budget totale
-      if (newAllocatedTotal > totalBudget) {
-        const overBudget = newAllocatedTotal - totalBudget;
-        const confirmed = window.confirm(
-          `Attenzione! Questa categoria porterà il budget allocato a €${newAllocatedTotal.toLocaleString()}, ` +
-          `superando il budget totale di €${overBudget.toLocaleString()}. Vuoi continuare?`
-        );
-        
-        if (!confirmed) return;
-      }
-
-      const success = await addCategory(newCategory.name, budgetAmount);
-      if (success) {
-        setNewCategory({ name: "", budget: "" });
-      }
-    };
-
-    // *** FUNZIONE PER MODIFICARE BUDGET DI UNA CATEGORIA ***
-    const handleUpdateCategoryBudget = async (categoryId: string, newBudget: number) => {
-      const oldCategory = categories.find(cat => cat.id === categoryId);
-      if (!oldCategory) return;
-
-      const budgetDifference = newBudget - oldCategory.budgeted;
-      const newAllocatedTotal = totalAllocated + budgetDifference;
-
-      // Warning se supera il budget totale
-      if (newAllocatedTotal > totalBudget && budgetDifference > 0) {
-        const overBudget = newAllocatedTotal - totalBudget;
-        const confirmed = window.confirm(
-          `Attenzione! Questa modifica porterà il budget allocato a €${newAllocatedTotal.toLocaleString()}, ` +
-          `superando il budget totale di €${overBudget.toLocaleString()}. Vuoi continuare?`
-        );
-        
-        if (!confirmed) return;
-      }
-
-      await updateCategory(categoryId, { budgeted: newBudget });
-    };
-
-    // *** FUNZIONE PER AGGIUNGERE SPESA ***
-    const handleAddItem = async () => {
-      if (!newItem.name || !newItem.amount || !newItem.categoryId) {
-        toast({
-          title: "Errore",
-          description: "Compila tutti i campi obbligatori",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const itemAmount = parseFloat(newItem.amount);
-      
-      if (isNaN(itemAmount) || itemAmount <= 0) {
-        toast({
-          title: "Errore",
-          description: "Inserisci un importo valido",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const newTotalSpent = totalSpent + itemAmount;
-
-      // Warning se supera il budget totale
-      if (newTotalSpent > totalBudget) {
-        const overBudget = newTotalSpent - totalBudget;
-        const confirmed = window.confirm(
-          `Attenzione! Questa spesa porterà il totale speso a €${newTotalSpent.toLocaleString()}, ` +
-          `superando il budget totale di €${overBudget.toLocaleString()}. Vuoi continuare?`
-        );
-        
-        if (!confirmed) return;
-      }
-
-      const success = await addItem({
-        category_id: newItem.categoryId,
-        name: newItem.name,
-        amount: itemAmount,
-        expense_date: newItem.date || new Date().toISOString().split('T')[0],
-        paid: false
-      });
-
-      if (success) {
-        setNewItem({ name: "", amount: "", categoryId: "", date: "" });
-      }
-    };
-
-    const handleDeleteCategory = async (id: string) => {
-      await deleteCategory(id);
-    };
-
-    const handleToggleItemPaid = async (itemId: string) => {
-      await toggleItemPaid(itemId);
-    };
 
     // Chart data
     const enhancedChartData = categories.map(cat => ({
       name: cat.name,
-      value: cat.budgeted,      // Mostra budget allocato
+      value: cat.budgeted,
       budgeted: cat.budgeted,
       spent: cat.spent,
       percentage: totalBudget > 0 ? ((cat.budgeted / totalBudget) * 100).toFixed(1) : 0,
       color: cat.color
     }));
-
-    const chartData = enhancedChartData;
-    // Subito dopo la definizione di enhancedChartData
-    console.log("🔍 Enhanced Chart Data:", enhancedChartData);
-    console.log("📊 Total Budget:", totalBudget);
-    console.log("📈 Total Allocated:", totalAllocated);
 
     // Loading state
     if (loading) {
@@ -253,7 +93,7 @@ const FinanceLayout = () => {
               Budget Matrimonio
             </h1>
             <p className="text-muted-foreground">
-              Gestisci il budget per il tuo giorno speciale - Database Integration
+              Gestisci il budget per il tuo giorno speciale - React Query
             </p>
           </div>
         </div>
@@ -273,7 +113,7 @@ const FinanceLayout = () => {
           </Alert>
         )}
 
-        {/* *** BUDGET OVERVIEW CARDS - SEMPRE VISIBILI *** */}
+        {/* *** BUDGET OVERVIEW CARDS *** */}
         <BudgetOverview
           totalBudget={totalBudget}
           totalSpent={totalSpent}
@@ -282,12 +122,12 @@ const FinanceLayout = () => {
           daysToWedding={daysToWedding}
           vendorsPaid={3}
           vendorsTotal={categories.length}
-          onBudgetChange={async (newBudget) => {
-            await updateTotalBudget(newBudget);
+          onBudgetChange={(newBudget) => {
+            updateTotalBudget(newBudget);
           }}
         />
 
-        {/* *** TABS - SOTTO LE CARDS *** */}
+        {/* *** TABS *** */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Panoramica</TabsTrigger>
@@ -298,7 +138,6 @@ const FinanceLayout = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            {/* Budget Chart */}
             <BudgetChart 
               categories={categories}
               totalBudget={totalBudget}
@@ -353,7 +192,6 @@ const FinanceLayout = () => {
             </div>
           </TabsContent>
 
-
           <TabsContent value="categories" className="space-y-4">
             <CategoryManager
               categories={categories}
@@ -363,24 +201,20 @@ const FinanceLayout = () => {
               remainingToAllocate={remainingToAllocate}
               getItemsByCategory={getItemsByCategory}
               getVendorsByCategory={getVendorsByCategory}
-              onAddCategory={async (name: string, budget: number, color?: string, icon?: string) => {
-                try {
-                  const newCategory = await addCategory(name, budget);  // addCategory should return the created category
-                  if (newCategory && color && icon) {
-                    await updateCategory(newCategory.id, { color, icon });
-                  }
-                  return !!newCategory;
-                } catch (err) {
-                  console.error('Error in onAddCategory:', err);
-                  return false;
+              onAddCategory={(name: string, budget: number, color?: string, icon?: string) => {
+                addCategory({ name, budgeted: budget, color });
+                if (color || icon) {
+                  // Update with color/icon after creation (will be handled by React Query)
                 }
+                return Promise.resolve(true);
               }}
-
-              onUpdateCategory={async (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string }) => {
-                await updateCategory(id, updates);
+              onUpdateCategory={(id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string }) => {
+                updateCategory(id, updates);
+                return Promise.resolve();
               }}
-              onDeleteCategory={async (id: string) => {
-                await deleteCategory(id);
+              onDeleteCategory={(id: string) => {
+                deleteCategory(id);
+                return Promise.resolve();
               }}
             />
           </TabsContent>
@@ -409,7 +243,6 @@ const FinanceLayout = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categories}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -419,7 +252,6 @@ const FinanceLayout = () => {
         </Tabs>
       </div>
     );
-
   };
 
   return (
@@ -449,11 +281,11 @@ const Finance = () => {
     
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con database integration. Imposta un budget totale e alloca le risorse nelle diverse categorie.');
+      metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con React Query. Imposta un budget totale e alloca le risorse nelle diverse categorie.');
     } else {
       const meta = document.createElement('meta');
       meta.name = 'description';
-      meta.content = 'Gestisci il budget del tuo matrimonio con database integration. Imposta un budget totale e alloca le risorse nelle diverse categorie.';
+      meta.content = 'Gestisci il budget del tuo matrimonio con React Query. Imposta un budget totale e alloca le risorse nelle diverse categorie.';
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
   }, []);

@@ -21,14 +21,15 @@ import {
   Users
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useBudget } from '@/hooks/useBudget';
+//import { useBudget } from '@/hooks/useBudget';
+import { useBudgetQuery } from '@/hooks/useBudgetQuery';
 
 interface VendorManagerProps {
   categories: any[];
 }
 
 const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
-  const { vendors, addVendor, updateVendor, deleteVendor, loading } = useBudget();
+  const { vendors, addVendor, updateVendor, deleteVendor, loading } = useBudgetQuery();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVendor, setEditingVendor] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
