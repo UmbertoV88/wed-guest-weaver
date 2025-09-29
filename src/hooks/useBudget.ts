@@ -37,6 +37,10 @@ export const useBudget = () => {
   const loadData = async () => {
     if (!user) return;
 
+    // ✅ AGGIUNGI QUESTO LOG PER TRACCIARE CHI CHIAMA loadData()
+    console.trace('🔍 loadData() chiamato da:');
+    console.log('📍 Stack trace completo sopra');
+
     setLoading(true);
     setError(null);
 
@@ -78,6 +82,7 @@ export const useBudget = () => {
       setLoading(false);
     }
   };
+
 
   // =====================================================
   // BUDGET SETTINGS
