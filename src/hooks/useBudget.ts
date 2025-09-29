@@ -37,27 +37,15 @@ export const useBudget = () => {
   const loadData = async () => {
     if (!user) return;
 
-    // ✅ AGGIUNGI QUESTO LOG PER TRACCIARE CHI CHIAMA loadData()
-    console.trace('🔍 loadData() chiamato da:');
-    console.log('📍 Stack trace completo sopra');
-
     setLoading(true);
     setError(null);
 
     try {
-      console.log('Loading budget data...');
-      
-      // Load budget data with explicit type checking
       const settingsResult = await budgetSettingsApi.get();
       const categoriesResult = await budgetCategoriesApi.getAll();
       const itemsResult = await budgetItemsApi.getAll();
       const vendorsResult = await budgetVendorsApi.getAll();
-
-      console.log('Settings result:', settingsResult);
-      console.log('Categories result:', categoriesResult);
-      console.log('Items result:', itemsResult);
-      console.log('Vendors result:', vendorsResult);
-
+      
       // Set data directly - let's see what we actually get  
       setSettings(settingsResult as any || null);
       setCategories(Array.isArray(categoriesResult) ? categoriesResult as any : []);
@@ -66,7 +54,6 @@ export const useBudget = () => {
 
       // Initialize defaults if no categories
       if (!categoriesResult || categoriesResult.length === 0) {
-        console.log('No categories found, initializing defaults...');
         await initializeDefaults();
       }
 

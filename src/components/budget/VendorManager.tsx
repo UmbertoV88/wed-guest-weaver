@@ -104,7 +104,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   };
 
   const handleAddVendor = async () => {
-    if (!newVendor.name || !newVendor.category_id) {
+    if (!newVendor.name || !newVendor.category_id || !newVendor.default_cost) {
       toast({
         title: "Errore",
         description: "Compila tutti i campi obbligatori",
@@ -113,9 +113,20 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       return;
     }
 
+    const cost = parseFloat(newVendor.default_cost);
+    if (isNaN(cost) || cost <= 0) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un costo valido maggiore di 0",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+
     const vendorData = {
       ...newVendor,
-      default_cost: newVendor.default_cost ? parseFloat(newVendor.default_cost) : null
+      default_cost: cost
     };
 
     const result = await addVendor(vendorData);
@@ -209,7 +220,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="vendor-cost">Costo</Label>
+                <Label htmlFor="vendor-cost">Costo *</Label>
                 <Input
                   id="vendor-cost"
                   type="number"
@@ -217,7 +228,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   onChange={(e) => setNewVendor(prev => ({ ...prev, default_cost: e.target.value }))}
                   placeholder="0.00"
                   step="0.01"
-                  min="0"
+                  min="0.01"
+                  required
                 />
               </div>
               <div>

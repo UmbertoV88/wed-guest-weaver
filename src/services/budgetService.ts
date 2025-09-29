@@ -12,7 +12,6 @@ const createTypedQuery = (tableName: string) => ({
 export const budgetSettingsApi = {
   async get() {
     try {
-      console.log('Fetching budget settings...');
       const { data, error } = await createTypedQuery('budget_settings')
         .select('*')
         .single();
@@ -22,7 +21,6 @@ export const budgetSettingsApi = {
         throw error;
       }
 
-      console.log('Budget settings data:', data);
       return data;
     } catch (error) {
       console.error('Budget settings fetch error:', error);
@@ -90,7 +88,6 @@ export const budgetSettingsApi = {
 export const budgetCategoriesApi = {
   async getAll() {
     try {
-      console.log('Fetching budget categories...');
       const { data, error } = await createTypedQuery('budget_categories')
         .select('*')
         .eq('is_active', true)
@@ -101,7 +98,6 @@ export const budgetCategoriesApi = {
         throw error;
       }
 
-      console.log('Budget categories data:', data);
       return data || [];
     } catch (error) {
       console.error('Budget categories fetch error:', error);
@@ -200,7 +196,6 @@ export const budgetCategoriesApi = {
 export const budgetItemsApi = {
   async getAll() {
     try {
-      console.log('Fetching budget items...');
       const { data, error } = await createTypedQuery('budget_items')
         .select('*')
         .order('expense_date', { ascending: false });
@@ -210,7 +205,6 @@ export const budgetItemsApi = {
         throw error;
       }
 
-      console.log('Budget items data:', data);
       return data || [];
     } catch (error) {
       console.error('Budget items fetch error:', error);
@@ -299,7 +293,6 @@ export const budgetItemsApi = {
 export const budgetVendorsApi = {
   async getAll() {
     try {
-      console.log('Fetching budget vendors...');
       const { data, error } = await createTypedQuery('budget_vendors')
         .select('*')
         .eq('is_active', true)
@@ -310,7 +303,6 @@ export const budgetVendorsApi = {
         throw error;
       }
 
-      console.log('Budget vendors data:', data);
       return data || [];
     } catch (error) {
       console.error('Budget vendors fetch error:', error);
