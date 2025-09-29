@@ -43,7 +43,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     notes: '',
     default_cost: ''
   });
-  
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   // Calcola le spese per categoria per determinare i pagamenti ai fornitori
@@ -104,73 +105,51 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   };
 
   const handleAddVendor = async () => {
-    // ✅ VALIDAZIONE CLIENT-SIDE COMPLETA
-    const errors: string[] = [];
+    // ✅ RESET ERRORI PRECEDENTI
+    setFormErrors({});
     
-    // Controlli obbligatori
+    // ✅ VALIDAZIONE CAMPO PER CAMPO
+    const errors: Record<string, string> = {};
+    
     if (!newVendor.name.trim()) {
-      errors.push("Nome fornitore è obbligatorio");
+      errors.name = "Nome fornitore è obbligatorio";
+    } else if (newVendor.name.trim().length < 2) {
+      errors.name = "Il nome deve avere almeno 2 caratteri";
     }
     
     if (!newVendor.category_id) {
-      errors.push("Categoria è obbligatoria");
+      errors.category_id = "Seleziona una categoria";
     }
     
     if (!newVendor.default_cost.trim()) {
-      errors.push("Costo è obbligatorio");
+      errors.default_cost = "Costo è obbligatorio";
+    } else {
+      const cost = parseFloat(newVendor.default_cost);
+      if (isNaN(cost) || cost <= 0) {
+        errors.default_cost = "Inserisci un costo valido maggiore di 0";
+      } else if (cost > 100000) {
+        errors.default_cost = "Il costo sembra eccessivo (max €100.000)";
+      }
     }
     
-    // Validazione costo numerico
-    const cost = parseFloat(newVendor.default_cost);
-    if (newVendor.default_cost.trim() && (isNaN(cost) || cost <= 0)) {
-      errors.push("Il costo deve essere un numero maggiore di 0");
-    }
-    
-    // Validazione email (se inserita)
+    // Validazione email opzionale
     if (newVendor.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newVendor.contact_email)) {
-      errors.push("Email non valida");
+      errors.contact_email = "Formato email non valido";
     }
     
-    // Validazione URL website (se inserito)
+    // Validazione website opzionale
     if (newVendor.website.trim() && !newVendor.website.startsWith('http')) {
-      errors.push("Il sito web deve iniziare con http:// o https://");
+      errors.website = "Il sito deve iniziare con http:// o https://";
     }
     
-    // Validazione lunghezza nome
-    if (newVendor.name.trim().length < 2) {
-      errors.push("Il nome fornitore deve avere almeno 2 caratteri");
+    // ✅ SE CI SONO ERRORI, MOSTRALI SUI CAMPI (NON CHIUDERE LA FINESTRA)
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return; // ESCE SENZA CHIUDERE IL FORM
     }
     
-    if (newVendor.name.trim().length > 100) {
-      errors.push("Il nome fornitore non può superare i 100 caratteri");
-    }
-    
-    // Validazione costo massimo ragionevole
-    if (!isNaN(cost) && cost > 100000) {
-      errors.push("Il costo sembra eccessivo (max €100.000). Verifica l'importo inserito");
-    }
-    
-    // Se ci sono errori, mostra toast con tutti gli errori
-    if (errors.length > 0) {
-      toast({
-        title: `Errore${errors.length > 1 ? 'i' : ''} di Validazione`,
-        description: (
-          <div>
-            <p className="mb-2">Correggi questi problemi:</p>
-            <ul className="list-disc pl-4 space-y-1">
-              {errors.map((error, index) => (
-                <li key={index} className="text-sm">{error}</li>
-              ))}
-            </ul>
-          </div>
-        ),
-        variant: "destructive",
-        duration: 5000, // Più lungo per leggere tutti gli errori
-      });
-      return;
-    }
-    
-    // ✅ PREPARAZIONE DATI VALIDATI
+    // ✅ SE TUTTO OK, PROCEDI CON IL SALVATAGGIO
+    const cost = parseFloat(newVendor.default_cost);
     const vendorData = {
       name: newVendor.name.trim(),
       category_id: newVendor.category_id,
@@ -182,18 +161,10 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       default_cost: cost
     };
 
-    // ✅ TOAST DI CONFERMA PRIMA DELL'INVIO
-    const confirmed = window.confirm(
-      `Confermi la creazione del fornitore "${vendorData.name}" con costo di €${cost.toLocaleString()}?`
-    );
-    
-    if (!confirmed) return;
-    
-    // ✅ CHIAMATA AL DATABASE
     const result = await addVendor(vendorData);
     
     if (result) {
-      // Reset form solo se successo
+      // Reset form e chiudi solo se successo
       setNewVendor({
         name: '',
         category_id: '',
@@ -204,9 +175,11 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
         notes: '',
         default_cost: ''
       });
+      setFormErrors({});
       setShowAddForm(false);
     }
   };
+
 
 
   const handleDeleteVendor = async (vendorId: string) => {
@@ -255,25 +228,41 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome Fornitore */}
               <div>
                 <Label htmlFor="vendor-name">Nome Fornitore *</Label>
                 <Input
                   id="vendor-name"
                   value={newVendor.name}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, name: e.target.value }));
+                    // Pulisci errore quando l'utente inizia a digitare
+                    if (formErrors.name) {
+                      setFormErrors(prev => ({ ...prev, name: '' }));
+                    }
+                  }}
                   placeholder="es. Studio Fotografico Luce"
-                  className={`${!newVendor.name.trim() ? 'border-red-300 focus:border-red-500' : ''}`} // ✅ VISUAL FEEDBACK
-                  required
+                  className={formErrors.name ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {formErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.name}</p>
+                )}
               </div>
+
+              {/* Categoria */}
               <div>
                 <Label>Categoria *</Label>
                 <Select 
                   value={newVendor.category_id} 
-                  onValueChange={(value) => setNewVendor(prev => ({ ...prev, category_id: value }))}
-                  required
+                  onValueChange={(value) => {
+                    setNewVendor(prev => ({ ...prev, category_id: value }));
+                    // Pulisci errore quando l'utente seleziona
+                    if (formErrors.category_id) {
+                      setFormErrors(prev => ({ ...prev, category_id: '' }));
+                    }
+                  }}
                 >
-                  <SelectTrigger className={`${!newVendor.category_id ? 'border-red-300 focus:border-red-500' : ''}`}>
+                  <SelectTrigger className={formErrors.category_id ? 'border-red-500 focus:border-red-500' : ''}>
                     <SelectValue placeholder="Seleziona categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -284,31 +273,54 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {formErrors.category_id && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.category_id}</p>
+                )}
               </div>
 
+              {/* Costo */}
               <div>
                 <Label htmlFor="vendor-cost">Costo *</Label>
                 <Input
                   id="vendor-cost"
                   type="number"
                   value={newVendor.default_cost}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, default_cost: e.target.value }))}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, default_cost: e.target.value }));
+                    // Pulisci errore quando l'utente inizia a digitare
+                    if (formErrors.default_cost) {
+                      setFormErrors(prev => ({ ...prev, default_cost: '' }));
+                    }
+                  }}
                   placeholder="1000.00"
                   step="0.01"
                   min="0.01"
-                  className={`${!newVendor.default_cost.trim() ? 'border-red-300 focus:border-red-500' : ''}`} // ✅ VISUAL FEEDBACK
-                  required
+                  className={formErrors.default_cost ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {formErrors.default_cost && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.default_cost}</p>
+                )}
               </div>
+
+              {/* Email */}
               <div>
                 <Label htmlFor="vendor-email">Email</Label>
                 <Input
                   id="vendor-email"
                   type="email"
                   value={newVendor.contact_email}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, contact_email: e.target.value }))}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, contact_email: e.target.value }));
+                    if (formErrors.contact_email) {
+                      setFormErrors(prev => ({ ...prev, contact_email: '' }));
+                    }
+                  }}
                   placeholder="email@example.com"
+                  className={formErrors.contact_email ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {formErrors.contact_email && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.contact_email}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="vendor-phone">Telefono</Label>
