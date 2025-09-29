@@ -406,13 +406,55 @@ export const useBudget = () => {
 
   const deleteVendor = async (id: string) => {
     try {
+      // Prima trova il fornitore per ottenere il nome
+      const vendor = vendors.find(v => v.id === id);
+      if (!vendor) {
+        toast({
+          title: 'Errore',
+          description: 'Fornitore non trovato',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Trova tutti i budget_items associati a questo fornitore
+      const vendorItems = items.filter(item => 
+        item.notes?.includes(`Costo fornitore - ${vendor.name}`)
+      );
+
+      // Cancella tutti gli items associati al fornitore
+      for (const item of vendorItems) {
+        const itemDeleted = await budgetItemsApi.delete(item.id);
+        if (!itemDeleted) {
+          console.error(`Failed to delete item ${item.id} for vendor ${vendor.name}`);
+        }
+      }
+
+      // Aggiorna lo stato locale rimuovendo gli items del fornitore
+      const deletedItemIds = vendorItems.map(item => item.id);
+      setItems(prev => prev.filter(item => !deletedItemIds.includes(item.id)));
+
+      // Aggiorna le categorie riducendo lo "spent" per gli items cancellati
+      const itemsByCategory = vendorItems.reduce((acc, item) => {
+        acc[item.category_id] = (acc[item.category_id] || 0) + item.amount;
+        return acc;
+      }, {} as Record<string, number>);
+
+      setCategories(prev => 
+        prev.map(cat => ({
+          ...cat,
+          spent: cat.spent - (itemsByCategory[cat.id] || 0)
+        }))
+      );
+
+      // Ora cancella il fornitore
       const success = await budgetVendorsApi.delete(id);
 
       if (success) {
         setVendors(prev => prev.filter(vendor => vendor.id !== id));
         toast({
           title: 'Fornitore eliminato',
-          description: 'Fornitore rimosso completamente dal database',
+          description: `${vendor.name} e le spese associate sono state rimosse`,
         });
         return true;
       }
