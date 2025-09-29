@@ -464,7 +464,7 @@ Questa operazione non può essere annullata.`
                                 <div key={expense.id} className="flex justify-between items-center py-2">
                                   <div>
                                     <span className="text-gray-800">{expense.name}</span>
-                                    {expense.notes && (
+                                    {expense.notes && !expense.notes.includes('Costo fornitore -') && (
                                       <p className="text-xs text-gray-500">{expense.notes}</p>
                                     )}
                                   </div>
