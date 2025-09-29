@@ -9,198 +9,81 @@ const createTypedQuery = (tableName: string) => ({
   upsert: (data: any) => supabase.from(tableName as any).upsert(data)
 });
 
-// In src/services/budgetService.ts
-
 export const budgetSettingsApi = {
-  // ✅ GET - CON FALLBACK DA PROFILES
   async get() {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) throw new Error('Not authenticated');
-
     try {
-      // Prima prova a prendere da budget_settings
-      let { data: settings, error: settingsError } = await supabase
-        .from('budget_settings')
+      const { data, error } = await createTypedQuery('budget_settings')
         .select('*')
-        .eq('user_id', user.user.id)
         .single();
 
-      // Se non esiste o wedding_date è null, prendi da profiles
-      if (!settings?.wedding_date) {
-        console.log('Wedding date not found in budget_settings, checking profiles...');
-        
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('wedding_date')
-          .eq('id', user.user.id)
-          .single();
-
-        if (!profileError && profile) {
-          if (settings) {
-            // Aggiorna settings esistente con data del profilo
-            console.log('Updating existing settings with profile wedding date:', profile.wedding_date);
-            settings.wedding_date = profile.wedding_date;
-          } else {
-            // Crea nuovo settings con data del profilo
-            console.log('Creating new settings with profile wedding date:', profile.wedding_date);
-            settings = {
-              id: crypto.randomUUID(),
-              user_id: user.user.id,
-              total_budget: 35000,
-              currency: 'EUR',
-              wedding_date: profile.wedding_date,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-
-            // Salva nel database per future chiamate
-            try {
-              const { error: insertError } = await supabase
-                .from('budget_settings')
-                .insert(settings);
-              
-              if (!insertError) {
-                console.log('New budget_settings created with profile wedding date');
-              }
-            } catch (insertErr) {
-              console.log('Could not create budget_settings, continuing with temp data');
-            }
-          }
-        }
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching budget settings:', error);
+        throw error;
       }
 
-      // Se ancora non hai settings, crea default
-      if (!settings) {
-        settings = {
-          id: crypto.randomUUID(),
-          user_id: user.user.id,
-          total_budget: 35000,
-          currency: 'EUR',
-          wedding_date: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-      }
-
-      return settings;
+      return data;
     } catch (error) {
-      console.error('Error in budgetSettingsApi.get:', error);
-      // Fallback settings
-      return {
-        id: crypto.randomUUID(),
-        user_id: user.user.id,
-        total_budget: 35000,
-        currency: 'EUR',
-        wedding_date: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      console.error('Budget settings fetch error:', error);
+      return null;
     }
   },
 
-  // ✅ UPSERT - CON GESTIONE WEDDING_DATE DA PROFILES
-  async upsert(data: { total_budget?: number; wedding_date?: string; currency?: string }) {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) throw new Error('Not authenticated');
-
+  async upsert(data: any) {
     try {
-      // Prima controlla se esiste già
-      const { data: existing } = await supabase
-        .from('budget_settings')
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: existing, error: fetchError } = await createTypedQuery('budget_settings')
         .select('*')
-        .eq('user_id', user.user.id)
+        .eq('user_id', user.id)
         .single();
 
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error checking existing budget settings:', fetchError);
+        throw fetchError;
+      }
+
+      let result;
+      
       if (existing) {
-        // UPDATE esistente
-        const { data: updated, error } = await supabase
-          .from('budget_settings')
+        const { data: updateResult, error: updateError } = await createTypedQuery('budget_settings')
           .update({
-            ...data,
-            updated_at: new Date().toISOString()
+            total_budget: data.total_budget,
+            wedding_date: data.wedding_date
           })
-          .eq('user_id', user.user.id)
+          .eq('user_id', user.id)
           .select()
           .single();
 
-        if (error) throw error;
-        return updated;
-      } else {
-        // INSERT nuovo - prendi wedding_date da profiles se non fornita
-        let weddingDate = data.wedding_date;
-        
-        if (!weddingDate) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('wedding_date')
-            .eq('id', user.user.id)
-            .single();
-          weddingDate = profile?.wedding_date;
+        if (updateError) {
+          console.error('Error updating budget settings:', updateError);
+          throw updateError;
         }
-
-        const newSettings = {
-          id: crypto.randomUUID(),
-          user_id: user.user.id,
-          total_budget: data.total_budget || 35000,
-          currency: data.currency || 'EUR',
-          wedding_date: weddingDate,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-
-        const { data: created, error } = await supabase
-          .from('budget_settings')
-          .insert(newSettings)
+        result = updateResult;
+      } else {
+        const { data: insertResult, error: insertError } = await createTypedQuery('budget_settings')
+          .insert({
+            user_id: user.id,
+            total_budget: data.total_budget,
+            wedding_date: data.wedding_date
+          })
           .select()
           .single();
 
-        if (error) throw error;
-        return created;
+        if (insertError) {
+          console.error('Error inserting budget settings:', insertError);
+          throw insertError;
+        }
+        result = insertResult;
       }
+
+      return result;
     } catch (error) {
-      console.error('Error in budgetSettingsApi.upsert:', error);
-      throw error;
-    }
-  },
-
-  // ✅ UPDATE - FUNZIONE SEPARATA PER AGGIORNAMENTI
-  async update(id: string, data: { total_budget?: number; wedding_date?: string; currency?: string }) {
-    try {
-      const { data: updated, error } = await supabase
-        .from('budget_settings')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return updated;
-    } catch (error) {
-      console.error('Error in budgetSettingsApi.update:', error);
-      throw error;
-    }
-  },
-
-  // ✅ DELETE - SE NECESSARIO
-  async delete(id: string) {
-    try {
-      const { error } = await supabase
-        .from('budget_settings')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error in budgetSettingsApi.delete:', error);
-      return false;
+      console.error('Budget settings upsert error:', error);
+      return null;
     }
   }
 };
-
 
 export const budgetCategoriesApi = {
   async getAll() {
