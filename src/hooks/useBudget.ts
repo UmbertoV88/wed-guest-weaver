@@ -405,36 +405,28 @@ export const useBudget = () => {
   };
 
   const deleteVendor = async (id: string) => {
+    const vendor = vendors.find(v => v.id === id);
+    if (!vendor) {
+      toast({
+        title: 'Errore',
+        description: 'Fornitore non trovato',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    // Backup per rollback
+    const vendorItems = items.filter(item => 
+      item.notes?.includes(`Costo fornitore - ${vendor.name}`)
+    );
+
     try {
-      // Prima trova il fornitore per ottenere il nome
-      const vendor = vendors.find(v => v.id === id);
-      if (!vendor) {
-        toast({
-          title: 'Errore',
-          description: 'Fornitore non trovato',
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      // Trova tutti i budget_items associati a questo fornitore
-      const vendorItems = items.filter(item => 
-        item.notes?.includes(`Costo fornitore - ${vendor.name}`)
-      );
-
-      // Cancella tutti gli items associati al fornitore
-      for (const item of vendorItems) {
-        const itemDeleted = await budgetItemsApi.delete(item.id);
-        if (!itemDeleted) {
-          console.error(`Failed to delete item ${item.id} for vendor ${vendor.name}`);
-        }
-      }
-
-      // Aggiorna lo stato locale rimuovendo gli items del fornitore
+      // ✅ OPTIMISTIC DELETE - Update UI immediately
+      setVendors(prev => prev.filter(v => v.id !== id));
+      
       const deletedItemIds = vendorItems.map(item => item.id);
       setItems(prev => prev.filter(item => !deletedItemIds.includes(item.id)));
 
-      // Aggiorna le categorie riducendo lo "spent" per gli items cancellati
       const itemsByCategory = vendorItems.reduce((acc, item) => {
         acc[item.category_id] = (acc[item.category_id] || 0) + item.amount;
         return acc;
@@ -447,20 +439,36 @@ export const useBudget = () => {
         }))
       );
 
-      // Ora cancella il fornitore
+      // Delete in background
+      for (const item of vendorItems) {
+        budgetItemsApi.delete(item.id).catch(console.error);
+      }
+
       const success = await budgetVendorsApi.delete(id);
 
       if (success) {
-        setVendors(prev => prev.filter(vendor => vendor.id !== id));
         toast({
           title: 'Fornitore eliminato',
           description: `${vendor.name} e le spese associate sono state rimosse`,
         });
         return true;
+      } else {
+        // ✅ ROLLBACK su errore
+        setVendors(prev => [...prev, vendor]);
+        setItems(prev => [...prev, ...vendorItems]);
+        setCategories(prev => 
+          prev.map(cat => ({
+            ...cat,
+            spent: cat.spent + (itemsByCategory[cat.id] || 0)
+          }))
+        );
+        return false;
       }
-      return false;
     } catch (err) {
       console.error('Error deleting vendor:', err);
+      // ✅ ROLLBACK su errore
+      setVendors(prev => [...prev, vendor]);
+      setItems(prev => [...prev, ...vendorItems]);
       toast({
         title: 'Errore',
         description: 'Impossibile eliminare il fornitore',
@@ -470,13 +478,22 @@ export const useBudget = () => {
     }
   };
 
+
   const addVendorPayment = async (vendorId: string, amount: number, categoryId: string, notes?: string) => {
     try {
       const result = await budgetVendorsApi.addPayment(vendorId, amount, categoryId, notes);
 
       if (result) {
-        // Refresh data to sync with budget items
-        await loadData();
+        // ✅ MODIFICA: Update UI senza loadData()
+        setItems(prev => [...prev, result as any]);
+        setCategories(prev => 
+          prev.map(cat => 
+            cat.id === categoryId 
+              ? {...cat, spent: cat.spent + amount}
+              : cat
+          )
+        );
+        
         toast({
           title: 'Pagamento registrato',
           description: `Pagamento di €${amount.toLocaleString()} registrato`,
