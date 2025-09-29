@@ -174,13 +174,22 @@ export const useBudget = () => {
         return result as any;
       } else {
         // 4. REVERT IF FAILED
-        await loadData(); // Reload to get correct state
+        const originalCategory = categories.find(cat => cat.id === id);
+        if (originalCategory) {
+          setCategories((prev: any) => 
+            prev.map((cat: any) => cat.id === id ? originalCategory : cat)
+          );
+        }
       }
       return null;
     } catch (err) {
       console.error('Error updating category:', err);
-      // REVERT OPTIMISTIC UPDATE
-      await loadData();
+      const originalCategory = categories.find(cat => cat.id === id);
+      if (originalCategory) {
+        setCategories((prev: any) => 
+          prev.map((cat: any) => cat.id === id ? originalCategory : cat)
+        );
+      }
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
@@ -340,23 +349,52 @@ export const useBudget = () => {
         
         // If vendor has a cost, create a budget item automatically
         if (data.default_cost && data.default_cost > 0) {
-          const itemData = {
-            name: data.name,
-            amount: data.default_cost,
-            category_id: data.category_id,
-            expense_date: new Date().toISOString().split('T')[0],
-            notes: `Costo fornitore - ${data.name}`
-          };
-          
-          await addItem(itemData);
-        }
-        
-        toast({
-          title: 'Fornitore aggiunto',
-          description: `${data.name} aggiunto con successo${data.default_cost ? ` (costo: €${data.default_cost.toLocaleString()})` : ''}`,
+        // ✅ MODIFICA: Crea item senza chiamare loadData()
+        const tempItem: BudgetItem = {
+          id: `temp-${Date.now()}`,
+          user_id: user?.id || '',
+          category_id: data.category_id,
+          name: data.name,
+          amount: data.default_cost,
+          expense_date: new Date().toISOString().split('T')[0],
+          paid: false,
+          notes: `Costo fornitore - ${data.name}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        // Update UI immediately
+        setItems(prev => [...prev, tempItem]);
+        setCategories(prev => 
+          prev.map(cat => 
+            cat.id === data.category_id 
+              ? {...cat, spent: cat.spent + data.default_cost}
+              : cat
+          )
+        );
+
+        // Create in background
+        budgetItemsApi.create({
+          category_id: data.category_id,
+          name: data.name,
+          amount: data.default_cost,
+          expense_date: new Date().toISOString().split('T')[0],
+          notes: `Costo fornitore - ${data.name}`
+        }).then(realItem => {
+          if (realItem) {
+            setItems(prev => 
+              prev.map(item => item.id === tempItem.id ? realItem as any : item)
+            );
+          }
         });
-        return result as any;
       }
+      
+      toast({
+        title: 'Fornitore aggiunto',
+        description: `${data.name} aggiunto con successo${data.default_cost ? ` (costo: €${data.default_cost.toLocaleString()})` : ''}`,
+      });
+      return result as any;
+    }
       return null;
     } catch (err) {
       console.error('Error adding vendor:', err);
@@ -370,6 +408,7 @@ export const useBudget = () => {
   };
 
   const updateVendor = async (id: string, data: any) => {
+    const previousVendor = vendors.find(v => v.id === id);
     try {
       // Optimistic update
       setVendors(prev => 
@@ -388,13 +427,20 @@ export const useBudget = () => {
         });
         return result as any;
       } else {
-        // Revert optimistic update
-        await loadData();
+        if (previousVendor) {
+          setVendors(prev => 
+            prev.map(vendor => vendor.id === id ? previousVendor : vendor)
+          );
+        }
       }
       return null;
     } catch (err) {
       console.error('Error updating vendor:', err);
-      await loadData(); // Revert optimistic update
+      if (previousVendor) {
+        setVendors(prev => 
+          prev.map(vendor => vendor.id === id ? previousVendor : vendor)
+        );
+      }
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare il fornitore',
