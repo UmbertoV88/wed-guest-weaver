@@ -104,96 +104,34 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   };
 
   const handleAddVendor = async () => {
-    // ✅ VALIDAZIONE CLIENT-SIDE COMPLETA
-    const errors: string[] = [];
-    
-    // Controlli obbligatori
-    if (!newVendor.name.trim()) {
-      errors.push("Nome fornitore è obbligatorio");
-    }
-    
-    if (!newVendor.category_id) {
-      errors.push("Categoria è obbligatoria");
-    }
-    
-    if (!newVendor.default_cost.trim()) {
-      errors.push("Costo è obbligatorio");
-    }
-    
-    // Validazione costo numerico
-    const cost = parseFloat(newVendor.default_cost);
-    if (newVendor.default_cost.trim() && (isNaN(cost) || cost <= 0)) {
-      errors.push("Il costo deve essere un numero maggiore di 0");
-    }
-    
-    // Validazione email (se inserita)
-    if (newVendor.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newVendor.contact_email)) {
-      errors.push("Email non valida");
-    }
-    
-    // Validazione URL website (se inserito)
-    if (newVendor.website.trim() && !newVendor.website.startsWith('http')) {
-      errors.push("Il sito web deve iniziare con http:// o https://");
-    }
-    
-    // Validazione lunghezza nome
-    if (newVendor.name.trim().length < 2) {
-      errors.push("Il nome fornitore deve avere almeno 2 caratteri");
-    }
-    
-    if (newVendor.name.trim().length > 100) {
-      errors.push("Il nome fornitore non può superare i 100 caratteri");
-    }
-    
-    // Validazione costo massimo ragionevole
-    if (!isNaN(cost) && cost > 100000) {
-      errors.push("Il costo sembra eccessivo (max €100.000). Verifica l'importo inserito");
-    }
-    
-    // Se ci sono errori, mostra toast con tutti gli errori
-    if (errors.length > 0) {
+    if (!newVendor.name || !newVendor.category_id || !newVendor.default_cost) {
       toast({
-        title: `Errore${errors.length > 1 ? 'i' : ''} di Validazione`,
-        description: (
-          <div>
-            <p className="mb-2">Correggi questi problemi:</p>
-            <ul className="list-disc pl-4 space-y-1">
-              {errors.map((error, index) => (
-                <li key={index} className="text-sm">{error}</li>
-              ))}
-            </ul>
-          </div>
-        ),
-        variant: "destructive",
-        duration: 5000, // Più lungo per leggere tutti gli errori
+        title: "Errore",
+        description: "Compila tutti i campi obbligatori",
+        variant: "destructive"
       });
       return;
     }
-    
-    // ✅ PREPARAZIONE DATI VALIDATI
+
+    const cost = parseFloat(newVendor.default_cost);
+    if (isNaN(cost) || cost <= 0) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un costo valido maggiore di 0",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+
     const vendorData = {
-      name: newVendor.name.trim(),
-      category_id: newVendor.category_id,
-      contact_email: newVendor.contact_email.trim() || undefined,
-      contact_phone: newVendor.contact_phone.trim() || undefined,
-      address: newVendor.address.trim() || undefined,
-      website: newVendor.website.trim() || undefined,
-      notes: newVendor.notes.trim() || undefined,
+      ...newVendor,
       default_cost: cost
     };
 
-    // ✅ TOAST DI CONFERMA PRIMA DELL'INVIO
-    const confirmed = window.confirm(
-      `Confermi la creazione del fornitore "${vendorData.name}" con costo di €${cost.toLocaleString()}?`
-    );
-    
-    if (!confirmed) return;
-    
-    // ✅ CHIAMATA AL DATABASE
     const result = await addVendor(vendorData);
     
     if (result) {
-      // Reset form solo se successo
       setNewVendor({
         name: '',
         category_id: '',
@@ -207,7 +145,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       setShowAddForm(false);
     }
   };
-
 
   const handleDeleteVendor = async (vendorId: string) => {
     if (window.confirm('Sei sicuro di voler eliminare questo fornitore? Questa azione non può essere annullata.')) {
@@ -262,8 +199,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   value={newVendor.name}
                   onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="es. Studio Fotografico Luce"
-                  className={`${!newVendor.name.trim() ? 'border-red-300 focus:border-red-500' : ''}`} // ✅ VISUAL FEEDBACK
-                  required
                 />
               </div>
               <div>
@@ -271,9 +206,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 <Select 
                   value={newVendor.category_id} 
                   onValueChange={(value) => setNewVendor(prev => ({ ...prev, category_id: value }))}
-                  required
                 >
-                  <SelectTrigger className={`${!newVendor.category_id ? 'border-red-300 focus:border-red-500' : ''}`}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Seleziona categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -285,7 +219,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   </SelectContent>
                 </Select>
               </div>
-
               <div>
                 <Label htmlFor="vendor-cost">Costo *</Label>
                 <Input
@@ -293,10 +226,9 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   type="number"
                   value={newVendor.default_cost}
                   onChange={(e) => setNewVendor(prev => ({ ...prev, default_cost: e.target.value }))}
-                  placeholder="1000.00"
+                  placeholder="0.00"
                   step="0.01"
                   min="0.01"
-                  className={`${!newVendor.default_cost.trim() ? 'border-red-300 focus:border-red-500' : ''}`} // ✅ VISUAL FEEDBACK
                   required
                 />
               </div>
