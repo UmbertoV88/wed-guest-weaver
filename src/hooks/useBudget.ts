@@ -596,11 +596,11 @@ export const useBudget = () => {
   // EFFECTS
   // =====================================================
 
-  /*useEffect(() => {
+  useEffect(() => {
     if (user?.id) {
       loadData();
     }
-  }, [user?.id]);*/
+  }, [user?.id]);
 
   // =====================================================
   // HELPER FUNCTIONS
