@@ -341,7 +341,7 @@ export const useBudget = () => {
         // If vendor has a cost, create a budget item automatically
         if (data.default_cost && data.default_cost > 0) {
           const itemData = {
-            name: ${data.name},
+            name: data.name,
             amount: data.default_cost,
             category_id: data.category_id,
             expense_date: new Date().toISOString().split('T')[0],
