@@ -89,6 +89,7 @@ export const useBudgetQuery = () => {
       toast({
         title: 'Budget aggiornato',
         description: `Budget totale impostato a €${totalBudget.toLocaleString()}`,
+        duration: 3000,
       });
     },
     onError: () => {
@@ -96,6 +97,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiornare il budget totale',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -139,6 +141,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiungere la categoria',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -167,6 +170,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -193,6 +197,7 @@ export const useBudgetQuery = () => {
       toast({
         title: 'Categoria eliminata',
         description: 'Categoria e relative spese rimosse',
+        duration: 3000,
       });
     },
     onError: (err, variables, context) => {
@@ -202,6 +207,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile eliminare la categoria',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -264,6 +270,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiungere la spesa',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -293,6 +300,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiornare lo stato del pagamento',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -390,6 +398,7 @@ export const useBudgetQuery = () => {
       toast({
         title: 'Fornitore aggiunto',
         description: `${variables.name} aggiunto con successo${variables.default_cost ? ` (costo: €${variables.default_cost.toLocaleString()})` : ''}`,
+        duration: 3000,
       });
     },
     onError: (err, variables, context) => {
@@ -398,6 +407,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiungere il fornitore',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -424,6 +434,7 @@ export const useBudgetQuery = () => {
       toast({
         title: 'Fornitore aggiornato',
         description: 'Informazioni aggiornate con successo',
+        duration: 3000,
       });
     },
     onError: (err, variables, context) => {
@@ -432,6 +443,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile aggiornare il fornitore',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -486,6 +498,7 @@ export const useBudgetQuery = () => {
       toast({
         title: 'Fornitore eliminato',
         description: `${context?.vendor.name} e le spese associate sono state rimosse`,
+        duration: 3000,
       });
     },
     onError: (err, variables, context) => {
@@ -496,6 +509,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile eliminare il fornitore',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
@@ -531,6 +545,7 @@ export const useBudgetQuery = () => {
       toast({
         title: 'Pagamento registrato',
         description: `Pagamento di €${amount.toLocaleString()} registrato`,
+        duration: 3000,
       });
     },
     onError: (err, variables, context) => {
@@ -540,6 +555,7 @@ export const useBudgetQuery = () => {
         title: 'Errore',
         description: 'Impossibile registrare il pagamento',
         variant: 'destructive',
+        duration: 3000,
       });
     },
   });
