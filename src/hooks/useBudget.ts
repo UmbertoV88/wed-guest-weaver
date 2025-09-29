@@ -597,10 +597,10 @@ export const useBudget = () => {
   // =====================================================
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       loadData();
     }
-  }, [user]);
+  }, [user?.id]);
 
   // =====================================================
   // HELPER FUNCTIONS
