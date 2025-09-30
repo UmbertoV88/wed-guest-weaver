@@ -1,18 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
-// Type-safe wrapper for budget operations
-const createTypedQuery = (tableName: string) => ({
-  select: (columns: string) => supabase.from(tableName as any).select(columns),
-  insert: (data: any) => supabase.from(tableName as any).insert(data),
-  update: (data: any) => supabase.from(tableName as any).update(data),
-  delete: () => supabase.from(tableName as any).delete(),
-  upsert: (data: any) => supabase.from(tableName as any).upsert(data)
-});
+type BudgetSettings = Database['public']['Tables']['budget_settings']['Row'];
+type BudgetCategory = Database['public']['Tables']['budget_categories']['Row'];
+type BudgetItem = Database['public']['Tables']['budget_items']['Row'];
+type BudgetVendor = Database['public']['Tables']['budget_vendors']['Row'];
 
 export const budgetSettingsApi = {
-  async get() {
+  async get(): Promise<BudgetSettings | null> {
     try {
-      const { data, error } = await createTypedQuery('budget_settings')
+      const { data, error } = await supabase
+        .from('budget_settings')
         .select('*')
         .single();
 
@@ -28,12 +26,13 @@ export const budgetSettingsApi = {
     }
   },
 
-  async upsert(data: any) {
+  async upsert(data: any): Promise<BudgetSettings | null> {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: existing, error: fetchError } = await createTypedQuery('budget_settings')
+      const { data: existing, error: fetchError } = await supabase
+        .from('budget_settings')
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -46,7 +45,8 @@ export const budgetSettingsApi = {
       let result;
       
       if (existing) {
-        const { data: updateResult, error: updateError } = await createTypedQuery('budget_settings')
+        const { data: updateResult, error: updateError } = await supabase
+          .from('budget_settings')
           .update({
             total_budget: data.total_budget,
             wedding_date: data.wedding_date
@@ -61,7 +61,8 @@ export const budgetSettingsApi = {
         }
         result = updateResult;
       } else {
-        const { data: insertResult, error: insertError } = await createTypedQuery('budget_settings')
+        const { data: insertResult, error: insertError } = await supabase
+          .from('budget_settings')
           .insert({
             user_id: user.id,
             total_budget: data.total_budget,
@@ -86,9 +87,10 @@ export const budgetSettingsApi = {
 };
 
 export const budgetCategoriesApi = {
-  async getAll() {
+  async getAll(): Promise<BudgetCategory[]> {
     try {
-      const { data, error } = await createTypedQuery('budget_categories')
+      const { data, error } = await supabase
+        .from('budget_categories')
         .select('*')
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
@@ -110,7 +112,8 @@ export const budgetCategoriesApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: result, error } = await createTypedQuery('budget_categories')
+      const { data: result, error } = await supabase
+        .from('budget_categories')
         .insert({
           user_id: user.id,
           name: data.name,
@@ -135,7 +138,8 @@ export const budgetCategoriesApi = {
 
   async update(id: string, data: any) {
     try {
-      const { data: result, error } = await createTypedQuery('budget_categories')
+      const { data: result, error } = await supabase
+        .from('budget_categories')
         .update(data)
         .eq('id', id)
         .select()
@@ -155,7 +159,8 @@ export const budgetCategoriesApi = {
 
   async delete(id: string) {
     try {
-      const { error } = await createTypedQuery('budget_categories')
+      const { error } = await supabase
+        .from('budget_categories')
         .update({ is_active: false })
         .eq('id', id);
 
@@ -194,9 +199,10 @@ export const budgetCategoriesApi = {
 };
 
 export const budgetItemsApi = {
-  async getAll() {
+  async getAll(): Promise<BudgetItem[]> {
     try {
-      const { data, error } = await createTypedQuery('budget_items')
+      const { data, error } = await supabase
+        .from('budget_items')
         .select('*')
         .order('expense_date', { ascending: false });
 
@@ -217,7 +223,8 @@ export const budgetItemsApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: result, error } = await createTypedQuery('budget_items')
+      const { data: result, error } = await supabase
+        .from('budget_items')
         .insert({
           user_id: user.id,
           category_id: data.category_id,
@@ -245,7 +252,8 @@ export const budgetItemsApi = {
 
   async delete(id: string) {
     try {
-      const { error } = await createTypedQuery('budget_items')
+      const { error } = await supabase
+        .from('budget_items')
         .delete()
         .eq('id', id);
 
@@ -263,7 +271,8 @@ export const budgetItemsApi = {
 
   async togglePaid(id: string) {
     try {
-      const { data: current, error: fetchError } = await createTypedQuery('budget_items')
+      const { data: current, error: fetchError } = await supabase
+        .from('budget_items')
         .select('paid')
         .eq('id', id)
         .single();
@@ -271,7 +280,8 @@ export const budgetItemsApi = {
       if (fetchError) throw fetchError;
       if (!current) throw new Error('Item not found');
 
-      const { data: result, error } = await createTypedQuery('budget_items')
+      const { data: result, error } = await supabase
+        .from('budget_items')
         .update({ paid: !(current as any).paid })
         .eq('id', id)
         .select()
@@ -291,9 +301,10 @@ export const budgetItemsApi = {
 };
 
 export const budgetVendorsApi = {
-  async getAll() {
+  async getAll(): Promise<BudgetVendor[]> {
     try {
-      const { data, error } = await createTypedQuery('budget_vendors')
+      const { data, error } = await supabase
+        .from('budget_vendors')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -315,7 +326,8 @@ export const budgetVendorsApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { data: result, error } = await createTypedQuery('budget_vendors')
+      const { data: result, error } = await supabase
+        .from('budget_vendors')
         .insert({
           user_id: user.id,
           name: data.name,
@@ -343,7 +355,8 @@ export const budgetVendorsApi = {
 
   async update(id: string, data: any) {
     try {
-      const { data: result, error } = await createTypedQuery('budget_vendors')
+      const { data: result, error } = await supabase
+        .from('budget_vendors')
         .update(data)
         .eq('id', id)
         .select()
@@ -364,7 +377,8 @@ export const budgetVendorsApi = {
   async delete(id: string) {
     try {
       // HARD DELETE - rimuove completamente dal database
-      const { error } = await createTypedQuery('budget_vendors')
+      const { error } = await supabase
+        .from('budget_vendors')
         .delete()
         .eq('id', id);
 
@@ -386,7 +400,8 @@ export const budgetVendorsApi = {
       if (!user) throw new Error('User not authenticated');
 
       // Crea un budget_item per tracciare il pagamento
-      const { data: result, error } = await createTypedQuery('budget_items')
+      const { data: result, error } = await supabase
+        .from('budget_items')
         .insert({
           user_id: user.id,
           category_id: categoryId,

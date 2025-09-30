@@ -161,23 +161,21 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       default_cost: cost
     };
 
-    const result = await addVendor(vendorData);
+    await addVendor(vendorData);
     
-    if (result) {
-      // Reset form e chiudi solo se successo
-      setNewVendor({
-        name: '',
-        category_id: '',
-        contact_email: '',
-        contact_phone: '',
-        address: '',
-        website: '',
-        notes: '',
-        default_cost: ''
-      });
-      setFormErrors({});
-      setShowAddForm(false);
-    }
+    // Reset form dopo l'aggiunta (gli errori sono gestiti dal toast nella mutation)
+    setNewVendor({
+      name: '',
+      category_id: '',
+      contact_email: '',
+      contact_phone: '',
+      address: '',
+      website: '',
+      notes: '',
+      default_cost: ''
+    });
+    setFormErrors({});
+    setShowAddForm(false);
   };
 
 
