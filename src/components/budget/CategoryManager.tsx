@@ -27,6 +27,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import AddVendorDialog from './AddVendorDialog';
 
 // Icon mapping
 const ICON_OPTIONS = {
@@ -88,6 +89,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [editForm, setEditForm] = useState<any>({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
+  const [showVendorDialog, setShowVendorDialog] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState({
     name: '',
     nameit: '',
@@ -97,6 +100,11 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   });
   
   const { toast } = useToast();
+
+  const handleAddExpenseClick = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setShowVendorDialog(true);
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -511,6 +519,7 @@ Questa operazione non può essere annullata.`
                         size="sm"
                         className="flex-1"
                         disabled={isDeleting}
+                        onClick={() => handleAddExpenseClick(category.id)}
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Aggiungi Spesa
@@ -537,6 +546,14 @@ Questa operazione non può essere annullata.`
           );
         })}
       </div>
+
+      {/* Vendor Dialog */}
+      <AddVendorDialog
+        open={showVendorDialog}
+        onOpenChange={setShowVendorDialog}
+        categories={categories}
+        preselectedCategoryId={selectedCategoryId || undefined}
+      />
     </div>
   );
 };
