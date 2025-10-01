@@ -21,8 +21,8 @@ import {
   Users
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+//import { useBudget } from '@/hooks/useBudget';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
-import EditVendorDialog from './EditVendorDialog';
 
 interface VendorManagerProps {
   categories: any[];
@@ -32,7 +32,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const { vendors, addVendor, updateVendor, deleteVendor, loading } = useBudgetQuery();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVendor, setEditingVendor] = useState<any>(null);
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [newVendor, setNewVendor] = useState({
     name: '',
@@ -47,11 +46,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
-
-  const handleEditClick = (vendor: any) => {
-    setEditingVendor(vendor);
-    setShowEditDialog(true);
-  };
 
   // Calcola le spese per categoria per determinare i pagamenti ai fornitori
   const getVendorPayments = (vendorId: string, categoryId: string) => {
@@ -396,19 +390,16 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
               <Card key={vendor.id} className="shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                    <div>
                       <CardTitle className="text-lg flex items-center gap-2">
                         {getStatusIcon(payments.status)}
                         {vendor.name}
                       </CardTitle>
-                      <p className="text-sm text-gray-600 mb-1">{getCategoryName(vendor.category_id)}</p>
+                      <p className="text-sm text-gray-600">{getCategoryName(vendor.category_id)}</p>
                       {vendor.default_cost && (
-                        <div className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full">
-                          <Euro className="w-4 h-4 text-green-600" />
-                          <span className="text-base font-bold text-green-700">
-                            {formatCurrency(vendor.default_cost)}
-                          </span>
-                        </div>
+                        <p className="text-sm font-medium text-primary">
+                          {formatCurrency(vendor.default_cost)}
+                        </p>
                       )}
                     </div>
                     {getStatusBadge(payments.status)}
@@ -458,7 +449,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                       size="sm" 
                       variant="outline"
                       className="flex-1"
-                      onClick={() => handleEditClick(vendor)}
+                      onClick={() => setEditingVendor(vendor)}
                     >
                       <Edit3 className="w-4 h-4 mr-2" />
                       Modifica
@@ -488,14 +479,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
           </CardContent>
         </Card>
       )}
-
-      {/* Edit Vendor Dialog */}
-      <EditVendorDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        categories={categories}
-        vendor={editingVendor}
-      />
     </div>
   );
 };
