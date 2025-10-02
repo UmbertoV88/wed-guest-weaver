@@ -145,6 +145,7 @@ export type Database = {
           is_active: boolean
           name: string
           notes: string | null
+          payment_due_date: string | null
           updated_at: string
           user_id: string
           website: string | null
@@ -160,6 +161,7 @@ export type Database = {
           is_active?: boolean
           name: string
           notes?: string | null
+          payment_due_date?: string | null
           updated_at?: string
           user_id: string
           website?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           notes?: string | null
+          payment_due_date?: string | null
           updated_at?: string
           user_id?: string
           website?: string | null

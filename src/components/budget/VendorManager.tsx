@@ -396,11 +396,20 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                         {vendor.name}
                       </CardTitle>
                       <p className="text-sm text-gray-600">{getCategoryName(vendor.category_id)}</p>
-                      {vendor.default_cost && (
-                        <p className="text-sm font-medium text-primary">
-                          {formatCurrency(vendor.default_cost)}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        {vendor.default_cost && (
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                            <Euro className="w-3 h-3 mr-1" />
+                            {formatCurrency(vendor.default_cost)}
+                          </Badge>
+                        )}
+                        {vendor.payment_due_date && (
+                          <Badge variant="outline" className="text-orange-700 border-orange-300">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            Scadenza: {formatDate(vendor.payment_due_date)}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     {getStatusBadge(payments.status)}
                   </div>

@@ -5,7 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Plus, X, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
 import { z } from 'zod';
 
@@ -50,7 +55,8 @@ const vendorSchema = z.object({
     .trim()
     .max(1000, 'Note troppo lunghe (max 1000 caratteri)')
     .optional()
-    .or(z.literal(''))
+    .or(z.literal('')),
+  payment_due_date: z.date().optional()
 });
 
 interface AddVendorDialogProps {
@@ -76,7 +82,8 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
     address: '',
     website: '',
     notes: '',
-    default_cost: ''
+    default_cost: '',
+    payment_due_date: undefined as Date | undefined
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -100,7 +107,8 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
         address: '',
         website: '',
         notes: '',
-        default_cost: ''
+        default_cost: '',
+        payment_due_date: undefined
       });
       setFormErrors({});
       setIsSubmitting(false);
@@ -139,7 +147,8 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
         address: formData.address.trim() || undefined,
         website: formData.website.trim() || undefined,
         notes: formData.notes.trim() || undefined,
-        default_cost: cost
+        default_cost: cost,
+        payment_due_date: formData.payment_due_date ? format(formData.payment_due_date, 'yyyy-MM-dd') : undefined
       };
 
       await addVendor(vendorData);
@@ -241,6 +250,40 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
               {formErrors.default_cost && (
                 <p className="text-sm text-red-500 mt-1">{formErrors.default_cost}</p>
               )}
+            </div>
+
+            {/* Data Scadenza */}
+            <div>
+              <Label>Data Scadenza</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.payment_due_date && "text-muted-foreground"
+                    )}
+                    disabled={isSubmitting}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.payment_due_date ? (
+                      format(formData.payment_due_date, "PPP", { locale: it })
+                    ) : (
+                      <span>Seleziona data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.payment_due_date}
+                    onSelect={(date) => setFormData(prev => ({ ...prev, payment_due_date: date }))}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-muted-foreground mt-1">Opzionale: data entro cui pagare il fornitore</p>
             </div>
 
             {/* Email */}
