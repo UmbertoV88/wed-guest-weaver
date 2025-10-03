@@ -443,15 +443,8 @@ Questa operazione non può essere annullata.`
                       <h4 className="font-medium text-gray-900 mb-2">Dettaglio spese</h4>
                       <div className="space-y-1 text-sm">
                         {(() => {
-                          const categoryVendors = getVendorsByCategory(category.id);
                           const categoryItems = getItemsByCategory(category.id);
                           const allExpenses = [
-                            ...categoryVendors.map((vendor: any) => ({
-                              id: `vendor-${vendor.id}`,
-                              name: vendor.name,
-                              amount: vendor.default_cost || 0,
-                              type: 'vendor'
-                            })),
                             ...categoryItems.map((item: any) => ({
                               id: `item-${item.id}`,
                               name: item.name,
