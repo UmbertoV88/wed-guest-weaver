@@ -370,7 +370,6 @@ export const useBudgetQuery = () => {
       return { previousVendors, tempVendor };
     },
     onSuccess: (result, variables, context) => {
-      console.log(result);
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
         old ? old.map((vendor: any) =>
           vendor.id === context?.tempVendor.id ? result : vendor
