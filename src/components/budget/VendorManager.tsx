@@ -6,11 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { 
   Plus, 
   Phone, 
   Mail, 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Euro, 
   Edit3, 
   Trash2,
@@ -20,6 +22,9 @@ import {
   Search,
   Users
 } from 'lucide-react';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 //import { useBudget } from '@/hooks/useBudget';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
@@ -41,7 +46,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     address: '',
     website: '',
     notes: '',
-    default_cost: ''
+    default_cost: '',
+    payment_due_date: undefined as Date | undefined
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -158,7 +164,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       address: newVendor.address.trim() || undefined,
       website: newVendor.website.trim() || undefined,
       notes: newVendor.notes.trim() || undefined,
-      default_cost: cost
+      default_cost: cost,
+      payment_due_date: newVendor.payment_due_date ? format(newVendor.payment_due_date, 'yyyy-MM-dd') : undefined
     };
 
     await addVendor(vendorData);
@@ -172,7 +179,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       address: '',
       website: '',
       notes: '',
-      default_cost: ''
+      default_cost: '',
+      payment_due_date: undefined
     });
     setFormErrors({});
     setShowAddForm(false);
@@ -300,6 +308,39 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 )}
               </div>
 
+              {/* Data Scadenza */}
+              <div>
+                <Label htmlFor="vendor-due-date">Data Scadenza</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="vendor-due-date"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newVendor.payment_due_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newVendor.payment_due_date ? (
+                        format(newVendor.payment_due_date, "PPP", { locale: it })
+                      ) : (
+                        <span>Seleziona data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={newVendor.payment_due_date}
+                      onSelect={(date) => setNewVendor(prev => ({ ...prev, payment_due_date: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               {/* Email */}
               <div>
                 <Label htmlFor="vendor-email">Email</Label>
@@ -405,7 +446,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                         )}
                         {vendor.payment_due_date && (
                           <Badge variant="outline" className="text-orange-700 border-orange-300">
-                            <Calendar className="w-3 h-3 mr-1" />
+                            <CalendarIcon className="w-3 h-3 mr-1" />
                             Scadenza: {formatDate(vendor.payment_due_date)}
                           </Badge>
                         )}
