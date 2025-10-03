@@ -319,6 +319,7 @@ export const useBudgetQuery = () => {
       website?: string;
       notes?: string;
       default_cost?: number | null;
+      payment_due_date?: string;
     }) => budgetVendorsApi.create(data),
     onMutate: async (newVendor) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.vendors() });
@@ -348,6 +349,7 @@ export const useBudgetQuery = () => {
           name: newVendor.name,
           amount: newVendor.default_cost,
           expense_date: new Date().toISOString().split('T')[0],
+          due_date: newVendor.payment_due_date,
           paid: false,
           notes: `Costo fornitore - ${newVendor.name}`,
           created_at: new Date().toISOString(),
@@ -384,6 +386,7 @@ export const useBudgetQuery = () => {
           name: variables.name,
           amount: variables.default_cost,
           expense_date: new Date().toISOString().split('T')[0],
+          due_date: variables.payment_due_date,
           notes: `Costo fornitore - ${variables.name}`
         }).then((realItem) => {
           if (realItem) {
