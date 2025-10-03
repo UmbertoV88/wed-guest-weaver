@@ -51,6 +51,19 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [editForm, setEditForm] = useState({
+    name: '',
+    category_id: '',
+    contact_email: '',
+    contact_phone: '',
+    address: '',
+    website: '',
+    notes: '',
+    default_cost: '',
+    payment_due_date: undefined as Date | undefined
+  });
+  const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
+
   const { toast } = useToast();
 
   // Normalizza URL aggiungendo https:// se manca il protocollo
@@ -198,6 +211,110 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       await deleteVendor(vendorId);
     }
   };
+
+  const handleEditVendor = (vendor: any) => {
+    setEditingVendor(vendor);
+    setEditForm({
+      name: vendor.name || '',
+      category_id: vendor.category_id || '',
+      contact_email: vendor.contact_email || '',
+      contact_phone: vendor.contact_phone || '',
+      address: vendor.address || '',
+      website: vendor.website?.replace('https://', '') || '',
+      notes: vendor.notes || '',
+      default_cost: vendor.default_cost?.toString() || '',
+      payment_due_date: vendor.payment_due_date ? new Date(vendor.payment_due_date) : undefined
+    });
+    setEditFormErrors({});
+  };
+  
+  const handleUpdateVendor = async () => {
+    // Reset errori precedenti
+    setEditFormErrors({});
+    
+    // Validazione campo per campo
+    const errors: Record<string, string> = {};
+    
+    if (!editForm.name.trim()) {
+      errors.name = "Nome fornitore è obbligatorio";
+    } else if (editForm.name.trim().length < 2) {
+      errors.name = "Il nome deve avere almeno 2 caratteri";
+    }
+    
+    if (!editForm.category_id) {
+      errors.category_id = "Seleziona una categoria";
+    }
+    
+    if (!editForm.default_cost.trim()) {
+      errors.default_cost = "Costo è obbligatorio";
+    } else {
+      const cost = parseFloat(editForm.default_cost);
+      if (isNaN(cost) || cost <= 0) {
+        errors.default_cost = "Inserisci un costo valido maggiore di 0";
+      } else if (cost > 100000) {
+        errors.default_cost = "Il costo sembra eccessivo (max €100.000)";
+      }
+    }
+    
+    // Validazione email opzionale
+    if (editForm.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.contact_email)) {
+      errors.contact_email = "Formato email non valido";
+    }
+    
+    // Se ci sono errori, mostrali sui campi
+    if (Object.keys(errors).length > 0) {
+      setEditFormErrors(errors);
+      return;
+    }
+    
+    // Se tutto OK, procedi con l'aggiornamento
+    const cost = parseFloat(editForm.default_cost);
+    const vendorData = {
+      name: editForm.name.trim(),
+      category_id: editForm.category_id,
+      contact_email: editForm.contact_email.trim() || undefined,
+      contact_phone: editForm.contact_phone.trim() || undefined,
+      address: editForm.address.trim() || undefined,
+      website: normalizeUrl(editForm.website) || undefined,
+      notes: editForm.notes.trim() || undefined,
+      default_cost: cost,
+      payment_due_date: editForm.payment_due_date ? format(editForm.payment_due_date, 'yyyy-MM-dd') : undefined
+    };
+    
+    await updateVendor(editingVendor.id, vendorData);
+    
+    // Reset dopo l'aggiornamento
+    setEditingVendor(null);
+    setEditForm({
+      name: '',
+      category_id: '',
+      contact_email: '',
+      contact_phone: '',
+      address: '',
+      website: '',
+      notes: '',
+      default_cost: '',
+      payment_due_date: undefined
+    });
+    setEditFormErrors({});
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingVendor(null);
+    setEditForm({
+      name: '',
+      category_id: '',
+      contact_email: '',
+      contact_phone: '',
+      address: '',
+      website: '',
+      notes: '',
+      default_cost: '',
+      payment_due_date: undefined
+    });
+    setEditFormErrors({});
+  };
+
 
   const filteredVendors = vendors.filter(vendor =>
     vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -431,6 +548,209 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
         </Card>
       )}
 
+      {/* Edit Vendor Form */}
+      {editingVendor && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-blue-800">
+              Modifica Fornitore: {editingVendor.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome Fornitore */}
+              <div>
+                <Label htmlFor="edit-vendor-name">Nome Fornitore *</Label>
+                <Input
+                  id="edit-vendor-name"
+                  value={editForm.name}
+                  onChange={(e) => {
+                    setEditForm(prev => ({ ...prev, name: e.target.value }));
+                    if (editFormErrors.name) {
+                      setEditFormErrors(prev => ({ ...prev, name: '' }));
+                    }
+                  }}
+                  placeholder="es. Studio Fotografico Luce"
+                  className={editFormErrors.name ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {editFormErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.name}</p>
+                )}
+              </div>
+      
+              {/* Categoria */}
+              <div>
+                <Label>Categoria *</Label>
+                <Select 
+                  value={editForm.category_id} 
+                  onValueChange={(value) => {
+                    setEditForm(prev => ({ ...prev, category_id: value }));
+                    if (editFormErrors.category_id) {
+                      setEditFormErrors(prev => ({ ...prev, category_id: '' }));
+                    }
+                  }}
+                >
+                  <SelectTrigger className={editFormErrors.category_id ? 'border-red-500 focus:border-red-500' : ''}>
+                    <SelectValue placeholder="Seleziona categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {editFormErrors.category_id && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.category_id}</p>
+                )}
+              </div>
+      
+              {/* Costo */}
+              <div>
+                <Label htmlFor="edit-vendor-cost">Costo *</Label>
+                <Input
+                  id="edit-vendor-cost"
+                  type="number"
+                  value={editForm.default_cost}
+                  onChange={(e) => {
+                    setEditForm(prev => ({ ...prev, default_cost: e.target.value }));
+                    if (editFormErrors.default_cost) {
+                      setEditFormErrors(prev => ({ ...prev, default_cost: '' }));
+                    }
+                  }}
+                  placeholder="1000.00"
+                  step="0.01"
+                  min="0.01"
+                  className={editFormErrors.default_cost ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {editFormErrors.default_cost && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.default_cost}</p>
+                )}
+              </div>
+      
+              {/* Data Scadenza */}
+              <div>
+                <Label>Data Scadenza</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editForm.payment_due_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {editForm.payment_due_date ? (
+                        format(editForm.payment_due_date, "PPP", { locale: it })
+                      ) : (
+                        <span>Seleziona data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={editForm.payment_due_date}
+                      onSelect={(date) => setEditForm(prev => ({ ...prev, payment_due_date: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+      
+              {/* Email */}
+              <div>
+                <Label htmlFor="edit-vendor-email">Email</Label>
+                <Input
+                  id="edit-vendor-email"
+                  type="email"
+                  value={editForm.contact_email}
+                  onChange={(e) => {
+                    setEditForm(prev => ({ ...prev, contact_email: e.target.value }));
+                    if (editFormErrors.contact_email) {
+                      setEditFormErrors(prev => ({ ...prev, contact_email: '' }));
+                    }
+                  }}
+                  placeholder="email@example.com"
+                  className={editFormErrors.contact_email ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {editFormErrors.contact_email && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.contact_email}</p>
+                )}
+              </div>
+      
+              {/* Telefono */}
+              <div>
+                <Label htmlFor="edit-vendor-phone">Telefono</Label>
+                <Input
+                  id="edit-vendor-phone"
+                  value={editForm.contact_phone}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, contact_phone: e.target.value }))}
+                  placeholder="+39 333 123 4567"
+                />
+              </div>
+      
+              {/* Sito Web */}
+              <div>
+                <Label htmlFor="edit-vendor-website">Sito Web</Label>
+                <Input
+                  id="edit-vendor-website"
+                  value={editForm.website}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="example.com"
+                />
+                <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
+              </div>
+            </div>
+      
+            {/* Indirizzo */}
+            <div className="mt-4">
+              <Label htmlFor="edit-vendor-address">Indirizzo</Label>
+              <Input
+                id="edit-vendor-address"
+                value={editForm.address}
+                onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Via Roma 123, Milano"
+              />
+            </div>
+      
+            {/* Note */}
+            <div className="mt-4">
+              <Label htmlFor="edit-vendor-notes">Note</Label>
+              <Textarea
+                id="edit-vendor-notes"
+                value={editForm.notes}
+                onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Note aggiuntive..."
+                rows={2}
+              />
+            </div>
+      
+            {/* Buttons */}
+            <div className="flex gap-2 mt-6">
+              <Button 
+                onClick={handleUpdateVendor}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                <Edit3 className="w-4 h-4 mr-2" />
+                Salva Modifiche
+              </Button>
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={handleCancelEdit}
+                className="flex-1"
+              >
+                Annulla
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Vendors List */}
       {loading ? (
         <Card className="text-center py-12">
@@ -511,14 +831,13 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   {/* Actions */}
                   <div className="flex gap-2 pt-4 border-t">
                     <Button 
+                      onClick={() => handleEditVendor(vendor)}
                       size="sm" 
                       variant="outline"
-                      className="flex-1"
-                      onClick={() => setEditingVendor(vendor)}
                     >
-                      <Edit3 className="w-4 h-4 mr-2" />
-                      Modifica
+                      <Edit3 className="w-4 h-4" />
                     </Button>
+
                     <Button 
                       size="sm" 
                       variant="destructive"
