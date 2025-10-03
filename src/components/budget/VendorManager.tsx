@@ -53,6 +53,16 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
+  // Normalizza URL aggiungendo https:// se manca il protocollo
+  const normalizeUrl = (url: string): string => {
+    if (!url.trim()) return '';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
   // Calcola le spese per categoria per determinare i pagamenti ai fornitori
   const getVendorPayments = (vendorId: string, categoryId: string) => {
     // Questa logica può essere espansa per tracciare i pagamenti specifici
@@ -143,11 +153,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       errors.contact_email = "Formato email non valido";
     }
     
-    // Validazione website opzionale
-    if (newVendor.website.trim() && !newVendor.website.startsWith('http')) {
-      errors.website = "Il sito deve iniziare con http:// o https://";
-    }
-    
     // ✅ SE CI SONO ERRORI, MOSTRALI SUI CAMPI (NON CHIUDERE LA FINESTRA)
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -162,7 +167,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       contact_email: newVendor.contact_email.trim() || undefined,
       contact_phone: newVendor.contact_phone.trim() || undefined,
       address: newVendor.address.trim() || undefined,
-      website: newVendor.website.trim() || undefined,
+      website: normalizeUrl(newVendor.website) || undefined,
       notes: newVendor.notes.trim() || undefined,
       default_cost: cost,
       payment_due_date: newVendor.payment_due_date ? format(newVendor.payment_due_date, 'yyyy-MM-dd') : undefined
@@ -375,9 +380,19 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 <Input
                   id="vendor-website"
                   value={newVendor.website}
-                  onChange={(e) => setNewVendor(prev => ({ ...prev, website: e.target.value }))}
-                  placeholder="https://example.com"
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, website: e.target.value }));
+                    if (formErrors.website) {
+                      setFormErrors(prev => ({ ...prev, website: '' }));
+                    }
+                  }}
+                  placeholder="example.com"
+                  className={formErrors.website ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {formErrors.website && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.website}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
               </div>
             </div>
             <div>

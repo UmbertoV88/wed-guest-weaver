@@ -41,9 +41,7 @@ const vendorSchema = z.object({
     .or(z.literal('')),
   website: z.string()
     .trim()
-    .refine((val) => !val || val.startsWith('http://') || val.startsWith('https://'), {
-      message: 'Il sito deve iniziare con http:// o https://'
-    })
+    .max(255, 'URL troppo lungo')
     .optional()
     .or(z.literal('')),
   address: z.string()
@@ -74,6 +72,16 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 }) => {
   const { addVendor } = useBudgetQuery();
   
+  // Normalizza URL aggiungendo https:// se manca il protocollo
+  const normalizeUrl = (url: string): string => {
+    if (!url.trim()) return '';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     category_id: preselectedCategoryId || '',
@@ -145,7 +153,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
         contact_email: formData.contact_email.trim() || undefined,
         contact_phone: formData.contact_phone.trim() || undefined,
         address: formData.address.trim() || undefined,
-        website: formData.website.trim() || undefined,
+        website: normalizeUrl(formData.website) || undefined,
         notes: formData.notes.trim() || undefined,
         default_cost: cost,
         payment_due_date: formData.payment_due_date ? format(formData.payment_due_date, 'yyyy-MM-dd') : undefined
@@ -326,13 +334,14 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
                 id="vendor-website"
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="https://example.com"
+                placeholder="example.com"
                 className={formErrors.website ? 'border-red-500 focus:border-red-500' : ''}
                 disabled={isSubmitting}
               />
               {formErrors.website && (
                 <p className="text-sm text-red-500 mt-1">{formErrors.website}</p>
               )}
+              <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
             </div>
           </div>
 
