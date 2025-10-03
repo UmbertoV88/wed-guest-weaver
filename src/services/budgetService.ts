@@ -337,6 +337,7 @@ export const budgetVendorsApi = {
           address: data.address,
           website: data.website,
           notes: data.notes,
+          default_cost: data.default_cost,
         })
         .select()
         .single();
