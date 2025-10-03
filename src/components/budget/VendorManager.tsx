@@ -834,8 +834,10 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                       onClick={() => handleEditVendor(vendor)}
                       size="sm" 
                       variant="outline"
+                      className="flex-1"
                     >
-                      <Edit3 className="w-4 h-4" />
+                      <Edit3 className="w-4 h-4 mr-2" />
+                      Modifica
                     </Button>
 
                     <Button 
