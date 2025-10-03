@@ -338,6 +338,7 @@ export const budgetVendorsApi = {
           website: data.website,
           notes: data.notes,
           default_cost: data.default_cost,
+          payment_due_date: data.payment_due_date,
         })
         .select()
         .single();
