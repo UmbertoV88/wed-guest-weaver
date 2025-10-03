@@ -52,6 +52,7 @@ export interface BudgetVendor {
   notes?: string;
   is_active: boolean;
   payment_due_date?: string;
+  default_cost?: number | null;
   created_at: string;
   updated_at: string;
 }
