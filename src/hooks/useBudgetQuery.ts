@@ -536,7 +536,6 @@ export const useBudgetQuery = () => {
 
         if (shouldDeleteItem) {
           await budgetItemsApi.delete(context.relatedItem.id);
-          queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
         } else {
           const updatedItem = await budgetItemsApi.update(context.relatedItem.id, {
             name: data.name || context.oldVendor.name,
@@ -573,7 +572,9 @@ export const useBudgetQuery = () => {
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
+      // Invalida le query SOLO DOPO che tutte le operazioni async sono completate
+      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
+      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
 
       toast({
         title: 'Fornitore aggiornato',
