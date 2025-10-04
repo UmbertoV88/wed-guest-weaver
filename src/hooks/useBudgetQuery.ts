@@ -421,7 +421,19 @@ export const useBudgetQuery = () => {
       budgetVendorsApi.update(id, data),
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.vendors() });
+      await queryClient.cancelQueries({ queryKey: budgetQueryKeys.items() });
+      await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
+
       const previousVendors = queryClient.getQueryData(budgetQueryKeys.vendors());
+      const previousItems = queryClient.getQueryData(budgetQueryKeys.items());
+      const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
+
+      const oldVendor = (previousVendors as any)?.find((v: any) => v.id === id);
+      if (!oldVendor) throw new Error('Fornitore non trovato');
+
+      const relatedItem = (previousItems as any)?.find((item: any) =>
+        item.notes?.includes(`Costo fornitore - ${oldVendor.name}`)
+      );
 
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
         old ? old.map((vendor: any) =>
@@ -429,20 +441,150 @@ export const useBudgetQuery = () => {
         ) : []
       );
 
-      return { previousVendors };
+      if (relatedItem) {
+        const costChanged = data.default_cost !== undefined && data.default_cost !== oldVendor.default_cost;
+        const categoryChanged = data.category_id && data.category_id !== oldVendor.category_id;
+        const nameChanged = data.name && data.name !== oldVendor.name;
+        
+        const newCost = data.default_cost !== undefined ? data.default_cost : oldVendor.default_cost;
+        const shouldDeleteItem = !newCost || newCost <= 0;
+
+        if (shouldDeleteItem) {
+          queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
+            old ? old.filter((item: any) => item.id !== relatedItem.id) : []
+          );
+
+          queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
+            old ? old.map((cat: any) =>
+              cat.id === relatedItem.category_id
+                ? { ...cat, spent: cat.spent - relatedItem.amount }
+                : cat
+            ) : []
+          );
+        } else {
+          queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
+            old ? old.map((item: any) =>
+              item.id === relatedItem.id
+                ? {
+                    ...item,
+                    name: data.name || oldVendor.name,
+                    amount: newCost,
+                    notes: `Costo fornitore - ${data.name || oldVendor.name}`,
+                    due_date: data.payment_due_date !== undefined ? data.payment_due_date : item.due_date,
+                    category_id: data.category_id || item.category_id
+                  }
+                : item
+            ) : []
+          );
+
+          if (costChanged || categoryChanged) {
+            queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
+              old ? old.map((cat: any) => {
+                if (categoryChanged) {
+                  if (cat.id === oldVendor.category_id) {
+                    return { ...cat, spent: cat.spent - relatedItem.amount };
+                  }
+                  if (cat.id === data.category_id) {
+                    return { ...cat, spent: cat.spent + newCost };
+                  }
+                } else if (costChanged && cat.id === relatedItem.category_id) {
+                  return { ...cat, spent: cat.spent - relatedItem.amount + newCost };
+                }
+                return cat;
+              }) : []
+            );
+          }
+        }
+      } else if (data.default_cost && data.default_cost > 0) {
+        const tempItem = {
+          id: `temp-${Date.now()}`,
+          user_id: oldVendor.user_id,
+          category_id: data.category_id || oldVendor.category_id,
+          name: data.name || oldVendor.name,
+          amount: data.default_cost,
+          expense_date: new Date().toISOString().split('T')[0],
+          due_date: data.payment_due_date,
+          paid: false,
+          notes: `Costo fornitore - ${data.name || oldVendor.name}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
+          old ? [...old, tempItem] : [tempItem]
+        );
+
+        queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
+          old ? old.map((cat: any) =>
+            cat.id === (data.category_id || oldVendor.category_id)
+              ? { ...cat, spent: cat.spent + data.default_cost }
+              : cat
+          ) : []
+        );
+      }
+
+      return { previousVendors, previousItems, previousCategories, oldVendor, relatedItem };
     },
-    onSuccess: (result, { id }) => {
+    onSuccess: async (result, { id, data }, context) => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
         old ? old.map((vendor: any) => vendor.id === id ? result : vendor) : [result]
       );
+
+      if (context?.relatedItem) {
+        const newCost = data.default_cost !== undefined ? data.default_cost : context.oldVendor.default_cost;
+        const shouldDeleteItem = !newCost || newCost <= 0;
+
+        if (shouldDeleteItem) {
+          await budgetItemsApi.delete(context.relatedItem.id);
+          queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
+        } else {
+          const updatedItem = await budgetItemsApi.update(context.relatedItem.id, {
+            name: data.name || context.oldVendor.name,
+            amount: newCost,
+            notes: `Costo fornitore - ${data.name || context.oldVendor.name}`,
+            due_date: data.payment_due_date !== undefined ? data.payment_due_date : context.relatedItem.due_date,
+            category_id: data.category_id || context.relatedItem.category_id
+          });
+
+          if (updatedItem) {
+            queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
+              old ? old.map((item: any) =>
+                item.id === context.relatedItem.id ? updatedItem : item
+              ) : [updatedItem]
+            );
+          }
+        }
+      } else if (data.default_cost && data.default_cost > 0) {
+        const newItem = await budgetItemsApi.create({
+          category_id: data.category_id || context?.oldVendor.category_id,
+          name: data.name || context?.oldVendor.name,
+          amount: data.default_cost,
+          expense_date: new Date().toISOString().split('T')[0],
+          due_date: data.payment_due_date,
+          notes: `Costo fornitore - ${data.name || context?.oldVendor.name}`
+        });
+
+        if (newItem) {
+          queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
+            old ? old.map((item: any) =>
+              item.id.toString().startsWith('temp-') ? newItem : item
+            ) : [newItem]
+          );
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
+
       toast({
         title: 'Fornitore aggiornato',
-        description: 'Informazioni aggiornate con successo',
+        description: 'Fornitore e spese associate aggiornate con successo',
         duration: 3000,
       });
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), context?.previousVendors);
+      queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
+      queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare il fornitore',

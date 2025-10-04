@@ -269,6 +269,27 @@ export const budgetItemsApi = {
     }
   },
 
+  async update(id: string, data: any) {
+    try {
+      const { data: result, error } = await supabase
+        .from('budget_items')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating budget item:', error);
+        throw error;
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Budget item update error:', error);
+      return null;
+    }
+  },
+
   async togglePaid(id: string) {
     try {
       const { data: current, error: fetchError } = await supabase
