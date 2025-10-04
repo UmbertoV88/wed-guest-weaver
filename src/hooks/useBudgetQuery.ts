@@ -573,8 +573,8 @@ export const useBudgetQuery = () => {
       }
 
       // Invalida le query SOLO DOPO che tutte le operazioni async sono completate
-      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
+      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
 
       toast({
         title: 'Fornitore aggiornato',
