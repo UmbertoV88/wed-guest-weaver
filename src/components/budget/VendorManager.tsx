@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVendor, setEditingVendor] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const formRef = useRef<HTMLDivElement>(null);
   const [newVendor, setNewVendor] = useState({
     name: '',
     category_id: '',
@@ -65,6 +66,17 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (showAddForm && formRef.current) {
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100);
+    }
+  }, [showAddForm]);
 
   // Normalizza URL aggiungendo https:// se manca il protocollo
   const normalizeUrl = (url: string): string => {
@@ -350,7 +362,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
       {/* Add Vendor Form */}
       {showAddForm && (
-        <Card className="border-2 border-pink-200">
+        <Card ref={formRef} className="border-2 border-pink-200">
           <CardHeader>
             <CardTitle className="text-pink-700">Aggiungi Nuovo Fornitore</CardTitle>
           </CardHeader>
