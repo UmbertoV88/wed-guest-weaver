@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,6 +91,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
   const [showVendorDialog, setShowVendorDialog] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const addFormRef = useRef<HTMLDivElement>(null);
   const [newCategory, setNewCategory] = useState({
     name: '',
     nameit: '',
@@ -100,6 +101,17 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   });
   
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (showAddForm && addFormRef.current) {
+      setTimeout(() => {
+        addFormRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100);
+    }
+  }, [showAddForm]);
 
   const handleAddExpenseClick = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
@@ -205,7 +217,7 @@ Questa operazione non può essere annullata.`
 
       {/* Add Category Form */}
       {showAddForm && (
-        <Card className="border-2 border-pink-200">
+        <Card ref={addFormRef} className="border-2 border-pink-200">
           <CardHeader>
             <CardTitle className="text-pink-700">Aggiungi Nuova Categoria</CardTitle>
           </CardHeader>

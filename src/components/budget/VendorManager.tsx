@@ -39,6 +39,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const [editingVendor, setEditingVendor] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
+  const editFormRef = useRef<HTMLDivElement>(null);
   const [newVendor, setNewVendor] = useState({
     name: '',
     category_id: '',
@@ -77,6 +78,17 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       }, 100);
     }
   }, [showAddForm]);
+
+  useEffect(() => {
+    if (editingVendor && editFormRef.current) {
+      setTimeout(() => {
+        editFormRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100);
+    }
+  }, [editingVendor]);
 
   // Normalizza URL aggiungendo https:// se manca il protocollo
   const normalizeUrl = (url: string): string => {
@@ -562,7 +574,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
       {/* Edit Vendor Form */}
       {editingVendor && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card ref={editFormRef} className="border-blue-200 bg-blue-50">
           <CardHeader>
             <CardTitle className="text-blue-800">
               Modifica Fornitore: {editingVendor.name}
