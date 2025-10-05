@@ -537,11 +537,13 @@ Questa operazione non può essere annullata.`
                         disabled={isDeleting}
                       >
                         {isDeleting ? (
-                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          <Loader2 className="w-4 h-4 md:mr-1 animate-spin" />
                         ) : (
-                          <Trash2 className="w-4 h-4 mr-1" />
+                          <Trash2 className="w-4 h-4 md:mr-1" />
                         )}
-                        {isDeleting ? 'Eliminando...' : 'Elimina'}
+                        <span className="hidden md:inline">
+                          {isDeleting ? 'Eliminando...' : 'Elimina'}
+                        </span>
                       </Button>
                     </div>
                   </>
