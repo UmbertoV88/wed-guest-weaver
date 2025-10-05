@@ -516,8 +516,8 @@ Questa operazione non può essere annullata.`
                         className="flex-1"
                         disabled={isDeleting}
                       >
-                        <Edit3 className="w-4 h-4 mr-2" />
-                        Modifica
+                        <Edit3 className="w-4 h-4 md:mr-2" />
+                        <span className="hidden md:inline">Modifica</span>
                       </Button>
                       <Button 
                         variant="outline" 
