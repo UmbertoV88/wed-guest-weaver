@@ -129,28 +129,28 @@ const FinanceLayout = () => {
 
         {/* *** TABS *** */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">
-              <PieChart className="w-4 h-4 mr-2" />
-              Panoramica
-            </TabsTrigger>
-            <TabsTrigger value="categories">
-              <Settings className="w-4 h-4 mr-2" />
-              Categorie
-            </TabsTrigger>
-            <TabsTrigger value="vendors">
-              <Users className="w-4 h-4 mr-2" />
-              Fornitori
-            </TabsTrigger>
-            <TabsTrigger value="payments">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Pagamenti
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Analisi
-            </TabsTrigger>
-          </TabsList>
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">
+                <PieChart className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Panoramica</span>
+              </TabsTrigger>
+              <TabsTrigger value="categories">
+                <Settings className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Categorie</span>
+              </TabsTrigger>
+              <TabsTrigger value="vendors">
+                <Users className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Fornitori</span>
+              </TabsTrigger>
+              <TabsTrigger value="payments">
+                <CreditCard className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Pagamenti</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics">
+                <BarChart3 className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Analisi</span>
+              </TabsTrigger>
+            </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
             <BudgetChart 
