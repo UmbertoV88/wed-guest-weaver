@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, TrendingUp, AlertTriangle, Calendar } from "lucide-react";
+import { DollarSign, TrendingUp, AlertTriangle, Calendar, PieChart, Settings, Users, CreditCard, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer } from "@/components/ui/chart";
 import { ResponsiveContainer, BarChart, CartesianGrid } from "recharts";
@@ -130,11 +130,26 @@ const FinanceLayout = () => {
         {/* *** TABS *** */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Panoramica</TabsTrigger>
-            <TabsTrigger value="categories">Categorie</TabsTrigger>
-            <TabsTrigger value="vendors">Fornitori</TabsTrigger>
-            <TabsTrigger value="payments">Pagamenti</TabsTrigger>
-            <TabsTrigger value="analytics">Analisi</TabsTrigger>
+            <TabsTrigger value="overview">
+              <PieChart className="w-4 h-4 mr-2" />
+              Panoramica
+            </TabsTrigger>
+            <TabsTrigger value="categories">
+              <Settings className="w-4 h-4 mr-2" />
+              Categorie
+            </TabsTrigger>
+            <TabsTrigger value="vendors">
+              <Users className="w-4 h-4 mr-2" />
+              Fornitori
+            </TabsTrigger>
+            <TabsTrigger value="payments">
+              <CreditCard className="w-4 h-4 mr-2" />
+              Pagamenti
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analisi
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
