@@ -5,7 +5,7 @@ import { DollarSign, TrendingUp, AlertTriangle, Calendar, PieChart, Settings, Us
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer } from "@/components/ui/chart";
 import { ResponsiveContainer, BarChart, CartesianGrid } from "recharts";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import CommonHeader from "@/components/CommonHeader";
 import { useAuth } from "@/contexts/AuthContext";
@@ -270,7 +270,7 @@ const FinanceLayout = () => {
   };
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="flex min-h-screen w-full">
       <DashboardSidebar 
         user={user}
         profile={profile}
@@ -279,13 +279,13 @@ const FinanceLayout = () => {
         signingOut={authLoading}
       />
       
-      <div className="flex-1 flex flex-col min-h-screen">
-        <CommonHeader />
+      <SidebarInset className="flex-1 flex flex-col">
+        <CommonHeader showSidebarTrigger={true} />
         
         <main className="flex-1 overflow-auto">
           <BudgetCalculator />
         </main>
-      </div>
+      </SidebarInset>
     </div>
   );
 };
