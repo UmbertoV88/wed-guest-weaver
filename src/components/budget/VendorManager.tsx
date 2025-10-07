@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Progress } from '@/components/ui/progress';
 import { 
   Plus, 
   Phone, 
@@ -100,15 +101,18 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     return `https://${trimmed}`;
   };
 
-  // Calcola le spese per categoria per determinare i pagamenti ai fornitori
-  const getVendorPayments = (vendorId: string, categoryId: string) => {
-    // Questa logica può essere espansa per tracciare i pagamenti specifici
-    // Per ora, mostriamo tutti i vendor come "in attesa" finché non aggiungiamo pagamenti
-    return {
-      paid: 0,
-      remaining: 0,
-      status: 'pending' as const
-    };
+  // Calcola i pagamenti per un fornitore
+  const getVendorPayments = (vendor: any) => {
+    const totalCost = vendor.default_cost || 0;
+    const paid = vendor.amount_paid || 0;
+    const remaining = totalCost - paid;
+    const percentage = totalCost > 0 ? (paid / totalCost) * 100 : 0;
+    
+    let status: 'paid' | 'partial' | 'pending' = 'pending';
+    if (percentage >= 100) status = 'paid';
+    else if (percentage > 0) status = 'partial';
+    
+    return { paid, remaining, percentage, status };
   };
 
   const getStatusIcon = (status: string) => {
@@ -785,7 +789,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredVendors.map((vendor) => {
-            const payments = getVendorPayments(vendor.id, vendor.category_id);
+            const payments = getVendorPayments(vendor);
             return (
               <Card key={vendor.id} className="shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardHeader className="pb-4">
@@ -844,6 +848,44 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                       </div>
                     )}
                   </div>
+
+                  {/* Payment Progress */}
+                  {vendor.default_cost && vendor.default_cost > 0 && (
+                    <div className="space-y-3 pt-4 border-t">
+                      {/* Labels con valori */}
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="text-left">
+                          <p className="text-muted-foreground">Costo Totale</p>
+                          <p className="font-semibold text-foreground">
+                            {formatCurrency(vendor.default_cost)}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-muted-foreground">Pagato</p>
+                          <p className="font-semibold text-green-600">
+                            {formatCurrency(payments.paid)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-muted-foreground">Rimanente</p>
+                          <p className="font-semibold text-red-600">
+                            {formatCurrency(payments.remaining)}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="space-y-1">
+                        <Progress 
+                          value={payments.percentage} 
+                          className="h-2"
+                        />
+                        <p className="text-xs text-muted-foreground text-right">
+                          {payments.percentage.toFixed(0)}% completato
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Notes */}
                   {vendor.notes && (

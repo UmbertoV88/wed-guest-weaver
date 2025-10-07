@@ -136,6 +136,7 @@ export type Database = {
       budget_vendors: {
         Row: {
           address: string | null
+          amount_paid: number
           category_id: string | null
           contact_email: string | null
           contact_phone: string | null
@@ -152,6 +153,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          amount_paid?: number
           category_id?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -168,6 +170,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          amount_paid?: number
           category_id?: string | null
           contact_email?: string | null
           contact_phone?: string | null
