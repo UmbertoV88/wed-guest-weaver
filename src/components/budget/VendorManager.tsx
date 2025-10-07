@@ -9,6 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   Plus, 
   Phone, 
@@ -35,12 +43,18 @@ interface VendorManagerProps {
 }
 
 const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
-  const { vendors, addVendor, updateVendor, deleteVendor, loading } = useBudgetQuery();
+  const { vendors, addVendor, updateVendor, deleteVendor, addVendorPayment, loading } = useBudgetQuery();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVendor, setEditingVendor] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
   const editFormRef = useRef<HTMLDivElement>(null);
+  
+  // Payment dialog state
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentNotes, setPaymentNotes] = useState('');
   const [newVendor, setNewVendor] = useState({
     name: '',
     category_id: '',
@@ -341,6 +355,49 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       payment_due_date: undefined
     });
     setEditFormErrors({});
+  };
+
+  const handleAddPayment = (vendor: any) => {
+    setSelectedVendor(vendor);
+    setPaymentAmount('');
+    setPaymentNotes('');
+    setShowPaymentDialog(true);
+  };
+
+  const handleSubmitPayment = async () => {
+    if (!selectedVendor || !paymentAmount) return;
+    
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: 'Errore',
+        description: 'Inserisci un importo valido',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const remaining = (selectedVendor.default_cost || 0) - (selectedVendor.amount_paid || 0);
+    if (amount > remaining) {
+      toast({
+        title: 'Attenzione',
+        description: `L'importo supera il rimanente da pagare (${formatCurrency(remaining)})`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    await addVendorPayment(
+      selectedVendor.id,
+      amount,
+      selectedVendor.category_id,
+      paymentNotes || `Pagamento per ${selectedVendor.name}`
+    );
+
+    setShowPaymentDialog(false);
+    setSelectedVendor(null);
+    setPaymentAmount('');
+    setPaymentNotes('');
   };
 
 
@@ -896,6 +953,18 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-4 border-t">
+                    {vendor.default_cost && vendor.default_cost > 0 && (
+                      <Button 
+                        onClick={() => handleAddPayment(vendor)}
+                        size="sm" 
+                        variant="default"
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                      >
+                        <Euro className="w-4 h-4 mr-2" />
+                        Registra Pagamento
+                      </Button>
+                    )}
+                    
                     <Button 
                       onClick={() => handleEditVendor(vendor)}
                       size="sm" 
@@ -931,6 +1000,67 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
           </CardContent>
         </Card>
       )}
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Registra Pagamento</DialogTitle>
+            <DialogDescription>
+              Fornitore: {selectedVendor?.name}
+              {selectedVendor && (
+                <div className="mt-2 space-y-1 text-sm">
+                  <p>Costo totale: <strong>{formatCurrency(selectedVendor.default_cost || 0)}</strong></p>
+                  <p>Già pagato: <strong className="text-green-600">{formatCurrency(selectedVendor.amount_paid || 0)}</strong></p>
+                  <p>Rimanente: <strong className="text-red-600">{formatCurrency((selectedVendor.default_cost || 0) - (selectedVendor.amount_paid || 0))}</strong></p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="payment-amount">Importo Pagamento *</Label>
+              <Input
+                id="payment-amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="payment-notes">Note (opzionale)</Label>
+              <Textarea
+                id="payment-notes"
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+                placeholder="Es: Acconto del 30%, Saldo finale, ecc."
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowPaymentDialog(false)}
+            >
+              Annulla
+            </Button>
+            <Button 
+              onClick={handleSubmitPayment}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Euro className="w-4 h-4 mr-2" />
+              Registra
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

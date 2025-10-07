@@ -422,8 +422,8 @@ export const budgetVendorsApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      // Crea un budget_item per tracciare il pagamento
-      const { data: result, error } = await supabase
+      // 1. Crea un budget_item per tracciare il pagamento
+      const { data: result, error: itemError } = await supabase
         .from('budget_items')
         .insert({
           user_id: user.id,
@@ -437,9 +437,29 @@ export const budgetVendorsApi = {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error creating vendor payment:', error);
-        throw error;
+      if (itemError) {
+        console.error('Error creating vendor payment:', itemError);
+        throw itemError;
+      }
+
+      // 2. Aggiorna amount_paid del vendor
+      const { data: vendor, error: vendorFetchError } = await supabase
+        .from('budget_vendors')
+        .select('amount_paid')
+        .eq('id', vendorId)
+        .single();
+
+      if (!vendorFetchError && vendor) {
+        const { error: vendorUpdateError } = await supabase
+          .from('budget_vendors')
+          .update({ 
+            amount_paid: (vendor.amount_paid || 0) + amount 
+          })
+          .eq('id', vendorId);
+
+        if (vendorUpdateError) {
+          console.error('Error updating vendor amount_paid:', vendorUpdateError);
+        }
       }
 
       return result;
