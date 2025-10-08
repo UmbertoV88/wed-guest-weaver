@@ -422,47 +422,36 @@ export const budgetVendorsApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      // 1. Crea un budget_item per tracciare il pagamento
-      const { data: result, error: itemError } = await supabase
-        .from('budget_items')
-        .insert({
-          user_id: user.id,
-          category_id: categoryId,
-          name: `Pagamento fornitore`,
-          amount: amount,
-          expense_date: new Date().toISOString().split('T')[0],
-          paid: true,
-          notes: notes || `Pagamento per fornitore ID: ${vendorId}`,
-        })
-        .select()
-        .single();
-
-      if (itemError) {
-        console.error('Error creating vendor payment:', itemError);
-        throw itemError;
-      }
-
-      // 2. Aggiorna amount_paid del vendor
+      // Fetch current vendor amount_paid
       const { data: vendor, error: vendorFetchError } = await supabase
         .from('budget_vendors')
         .select('amount_paid')
         .eq('id', vendorId)
         .single();
 
-      if (!vendorFetchError && vendor) {
-        const { error: vendorUpdateError } = await supabase
-          .from('budget_vendors')
-          .update({ 
-            amount_paid: (vendor.amount_paid || 0) + amount 
-          })
-          .eq('id', vendorId);
-
-        if (vendorUpdateError) {
-          console.error('Error updating vendor amount_paid:', vendorUpdateError);
-        }
+      if (vendorFetchError) {
+        console.error('Error fetching vendor:', vendorFetchError);
+        throw vendorFetchError;
       }
 
-      return result;
+      const newAmountPaid = (vendor.amount_paid || 0) + amount;
+
+      // Update only vendor amount_paid (no budget_item creation)
+      const { data: updatedVendor, error: vendorUpdateError } = await supabase
+        .from('budget_vendors')
+        .update({ 
+          amount_paid: newAmountPaid 
+        })
+        .eq('id', vendorId)
+        .select()
+        .single();
+
+      if (vendorUpdateError) {
+        console.error('Error updating vendor amount_paid:', vendorUpdateError);
+        throw vendorUpdateError;
+      }
+
+      return updatedVendor;
     } catch (error) {
       console.error('Vendor payment error:', error);
       return null;

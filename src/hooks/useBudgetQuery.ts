@@ -726,7 +726,11 @@ export const useBudgetQuery = () => {
 
   const totalBudget = (settings as any)?.total_budget || 35000;
   const totalAllocated = categories.reduce((sum: number, cat: any) => sum + (cat?.budgeted || 0), 0);
-  const totalSpent = categories.reduce((sum: number, cat: any) => sum + (cat?.spent || 0), 0);
+  
+  // Calculate total spent: manual expenses (category.spent) + vendor payments (vendor.amount_paid)
+  const itemsSpent = categories.reduce((sum: number, cat: any) => sum + (cat?.spent || 0), 0);
+  const vendorsSpent = vendors.reduce((sum: number, vendor: any) => sum + (vendor?.amount_paid || 0), 0);
+  const totalSpent = itemsSpent + vendorsSpent;
   const remainingToAllocate = totalBudget - totalAllocated;
   const remainingAfterSpent = totalBudget - totalSpent;
   const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;

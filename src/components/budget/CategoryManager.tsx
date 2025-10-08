@@ -501,6 +501,52 @@ Questa operazione non può essere annullata.`
                       </div>
                     </div>
 
+                    {/* Fornitori della categoria */}
+                    <div className="border-t pt-4 mt-4">
+                      <h4 className="font-medium text-gray-900 mb-2">Fornitori</h4>
+                      <div className="space-y-1 text-sm">
+                        {(() => {
+                          const categoryVendors = getVendorsByCategory(category.id);
+                          
+                          if (categoryVendors.length === 0) {
+                            return <p className="text-gray-500">Nessun fornitore associato</p>;
+                          }
+
+                          return (
+                            <div className="space-y-2">
+                              {categoryVendors.map((vendor: any) => {
+                                const paid = vendor.amount_paid || 0;
+                                const total = vendor.default_cost || 0;
+                                const percentage = total > 0 ? (paid / total) * 100 : 0;
+
+                                return (
+                                  <div key={vendor.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                    <div className="flex-1">
+                                      <span className="font-medium">{vendor.name}</span>
+                                      <Progress value={percentage} className="h-1 mt-1" />
+                                    </div>
+                                    <div className="text-right ml-4">
+                                      <p className="text-xs text-gray-600">
+                                        {formatCurrency(paid)} / {formatCurrency(total)}
+                                      </p>
+                                      <p className="text-xs text-green-600 font-medium">
+                                        {Math.round(percentage)}% pagato
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              <p className="text-xs text-gray-600 mt-2 pt-2 border-t">
+                                <strong>Totale pagato ai fornitori:</strong> {formatCurrency(
+                                  categoryVendors.reduce((sum: number, v: any) => sum + (v.amount_paid || 0), 0)
+                                )}
+                              </p>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
                     {/* Action Buttons */}
                     <div className="flex gap-2 pt-4 border-t">
                       <Button 
