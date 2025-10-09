@@ -3,28 +3,23 @@
 // Per Wed Guest Weaver - Sezione Finanza
 // =====================================================
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  budgetSettingsApi, 
-  budgetCategoriesApi, 
-  budgetItemsApi,
-  budgetVendorsApi
-} from '@/services/budgetService';
-import type { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { budgetSettingsApi, budgetCategoriesApi, budgetItemsApi, budgetVendorsApi } from "@/services/budgetService";
+import type { BudgetCategory, BudgetItem, BudgetSettings } from "@/types/budget";
 
 // =====================================================
 // QUERY KEYS
 // =====================================================
 
 export const budgetQueryKeys = {
-  all: ['budget'] as const,
-  settings: () => [...budgetQueryKeys.all, 'settings'] as const,
-  categories: () => [...budgetQueryKeys.all, 'categories'] as const,
-  items: () => [...budgetQueryKeys.all, 'items'] as const,
-  vendors: () => [...budgetQueryKeys.all, 'vendors'] as const,
+  all: ["budget"] as const,
+  settings: () => [...budgetQueryKeys.all, "settings"] as const,
+  categories: () => [...budgetQueryKeys.all, "categories"] as const,
+  items: () => [...budgetQueryKeys.all, "items"] as const,
+  vendors: () => [...budgetQueryKeys.all, "vendors"] as const,
 };
 
 // =====================================================
@@ -82,21 +77,20 @@ export const useBudgetQuery = () => {
   // =====================================================
 
   const updateTotalBudgetMutation = useMutation({
-    mutationFn: (totalBudget: number) => 
-      budgetSettingsApi.upsert({ total_budget: totalBudget }),
+    mutationFn: (totalBudget: number) => budgetSettingsApi.upsert({ total_budget: totalBudget }),
     onSuccess: (result, totalBudget) => {
       queryClient.setQueryData(budgetQueryKeys.settings(), result);
       toast({
-        title: 'Budget aggiornato',
+        title: "Budget aggiornato",
         description: `Budget totale impostato a €${totalBudget.toLocaleString()}`,
         duration: 3000,
       });
     },
     onError: () => {
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiornare il budget totale',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiornare il budget totale",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -107,69 +101,65 @@ export const useBudgetQuery = () => {
   // =====================================================
 
   const addCategoryMutation = useMutation({
-    mutationFn: (data: { name: string; budgeted: number; color?: string }) =>
-      budgetCategoriesApi.create(data),
+    mutationFn: (data: { name: string; budgeted: number; color?: string }) => budgetCategoriesApi.create(data),
     onMutate: async (newCategory) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
-      
+
       const tempCategory = {
         id: `temp-${Date.now()}`,
         ...newCategory,
         spent: 0,
-        user_id: user?.id || '',
+        user_id: user?.id || "",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) => 
-        old ? [...old, tempCategory] : [tempCategory]
+      queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
+        old ? [...old, tempCategory] : [tempCategory],
       );
 
       return { previousCategories, tempCategory };
     },
     onSuccess: (result, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) => 
-          cat.id === context?.tempCategory.id ? result : cat
-        ) : [result]
+        old ? old.map((cat: any) => (cat.id === context?.tempCategory.id ? result : cat)) : [result],
       );
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiungere la categoria',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiungere la categoria",
+        variant: "destructive",
         duration: 3000,
       });
     },
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      budgetCategoriesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) => budgetCategoriesApi.update(id, data),
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
 
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) => cat.id === id ? { ...cat, ...data } : cat) : []
+        old ? old.map((cat: any) => (cat.id === id ? { ...cat, ...data } : cat)) : [],
       );
 
       return { previousCategories };
     },
     onSuccess: (result, { id }) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) => cat.id === id ? result : cat) : [result]
+        old ? old.map((cat: any) => (cat.id === id ? result : cat)) : [result],
       );
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiornare la categoria',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiornare la categoria",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -180,23 +170,23 @@ export const useBudgetQuery = () => {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.items() });
-      
+
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
       const previousItems = queryClient.getQueryData(budgetQueryKeys.items());
 
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.filter((cat: any) => cat.id !== id) : []
+        old ? old.filter((cat: any) => cat.id !== id) : [],
       );
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? old.filter((item: any) => item.category_id !== id) : []
+        old ? old.filter((item: any) => item.category_id !== id) : [],
       );
 
       return { previousCategories, previousItems };
     },
     onSuccess: () => {
       toast({
-        title: 'Categoria eliminata',
-        description: 'Categoria e relative spese rimosse',
+        title: "Categoria eliminata",
+        description: "Categoria e relative spese rimosse",
         duration: 3000,
       });
     },
@@ -204,9 +194,9 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       toast({
-        title: 'Errore',
-        description: 'Impossibile eliminare la categoria',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile eliminare la categoria",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -228,48 +218,44 @@ export const useBudgetQuery = () => {
     onMutate: async (newItem) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.items() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
-      
+
       const previousItems = queryClient.getQueryData(budgetQueryKeys.items());
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
 
       const tempItem = {
         id: `temp-${Date.now()}`,
-        user_id: user?.id || '',
-        expense_date: new Date().toISOString().split('T')[0],
+        user_id: user?.id || "",
+        expense_date: new Date().toISOString().split("T")[0],
         paid: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         ...newItem,
       };
 
-      queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? [...old, tempItem] : [tempItem]
-      );
+      queryClient.setQueryData(budgetQueryKeys.items(), (old: any) => (old ? [...old, tempItem] : [tempItem]));
 
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) =>
-          cat.id === newItem.category_id
-            ? { ...cat, spent: cat.spent + newItem.amount }
-            : cat
-        ) : []
+        old
+          ? old.map((cat: any) =>
+              cat.id === newItem.category_id ? { ...cat, spent: cat.spent + newItem.amount } : cat,
+            )
+          : [],
       );
 
       return { previousItems, previousCategories, tempItem };
     },
     onSuccess: (result, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? old.map((item: any) =>
-          item.id === context?.tempItem.id ? result : item
-        ) : [result]
+        old ? old.map((item: any) => (item.id === context?.tempItem.id ? result : item)) : [result],
       );
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiungere la spesa',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiungere la spesa",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -282,24 +268,22 @@ export const useBudgetQuery = () => {
       const previousItems = queryClient.getQueryData(budgetQueryKeys.items());
 
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? old.map((item: any) =>
-          item.id === id ? { ...item, paid: !item.paid } : item
-        ) : []
+        old ? old.map((item: any) => (item.id === id ? { ...item, paid: !item.paid } : item)) : [],
       );
 
       return { previousItems };
     },
     onSuccess: (result, id) => {
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? old.map((item: any) => item.id === id ? result : item) : [result]
+        old ? old.map((item: any) => (item.id === id ? result : item)) : [result],
       );
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiornare lo stato del pagamento',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiornare lo stato del pagamento",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -327,15 +311,13 @@ export const useBudgetQuery = () => {
 
       const tempVendor = {
         id: `temp-${Date.now()}`,
-        user_id: user?.id || '',
+        user_id: user?.id || "",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         ...newVendor,
       };
 
-      queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
-        old ? [...old, tempVendor] : [tempVendor]
-      );
+      queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) => (old ? [...old, tempVendor] : [tempVendor]));
 
       // Handle default cost
       if (newVendor.default_cost && newVendor.default_cost > 0) {
@@ -344,11 +326,11 @@ export const useBudgetQuery = () => {
 
         const tempItem = {
           id: `temp-item-${Date.now()}`,
-          user_id: user?.id || '',
+          user_id: user?.id || "",
           category_id: newVendor.category_id,
           name: newVendor.name,
           amount: newVendor.default_cost,
-          expense_date: new Date().toISOString().split('T')[0],
+          expense_date: new Date().toISOString().split("T")[0],
           due_date: newVendor.payment_due_date,
           paid: false,
           notes: `Costo fornitore - ${newVendor.name}`,
@@ -356,16 +338,14 @@ export const useBudgetQuery = () => {
           updated_at: new Date().toISOString(),
         };
 
-        queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-          old ? [...old, tempItem] : [tempItem]
-        );
+        queryClient.setQueryData(budgetQueryKeys.items(), (old: any) => (old ? [...old, tempItem] : [tempItem]));
 
         queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-          old ? old.map((cat: any) =>
-            cat.id === newVendor.category_id
-              ? { ...cat, spent: cat.spent + newVendor.default_cost }
-              : cat
-          ) : []
+          old
+            ? old.map((cat: any) =>
+                cat.id === newVendor.category_id ? { ...cat, spent: cat.spent + newVendor.default_cost } : cat,
+              )
+            : [],
         );
       }
 
@@ -374,51 +354,52 @@ export const useBudgetQuery = () => {
     onSuccess: (result, variables, context) => {
       console.log(result);
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
-        old ? old.map((vendor: any) =>
-          vendor.id === context?.tempVendor.id ? result : vendor
-        ) : [result]
+        old ? old.map((vendor: any) => (vendor.id === context?.tempVendor.id ? result : vendor)) : [result],
       );
 
       if (variables.default_cost && variables.default_cost > 0) {
         // Create real item in background
-        budgetItemsApi.create({
-          category_id: variables.category_id,
-          name: variables.name,
-          amount: variables.default_cost,
-          expense_date: new Date().toISOString().split('T')[0],
-          due_date: variables.payment_due_date,
-          notes: `Costo fornitore - ${variables.name}`
-        }).then((realItem) => {
-          if (realItem) {
-            queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-              old ? old.map((item: any) =>
-                item.notes?.includes(`Costo fornitore - ${variables.name}`) ? realItem : item
-              ) : [realItem]
-            );
-          }
-        });
+        budgetItemsApi
+          .create({
+            category_id: variables.category_id,
+            name: variables.name,
+            amount: variables.default_cost,
+            expense_date: new Date().toISOString().split("T")[0],
+            due_date: variables.payment_due_date,
+            notes: `Costo fornitore - ${variables.name}`,
+          })
+          .then((realItem) => {
+            if (realItem) {
+              queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
+                old
+                  ? old.map((item: any) =>
+                      item.notes?.includes(`Costo fornitore - ${variables.name}`) ? realItem : item,
+                    )
+                  : [realItem],
+              );
+            }
+          });
       }
 
       toast({
-        title: 'Fornitore aggiunto',
-        description: `${variables.name} aggiunto con successo${variables.default_cost ? ` (costo: €${variables.default_cost.toLocaleString()})` : ''}`,
+        title: "Fornitore aggiunto",
+        description: `${variables.name} aggiunto con successo${variables.default_cost ? ` (costo: €${variables.default_cost.toLocaleString()})` : ""}`,
         duration: 3000,
       });
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), context?.previousVendors);
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiungere il fornitore',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiungere il fornitore",
+        variant: "destructive",
         duration: 3000,
       });
     },
   });
 
   const updateVendorMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      budgetVendorsApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) => budgetVendorsApi.update(id, data),
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.vendors() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.items() });
@@ -429,69 +410,71 @@ export const useBudgetQuery = () => {
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
 
       const oldVendor = (previousVendors as any)?.find((v: any) => v.id === id);
-      if (!oldVendor) throw new Error('Fornitore non trovato');
+      if (!oldVendor) throw new Error("Fornitore non trovato");
 
       const relatedItem = (previousItems as any)?.find((item: any) =>
-        item.notes?.includes(`Costo fornitore - ${oldVendor.name}`)
+        item.notes?.includes(`Costo fornitore - ${oldVendor.name}`),
       );
 
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
-        old ? old.map((vendor: any) =>
-          vendor.id === id ? { ...vendor, ...data } : vendor
-        ) : []
+        old ? old.map((vendor: any) => (vendor.id === id ? { ...vendor, ...data } : vendor)) : [],
       );
 
       if (relatedItem) {
         const costChanged = data.default_cost !== undefined && data.default_cost !== oldVendor.default_cost;
         const categoryChanged = data.category_id && data.category_id !== oldVendor.category_id;
         const nameChanged = data.name && data.name !== oldVendor.name;
-        
+
         const newCost = data.default_cost !== undefined ? data.default_cost : oldVendor.default_cost;
         const shouldDeleteItem = !newCost || newCost <= 0;
 
         if (shouldDeleteItem) {
           queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-            old ? old.filter((item: any) => item.id !== relatedItem.id) : []
+            old ? old.filter((item: any) => item.id !== relatedItem.id) : [],
           );
 
           queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-            old ? old.map((cat: any) =>
-              cat.id === relatedItem.category_id
-                ? { ...cat, spent: cat.spent - relatedItem.amount }
-                : cat
-            ) : []
+            old
+              ? old.map((cat: any) =>
+                  cat.id === relatedItem.category_id ? { ...cat, spent: cat.spent - relatedItem.amount } : cat,
+                )
+              : [],
           );
         } else {
           queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-            old ? old.map((item: any) =>
-              item.id === relatedItem.id
-                ? {
-                    ...item,
-                    name: data.name || oldVendor.name,
-                    amount: newCost,
-                    notes: `Costo fornitore - ${data.name || oldVendor.name}`,
-                    due_date: data.payment_due_date !== undefined ? data.payment_due_date : item.due_date,
-                    category_id: data.category_id || item.category_id
-                  }
-                : item
-            ) : []
+            old
+              ? old.map((item: any) =>
+                  item.id === relatedItem.id
+                    ? {
+                        ...item,
+                        name: data.name || oldVendor.name,
+                        amount: newCost,
+                        notes: `Costo fornitore - ${data.name || oldVendor.name}`,
+                        due_date: data.payment_due_date !== undefined ? data.payment_due_date : item.due_date,
+                        category_id: data.category_id || item.category_id,
+                      }
+                    : item,
+                )
+              : [],
           );
 
           if (costChanged || categoryChanged) {
             queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-              old ? old.map((cat: any) => {
-                if (categoryChanged) {
-                  if (cat.id === oldVendor.category_id) {
-                    return { ...cat, spent: cat.spent - relatedItem.amount };
-                  }
-                  if (cat.id === data.category_id) {
-                    return { ...cat, spent: cat.spent + newCost };
-                  }
-                } else if (costChanged && cat.id === relatedItem.category_id) {
-                  return { ...cat, spent: cat.spent - relatedItem.amount + newCost };
-                }
-                return cat;
-              }) : []
+              old
+                ? old.map((cat: any) => {
+                    if (categoryChanged) {
+                      if (cat.id === oldVendor.category_id) {
+                        return { ...cat, spent: cat.spent - relatedItem.amount };
+                      }
+                      if (cat.id === data.category_id) {
+                        return { ...cat, spent: cat.spent + newCost };
+                      }
+                    } else if (costChanged && cat.id === relatedItem.category_id) {
+                      return { ...cat, spent: cat.spent - relatedItem.amount + newCost };
+                    }
+                    return cat;
+                  })
+                : [],
             );
           }
         }
@@ -502,7 +485,7 @@ export const useBudgetQuery = () => {
           category_id: data.category_id || oldVendor.category_id,
           name: data.name || oldVendor.name,
           amount: data.default_cost,
-          expense_date: new Date().toISOString().split('T')[0],
+          expense_date: new Date().toISOString().split("T")[0],
           due_date: data.payment_due_date,
           paid: false,
           notes: `Costo fornitore - ${data.name || oldVendor.name}`,
@@ -510,16 +493,16 @@ export const useBudgetQuery = () => {
           updated_at: new Date().toISOString(),
         };
 
-        queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-          old ? [...old, tempItem] : [tempItem]
-        );
+        queryClient.setQueryData(budgetQueryKeys.items(), (old: any) => (old ? [...old, tempItem] : [tempItem]));
 
         queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-          old ? old.map((cat: any) =>
-            cat.id === (data.category_id || oldVendor.category_id)
-              ? { ...cat, spent: cat.spent + data.default_cost }
-              : cat
-          ) : []
+          old
+            ? old.map((cat: any) =>
+                cat.id === (data.category_id || oldVendor.category_id)
+                  ? { ...cat, spent: cat.spent + data.default_cost }
+                  : cat,
+              )
+            : [],
         );
       }
 
@@ -527,7 +510,7 @@ export const useBudgetQuery = () => {
     },
     onSuccess: async (result, { id, data }, context) => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
-        old ? old.map((vendor: any) => vendor.id === id ? result : vendor) : [result]
+        old ? old.map((vendor: any) => (vendor.id === id ? result : vendor)) : [result],
       );
 
       if (context?.relatedItem) {
@@ -542,14 +525,12 @@ export const useBudgetQuery = () => {
             amount: newCost,
             notes: `Costo fornitore - ${data.name || context.oldVendor.name}`,
             due_date: data.payment_due_date !== undefined ? data.payment_due_date : context.relatedItem.due_date,
-            category_id: data.category_id || context.relatedItem.category_id
+            category_id: data.category_id || context.relatedItem.category_id,
           });
 
           if (updatedItem) {
             queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-              old ? old.map((item: any) =>
-                item.id === context.relatedItem.id ? updatedItem : item
-              ) : [updatedItem]
+              old ? old.map((item: any) => (item.id === context.relatedItem.id ? updatedItem : item)) : [updatedItem],
             );
           }
         }
@@ -558,16 +539,14 @@ export const useBudgetQuery = () => {
           category_id: data.category_id || context?.oldVendor.category_id,
           name: data.name || context?.oldVendor.name,
           amount: data.default_cost,
-          expense_date: new Date().toISOString().split('T')[0],
+          expense_date: new Date().toISOString().split("T")[0],
           due_date: data.payment_due_date,
-          notes: `Costo fornitore - ${data.name || context?.oldVendor.name}`
+          notes: `Costo fornitore - ${data.name || context?.oldVendor.name}`,
         });
 
         if (newItem) {
           queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-            old ? old.map((item: any) =>
-              item.id.toString().startsWith('temp-') ? newItem : item
-            ) : [newItem]
+            old ? old.map((item: any) => (item.id.toString().startsWith("temp-") ? newItem : item)) : [newItem],
           );
         }
       }
@@ -577,8 +556,8 @@ export const useBudgetQuery = () => {
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
 
       toast({
-        title: 'Fornitore aggiornato',
-        description: 'Fornitore e spese associate aggiornate con successo',
+        title: "Fornitore aggiornato",
+        description: "Fornitore e spese associate aggiornate con successo",
         duration: 3000,
       });
     },
@@ -587,9 +566,9 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
-        title: 'Errore',
-        description: 'Impossibile aggiornare il fornitore',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile aggiornare il fornitore",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -607,19 +586,18 @@ export const useBudgetQuery = () => {
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
 
       const vendor = (previousVendors as any)?.find((v: any) => v.id === id);
-      if (!vendor) throw new Error('Fornitore non trovato');
+      if (!vendor) throw new Error("Fornitore non trovato");
 
-      const vendorItems = (previousItems as any)?.filter((item: any) =>
-        item.notes?.includes(`Costo fornitore - ${vendor.name}`)
-      ) || [];
+      const vendorItems =
+        (previousItems as any)?.filter((item: any) => item.notes?.includes(`Costo fornitore - ${vendor.name}`)) || [];
 
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
-        old ? old.filter((v: any) => v.id !== id) : []
+        old ? old.filter((v: any) => v.id !== id) : [],
       );
 
       const deletedItemIds = vendorItems.map((item: any) => item.id);
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? old.filter((item: any) => !deletedItemIds.includes(item.id)) : []
+        old ? old.filter((item: any) => !deletedItemIds.includes(item.id)) : [],
       );
 
       const itemsByCategory = vendorItems.reduce((acc: any, item: any) => {
@@ -628,10 +606,12 @@ export const useBudgetQuery = () => {
       }, {});
 
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) => ({
-          ...cat,
-          spent: cat.spent - (itemsByCategory[cat.id] || 0)
-        })) : []
+        old
+          ? old.map((cat: any) => ({
+              ...cat,
+              spent: cat.spent - (itemsByCategory[cat.id] || 0),
+            }))
+          : [],
       );
 
       return { previousVendors, previousItems, previousCategories, vendor, vendorItems };
@@ -643,7 +623,7 @@ export const useBudgetQuery = () => {
       });
 
       toast({
-        title: 'Fornitore eliminato',
+        title: "Fornitore eliminato",
         description: `${context?.vendor.name} e le spese associate sono state rimosse`,
         duration: 3000,
       });
@@ -653,16 +633,21 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
-        title: 'Errore',
-        description: 'Impossibile eliminare il fornitore',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile eliminare il fornitore",
+        variant: "destructive",
         duration: 3000,
       });
     },
   });
 
   const addVendorPaymentMutation = useMutation({
-    mutationFn: ({ vendorId, amount, categoryId, notes }: {
+    mutationFn: ({
+      vendorId,
+      amount,
+      categoryId,
+      notes,
+    }: {
       vendorId: string;
       amount: number;
       categoryId: string;
@@ -676,21 +661,15 @@ export const useBudgetQuery = () => {
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
 
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) =>
-          cat.id === categoryId
-            ? { ...cat, spent: cat.spent + amount }
-            : cat
-        ) : []
+        old ? old.map((cat: any) => (cat.id === categoryId ? { ...cat, spent: cat.spent + amount } : cat)) : [],
       );
 
       return { previousItems, previousCategories };
     },
     onSuccess: (result, { amount }) => {
-      queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? [...old, result] : [result]
-      );
+      queryClient.setQueryData(budgetQueryKeys.items(), (old: any) => (old ? [...old, result] : [result]));
       toast({
-        title: 'Pagamento registrato',
+        title: "Pagamento registrato",
         description: `Pagamento di €${amount.toLocaleString()} registrato`,
         duration: 3000,
       });
@@ -699,9 +678,9 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       toast({
-        title: 'Errore',
-        description: 'Impossibile registrare il pagamento',
-        variant: 'destructive',
+        title: "Errore",
+        description: "Impossibile registrare il pagamento",
+        variant: "destructive",
         duration: 3000,
       });
     },
@@ -726,10 +705,10 @@ export const useBudgetQuery = () => {
 
   const totalBudget = (settings as any)?.total_budget || 35000;
   const totalAllocated = categories.reduce((sum: number, cat: any) => sum + (cat?.budgeted || 0), 0);
-  
+
   // Calculate total spent: manual expenses (category.spent) + vendor payments (vendor.amount_paid)
   const itemsSpent = categories.reduce((sum: number, cat: any) => sum + (cat?.spent || 0), 0);
-  const vendorsSpent = vendors.reduce((sum: number, vendor: any) => sum + (vendor?.amount_paid || 0), 0);
+  const vendorsSpent = vendors.reduce((sum: number, vendor: any) => sum + (vendor?.default_cost || 0), 0);
   const totalSpent = itemsSpent + vendorsSpent;
   const remainingToAllocate = totalBudget - totalAllocated;
   const remainingAfterSpent = totalBudget - totalSpent;
