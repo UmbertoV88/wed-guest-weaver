@@ -450,60 +450,9 @@ Questa operazione non può essere annullata.`
                       </div>
                     </div>
 
-                    {/* Dettaglio spese */}
+                    {/* Dettaglio spese - SOLO FORNITORI */}
                     <div className="border-t pt-4">
                       <h4 className="font-medium text-gray-900 mb-2">Dettaglio spese</h4>
-                      <div className="space-y-1 text-sm">
-                        {(() => {
-                          const categoryItems = getItemsByCategory(category.id);
-                          const allExpenses = [
-                            ...categoryItems.map((item: any) => ({
-                              id: `item-${item.id}`,
-                              name: item.name,
-                              amount: item.amount,
-                              paid: item.paid,
-                              notes: item.notes,
-                              type: 'expense'
-                            }))
-                          ].filter(expense => expense.amount > 0);
-
-                          if (allExpenses.length === 0) {
-                            return <p className="text-gray-500">Nessuna spesa registrata</p>;
-                          }
-
-                          return (
-                            <div className="space-y-1">
-                              {allExpenses.map((expense: any) => (
-                                <div key={expense.id} className="flex justify-between items-center py-2">
-                                  <div>
-                                    <span className="text-gray-800">{expense.name}</span>
-                                    {expense.notes && !expense.notes.includes('Costo fornitore -') && (
-                                      <p className="text-xs text-gray-500">{expense.notes}</p>
-                                    )}
-                                  </div>
-                                  <div className="text-right">
-                                    <span className={`font-medium ${
-                                      expense.type === 'expense' 
-                                        ? (expense.paid ? 'text-green-600' : 'text-orange-600')
-                                        : 'text-primary'
-                                    }`}>
-                                      {formatCurrency(expense.amount)}
-                                    </span>
-                                    {expense.paid && expense.type === 'expense' && (
-                                      <p className="text-xs text-green-600">✓ Pagato</p>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    {/* Fornitori della categoria */}
-                    <div className="border-t pt-4 mt-4">
-                      <h4 className="font-medium text-gray-900 mb-2">Fornitori</h4>
                       <div className="space-y-1 text-sm">
                         {(() => {
                           const categoryVendors = getVendorsByCategory(category.id);
@@ -536,11 +485,6 @@ Questa operazione non può essere annullata.`
                                   </div>
                                 );
                               })}
-                              <p className="text-xs text-gray-600 mt-2 pt-2 border-t">
-                                <strong>Totale pagato ai fornitori:</strong> {formatCurrency(
-                                  categoryVendors.reduce((sum: number, v: any) => sum + (v.amount_paid || 0), 0)
-                                )}
-                              </p>
                             </div>
                           );
                         })()}
