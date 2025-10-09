@@ -707,8 +707,9 @@ export const useBudgetQuery = () => {
   const totalAllocated = categories.reduce((sum: number, cat: any) => sum + (cat?.budgeted || 0), 0);
 
   // Calculate total spent: manual expenses (category.spent) + vendor payments (vendor.amount_paid)
-  // Calculate total spent: only from vendors default_cost
-  const totalSpent = vendors.reduce((sum: number, vendor: any) => sum + (vendor?.default_cost || 0), 0);
+  const itemsSpent = categories.reduce((sum: number, cat: any) => sum + (cat?.spent || 0), 0);
+  const vendorsSpent = vendors.reduce((sum: number, vendor: any) => sum + (vendor?.default_cost || 0), 0);
+  const totalSpent = vendorsSpent; // USA SOLO IL COSTO DEI VENDORS
   const remainingToAllocate = totalBudget - totalAllocated;
   const remainingAfterSpent = totalBudget - totalSpent;
   const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
