@@ -653,30 +653,55 @@ export const useBudgetQuery = () => {
       categoryId: string;
       notes?: string;
     }) => budgetVendorsApi.addPayment(vendorId, amount, categoryId, notes),
-    onMutate: async ({ amount, categoryId }) => {
+
+    onMutate: async ({ vendorId, amount, categoryId }) => {
+      // ✅ Cancella tutte le query (incluso vendors)
+      await queryClient.cancelQueries({ queryKey: budgetQueryKeys.vendors() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.items() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
 
+      // ✅ Salva stato precedente
+      const previousVendors = queryClient.getQueryData(budgetQueryKeys.vendors());
       const previousItems = queryClient.getQueryData(budgetQueryKeys.items());
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
 
+      // ✅ Aggiornamento ottimistico: incrementa amount_paid del vendor
+      queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
+        old
+          ? old.map((vendor: any) =>
+              vendor.id === vendorId ? { ...vendor, amount_paid: (vendor.amount_paid || 0) + amount } : vendor,
+            )
+          : [],
+      );
+
+      // ✅ Aggiornamento ottimistico: incrementa spent della categoria
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
         old ? old.map((cat: any) => (cat.id === categoryId ? { ...cat, spent: cat.spent + amount } : cat)) : [],
       );
 
-      return { previousItems, previousCategories };
+      return { previousVendors, previousItems, previousCategories };
     },
-    onSuccess: (result, { amount }) => {
+
+    onSuccess: async (result, { amount, vendorId }) => {
+      // ✅ Invalida vendors per ricaricare dati reali dal DB
+      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.vendors() });
+
+      // Mantieni l'aggiornamento esistente per items
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) => (old ? [...old, result] : [result]));
+
       toast({
         title: "Pagamento registrato",
         description: `Pagamento di €${amount.toLocaleString()} registrato`,
         duration: 3000,
       });
     },
+
     onError: (err, variables, context) => {
+      // ✅ Ripristina tutti gli stati precedenti in caso di errore
+      queryClient.setQueryData(budgetQueryKeys.vendors(), context?.previousVendors);
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
+
       toast({
         title: "Errore",
         description: "Impossibile registrare il pagamento",
