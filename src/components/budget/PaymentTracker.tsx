@@ -32,9 +32,10 @@ const mockUpcomingPayments = [
 
 interface PaymentTrackerProps {
   payments?: any[];
+  vendors?: any[];
 }
 
-const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcomingPayments }) => {
+const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcomingPayments, vendors = [] }) => {
   const [completedPayments, setCompletedPayments] = useState(new Set());
   const { toast } = useToast();
 
@@ -104,6 +105,29 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
     new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   );
 
+  // Calcoli basati sui fornitori reali
+  const vendorPayments = vendors.map(vendor => {
+    const totalCost = vendor.default_cost || 0;
+    const paid = vendor.amount_paid || 0;
+    const remaining = totalCost - paid;
+    
+    return {
+      vendor,
+      totalCost,
+      paid,
+      remaining,
+      isPending: remaining > 0
+    };
+  });
+
+  // Totale da pagare = somma di tutti i "rimanenti"
+  const totalRemainingFromVendors = vendorPayments
+    .filter(v => v.isPending)
+    .reduce((sum, v) => sum + v.remaining, 0);
+
+  // Conteggio fornitori con pagamenti in sospeso
+  const pendingVendorsCount = vendorPayments.filter(v => v.isPending).length;
+
   const totalUpcoming = payments
     .filter(p => !completedPayments.has(p.id))
     .reduce((sum, p) => sum + p.amount, 0);
@@ -132,10 +156,10 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-900">
-              {formatCurrency(totalUpcoming)}
+              {formatCurrency(totalRemainingFromVendors)}
             </div>
             <p className="text-sm text-blue-600 mt-1">
-              {payments.filter(p => !completedPayments.has(p.id)).length} pagamenti rimanenti
+              {pendingVendorsCount} {pendingVendorsCount === 1 ? 'pagamento rimanente' : 'pagamenti rimanenti'}
             </p>
           </CardContent>
         </Card>

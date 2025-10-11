@@ -240,7 +240,7 @@ const FinanceLayout = () => {
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-4">
-            <PaymentTracker />
+            <PaymentTracker vendors={vendors} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
