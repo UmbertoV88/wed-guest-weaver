@@ -107,6 +107,50 @@ export const budgetCategoriesApi = {
     }
   },
 
+  async getAvailable(): Promise<BudgetCategory[]> {
+    try {
+      const { data, error } = await supabase
+        .from('budget_categories')
+        .select('*')
+        .eq('is_active', false)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching available budget categories:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Available budget categories fetch error:', error);
+      return [];
+    }
+  },
+
+  async activate(id: string, budgeted: number) {
+    try {
+      const { data: result, error } = await supabase
+        .from('budget_categories')
+        .update({ 
+          is_active: true,
+          budgeted: budgeted
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error activating budget category:', error);
+        throw error;
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Budget category activate error:', error);
+      return null;
+    }
+  },
+
   async create(data: any) {
     try {
       const user = (await supabase.auth.getUser()).data.user;

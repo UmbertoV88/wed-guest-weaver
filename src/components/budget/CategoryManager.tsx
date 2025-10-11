@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Package,
   MapPin,
@@ -62,11 +63,12 @@ interface BudgetCategory {
 
 interface CategoryManagerProps {
   categories: BudgetCategory[];
+  availableCategories: BudgetCategory[];
   items?: any[];
   vendors?: any[];
   totalBudget: number;
   remainingToAllocate: number;
-  onAddCategory: (name: string, budget: number, color?: string, icon?: string) => Promise<boolean>;
+  onAddCategory: (categoryId: string, budget: number) => Promise<boolean>;
   onUpdateCategory: (id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string; }) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
   getItemsByCategory?: (categoryId: string) => any[];
@@ -75,6 +77,7 @@ interface CategoryManagerProps {
 
 const CategoryManager: React.FC<CategoryManagerProps> = ({
   categories,
+  availableCategories,
   items = [],
   vendors = [],
   totalBudget,
@@ -93,8 +96,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const addFormRef = useRef<HTMLDivElement>(null);
   const [newCategory, setNewCategory] = useState({
-    name: '',
-    nameit: '',
+    categoryId: '',
     estimatedCost: '',
     color: '#E91E63',
     icon: 'Package'
@@ -224,22 +226,20 @@ Questa operazione non può essere annullata.`
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="new-category-name">Nome Categoria *</Label>
-                <Input
-                  id="new-category-name"
-                  value={newCategory.name}
-                  onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="es. Decorazioni Floreali"
-                />
-              </div>
-              <div>
-                <Label htmlFor="new-category-short">Nome Breve *</Label>
-                <Input
-                  id="new-category-short"
-                  value={newCategory.nameit}
-                  onChange={(e) => setNewCategory(prev => ({ ...prev, nameit: e.target.value }))}
-                  placeholder="es. Fiori"
-                />
+                <Label htmlFor="new-category-select">Nome Categoria *</Label>
+                <Select
+                  value={newCategory.categoryId}
+                  onValueChange={(value) => setNewCategory(prev => ({ ...prev, categoryId: value }))}
+                >
+                  <SelectTrigger id="new-category-select" className="bg-white">
+                    <SelectValue placeholder="Seleziona una categoria" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50">
+                    {availableCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="new-category-cost">Budget Stimato *</Label>
@@ -255,48 +255,11 @@ Questa operazione non può essere annullata.`
                   />
                 </div>
               </div>
-              <div>
-                <Label>Icona</Label>
-                <div className="grid grid-cols-6 gap-2">
-                  {Object.entries(ICON_OPTIONS).map(([iconName, IconComponent]) => (
-                    <button
-                      key={iconName}
-                      type="button"
-                      onClick={() => setNewCategory(prev => ({ ...prev, icon: iconName }))}
-                      className={`p-2 rounded border-2 transition-all ${
-                        newCategory.icon === iconName 
-                          ? 'border-pink-500 bg-pink-50' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <IconComponent className="w-4 h-4 mx-auto" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div>
-              <Label>Colore</Label>
-              <div className="flex gap-2 flex-wrap">
-                {COLOR_OPTIONS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setNewCategory(prev => ({ ...prev, color }))}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      newCategory.color === color 
-                        ? 'border-gray-800 scale-110' 
-                        : 'border-gray-300 hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
             </div>
             <div className="flex gap-2 pt-4">
               <Button 
                 onClick={async () => {
-                  if (!newCategory.name || !newCategory.estimatedCost) {
+                  if (!newCategory.categoryId || !newCategory.estimatedCost) {
                     toast({
                       title: "Errore",
                       description: "Compila tutti i campi obbligatori",
@@ -306,16 +269,13 @@ Questa operazione non può essere annullata.`
                   }
                   
                   const success = await onAddCategory(
-                    newCategory.name,
-                    parseFloat(newCategory.estimatedCost),
-                    newCategory.color,
-                    newCategory.icon
+                    newCategory.categoryId,
+                    parseFloat(newCategory.estimatedCost)
                   );
                   
                   if (success) {
                     setNewCategory({
-                      name: '',
-                      nameit: '',
+                      categoryId: '',
                       estimatedCost: '',
                       color: '#E91E63',
                       icon: 'Package'

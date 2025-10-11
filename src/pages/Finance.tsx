@@ -27,6 +27,7 @@ const FinanceLayout = () => {
     const {
       // State from database
       categories,
+      availableCategories,
       items,
       vendors,
       loading,
@@ -210,17 +211,15 @@ const FinanceLayout = () => {
           <TabsContent value="categories" className="space-y-4">
             <CategoryManager
               categories={categories}
+              availableCategories={availableCategories}
               items={items}
               vendors={vendors}
               totalBudget={totalBudget}
               remainingToAllocate={remainingToAllocate}
               getItemsByCategory={getItemsByCategory}
               getVendorsByCategory={getVendorsByCategory}
-              onAddCategory={(name: string, budget: number, color?: string, icon?: string) => {
-                addCategory({ name, budgeted: budget, color });
-                if (color || icon) {
-                  // Update with color/icon after creation (will be handled by React Query)
-                }
+              onAddCategory={(categoryId: string, budget: number) => {
+                addCategory({ categoryId, budgeted: budget });
                 return Promise.resolve(true);
               }}
               onUpdateCategory={(id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string }) => {

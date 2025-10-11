@@ -56,6 +56,13 @@ export const useBudgetQuery = () => {
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 
+  const { data: availableCategories = [], isLoading: availableCategoriesLoading } = useQuery({
+    queryKey: [...budgetQueryKeys.categories(), 'available'],
+    queryFn: () => budgetCategoriesApi.getAvailable(),
+    enabled: !!user,
+    staleTime: 1 * 60 * 1000, // 1 minute
+  });
+
   const { data: items = [], isLoading: itemsLoading } = useQuery({
     queryKey: budgetQueryKeys.items(),
     queryFn: () => budgetItemsApi.getAll(),
@@ -70,7 +77,7 @@ export const useBudgetQuery = () => {
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 
-  const isLoading = settingsLoading || categoriesLoading || itemsLoading || vendorsLoading;
+  const isLoading = settingsLoading || categoriesLoading || availableCategoriesLoading || itemsLoading || vendorsLoading;
 
   // =====================================================
   // SETTINGS MUTATIONS
@@ -101,36 +108,49 @@ export const useBudgetQuery = () => {
   // =====================================================
 
   const addCategoryMutation = useMutation({
-    mutationFn: (data: { name: string; budgeted: number; color?: string }) => budgetCategoriesApi.create(data),
-    onMutate: async (newCategory) => {
+    mutationFn: ({ categoryId, budgeted }: { categoryId: string; budgeted: number }) => 
+      budgetCategoriesApi.activate(categoryId, budgeted),
+    onMutate: async ({ categoryId, budgeted }) => {
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
+      await queryClient.cancelQueries({ queryKey: [...budgetQueryKeys.categories(), 'available'] });
+      
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
+      const previousAvailable = queryClient.getQueryData([...budgetQueryKeys.categories(), 'available']);
+      
+      // Trova la categoria in quelle disponibili
+      const categoryToActivate = (previousAvailable as any)?.find((cat: any) => cat.id === categoryId);
+      
+      if (categoryToActivate) {
+        // Rimuovi da available
+        queryClient.setQueryData([...budgetQueryKeys.categories(), 'available'], (old: any) =>
+          old ? old.filter((cat: any) => cat.id !== categoryId) : []
+        );
+        
+        // Aggiungi a categories con budgeted aggiornato
+        queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
+          old ? [...old, { ...categoryToActivate, budgeted, is_active: true }] : [{ ...categoryToActivate, budgeted, is_active: true }]
+        );
+      }
 
-      const tempCategory = {
-        id: `temp-${Date.now()}`,
-        ...newCategory,
-        spent: 0,
-        user_id: user?.id || "",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? [...old, tempCategory] : [tempCategory],
-      );
-
-      return { previousCategories, tempCategory };
+      return { previousCategories, previousAvailable };
     },
-    onSuccess: (result, variables, context) => {
-      queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.map((cat: any) => (cat.id === context?.tempCategory.id ? result : cat)) : [result],
-      );
+    onSuccess: (result) => {
+      // Invalida le query per ottenere dati aggiornati
+      queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: [...budgetQueryKeys.categories(), 'available'] });
+      
+      toast({
+        title: "Categoria attivata",
+        description: "Categoria aggiunta al tuo budget",
+        duration: 3000,
+      });
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
+      queryClient.setQueryData([...budgetQueryKeys.categories(), 'available'], context?.previousAvailable);
       toast({
         title: "Errore",
-        description: "Impossibile aggiungere la categoria",
+        description: "Impossibile attivare la categoria",
         variant: "destructive",
         duration: 3000,
       });
@@ -760,6 +780,7 @@ export const useBudgetQuery = () => {
     // State
     settings,
     categories,
+    availableCategories,
     items,
     vendors,
     loading: isLoading,

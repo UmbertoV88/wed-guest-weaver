@@ -25,6 +25,7 @@ export const useBudget = () => {
   // State with explicit types
   const [settings, setSettings] = useState<BudgetSettings | null>(null);
   const [categories, setCategories] = useState<BudgetCategory[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<BudgetCategory[]>([]);
   const [items, setItems] = useState<BudgetItem[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,12 +44,14 @@ export const useBudget = () => {
     try {
       const settingsResult = await budgetSettingsApi.get();
       const categoriesResult = await budgetCategoriesApi.getAll();
+      const availableCategoriesResult = await budgetCategoriesApi.getAvailable();
       const itemsResult = await budgetItemsApi.getAll();
       const vendorsResult = await budgetVendorsApi.getAll();
       
       // Set data directly - let's see what we actually get  
       setSettings(settingsResult as any || null);
       setCategories(Array.isArray(categoriesResult) ? categoriesResult as any : []);
+      setAvailableCategories(Array.isArray(availableCategoriesResult) ? availableCategoriesResult as any : []);
       setItems(Array.isArray(itemsResult) ? itemsResult as any : []);
       setVendors(Array.isArray(vendorsResult) ? vendorsResult as any : []);
 
@@ -124,24 +127,28 @@ export const useBudget = () => {
   const weddingDate = settings?.wedding_date;
   const daysToWedding = calculateDaysToWedding(weddingDate);
 
-  const addCategory = async (name: string, budgeted: number, color?: string) => {
+  const addCategory = async (categoryId: string, budgeted: number) => {
     try {
-      const result = await budgetCategoriesApi.create({
-        name,
-        budgeted,
-        color,
-      });
+      const result = await budgetCategoriesApi.activate(categoryId, budgeted);
 
       if (result) {
+        // Sposta dalla lista disponibili a quella attive
+        setAvailableCategories(prev => prev.filter(cat => cat.id !== categoryId));
         setCategories(prev => [...prev, result as any]);
+        
+        toast({
+          title: 'Categoria attivata',
+          description: 'Categoria aggiunta al tuo budget',
+        });
+        
         return result as any;
       }
       return null;
     } catch (err) {
-      console.error('Error adding category:', err);
+      console.error('Error activating category:', err);
       toast({
         title: 'Errore',
-        description: 'Impossibile aggiungere la categoria',
+        description: 'Impossibile attivare la categoria',
         variant: 'destructive',
       });
       return null;
@@ -609,6 +616,7 @@ export const useBudget = () => {
     // State
     settings,
     categories,
+    availableCategories,
     items,
     vendors,
     loading,
