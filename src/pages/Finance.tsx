@@ -63,16 +63,14 @@ const FinanceLayout = () => {
     }, [activeTab]);
 
     // Chart data
-    const enhancedChartData = categories
-      .filter(cat => cat && cat.name) // Filter out null or invalid categories
-      .map(cat => ({
-        name: cat.name,
-        value: cat.budgeted,
-        budgeted: cat.budgeted,
-        spent: cat.spent,
-        percentage: totalBudget > 0 ? ((cat.budgeted / totalBudget) * 100).toFixed(1) : 0,
-        color: cat.color
-      }));
+    const enhancedChartData = categories.map(cat => ({
+      name: cat.name,
+      value: cat.budgeted,
+      budgeted: cat.budgeted,
+      spent: cat.spent,
+      percentage: totalBudget > 0 ? ((cat.budgeted / totalBudget) * 100).toFixed(1) : 0,
+      color: cat.color
+    }));
 
     // Loading state
     if (loading) {

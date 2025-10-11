@@ -269,52 +269,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                 </div>
               </div>
             </div>
-            
-            {/* Icon Selection */}
-            <div>
-              <Label htmlFor="icon-selection">Icona</Label>
-              <div className="grid grid-cols-6 gap-2 mt-2">
-                {Object.entries(ICON_OPTIONS).map(([name, IconComponent]) => (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => setNewCategory(prev => ({ ...prev, icon: name }))}
-                    className={`p-3 rounded-lg border-2 transition-all hover:scale-110 ${
-                      newCategory.icon === name 
-                        ? 'border-pink-500 bg-pink-50' 
-                        : 'border-gray-200 hover:border-pink-300'
-                    }`}
-                    aria-label={`Icona ${name}`}
-                  >
-                    <IconComponent className="w-5 h-5 mx-auto text-gray-700" />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color Selection */}
-            <div>
-              <Label htmlFor="color-selection">Colore</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {COLOR_OPTIONS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setNewCategory(prev => ({ ...prev, color }))}
-                    className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${
-                      newCategory.color === color 
-                        ? 'ring-4 ring-pink-300 ring-offset-2' 
-                        : 'hover:ring-2 hover:ring-gray-300'
-                    }`}
-                    style={{ backgroundColor: color }}
-                    aria-label={`Colore ${color}`}
-                  />
-                ))}
-              </div>
-            </div>
-
             <div className="flex gap-2 pt-4">
-              <Button
+              <Button 
                 onClick={async () => {
                   if (!newCategory.categoryId || !newCategory.estimatedCost) {
                     toast({
@@ -331,12 +287,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                   );
                   
                   if (success) {
-                    // Update icon and color for the newly added category
-                    await onUpdateCategory(newCategory.categoryId, {
-                      icon: newCategory.icon,
-                      color: newCategory.color
-                    });
-                    
                     setNewCategory({
                       categoryId: '',
                       estimatedCost: '',
