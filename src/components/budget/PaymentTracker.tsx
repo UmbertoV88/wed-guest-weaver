@@ -128,6 +128,26 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
   // Conteggio fornitori con pagamenti in sospeso
   const pendingVendorsCount = vendorPayments.filter(v => v.isPending).length;
 
+  // Fornitori con pagamenti scaduti
+  const overdueVendors = vendorPayments.filter(v => {
+    if (!v.isPending || !v.vendor.payment_due_date) return false;
+    const daysUntilDue = getDaysUntilDue(v.vendor.payment_due_date);
+    return daysUntilDue < 0;
+  });
+
+  const overdueAmount = overdueVendors.reduce((sum, v) => sum + v.remaining, 0);
+  const overdueCount = overdueVendors.length;
+
+  // Fornitori con pagamenti urgenti (prossimi 7 giorni)
+  const urgentVendors = vendorPayments.filter(v => {
+    if (!v.isPending || !v.vendor.payment_due_date) return false;
+    const daysUntilDue = getDaysUntilDue(v.vendor.payment_due_date);
+    return daysUntilDue >= 0 && daysUntilDue <= 7;
+  });
+
+  const urgentAmount = urgentVendors.reduce((sum, v) => sum + v.remaining, 0);
+  const urgentCount = urgentVendors.length;
+
   const totalUpcoming = payments
     .filter(p => !completedPayments.has(p.id))
     .reduce((sum, p) => sum + p.amount, 0);
@@ -170,11 +190,11 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-red-900">
-              {overduePayments.length}
+              {overdueCount}
             </div>
             <p className="text-sm text-red-600 mt-1">
-              {overduePayments.length > 0 
-                ? `${formatCurrency(overduePayments.reduce((sum, p) => sum + p.amount, 0))} totali`
+              {overdueCount > 0 
+                ? `${formatCurrency(overdueAmount)} totali`
                 : "Nessun pagamento scaduto"
               }
             </p>
@@ -187,11 +207,11 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-orange-900">
-              {urgentPayments.length}
+              {urgentCount}
             </div>
             <p className="text-sm text-orange-600 mt-1">
-              {urgentPayments.length > 0
-                ? `${formatCurrency(urgentPayments.reduce((sum, p) => sum + p.amount, 0))} totali`
+              {urgentCount > 0
+                ? `${formatCurrency(urgentAmount)} totali`
                 : "Nessun pagamento urgente"
               }
             </p>
