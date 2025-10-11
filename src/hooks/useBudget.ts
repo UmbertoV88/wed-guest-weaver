@@ -200,27 +200,65 @@ export const useBudget = () => {
 
   const deleteCategory = async (id: string) => {
     try {
-      const success = await budgetCategoriesApi.delete(id);
-
-      if (success) {
-        setCategories(prev => prev.filter(cat => cat.id !== id));
-        // Rimuovi anche gli items associati
-        setItems(prev => prev.filter(item => item.category_id !== id));
-        toast({
-          title: 'Categoria eliminata',
-          description: 'Categoria e relative spese rimosse',
-        });
-        return true;
+      // 1. UPDATE UI IMMEDIATELY (Optimistic)
+      const categoryToDelete = categories.find(cat => cat.id === id);
+      const itemsToDelete = items.filter(item => item.category_id === id);
+      const vendorsToDelete = vendors.filter(vendor => vendor.category_id === id);
+      
+      setCategories((prev: any) => prev.filter((cat: any) => cat.id !== id));
+      setItems((prev: any) => prev.filter((item: any) => item.category_id !== id));
+      setVendors((prev: any) => prev.filter((vendor: any) => vendor.category_id !== id));
+      
+      // Aggiungi categoria tornata disponibile
+      if (categoryToDelete) {
+        setAvailableCategories((prev: any) => [
+          ...prev, 
+          { ...categoryToDelete, is_active: false, budgeted: 0, spent: 0 }
+        ]);
       }
-      return false;
+
+      // 2. DELETE IN DATABASE IN BACKGROUND
+      const result = await budgetCategoriesApi.delete(id);
+
+      if (result?.success) {
+        // Mostra toast con dettagli
+        let description = "Categoria disattivata con successo";
+        if (result.vendorsDeleted > 0 || result.itemsDeleted > 0) {
+          const parts = [];
+          if (result.vendorsDeleted > 0) parts.push(`${result.vendorsDeleted} fornitore/i`);
+          if (result.itemsDeleted > 0) parts.push(`${result.itemsDeleted} spesa/e`);
+          description = `Categoria disattivata. Eliminati: ${parts.join(' e ')}`;
+        }
+
+        toast({
+          title: '✅ Categoria eliminata',
+          description,
+          duration: 4000,
+        });
+
+        // 3. RELOAD DATA (no visual impact)
+        await loadData();
+      }
     } catch (err) {
       console.error('Error deleting category:', err);
+      
+      // 4. REVERT IF FAILED
+      const categoryToRestore = categories.find(cat => cat.id === id);
+      if (categoryToRestore) {
+        setCategories((prev: any) => [...prev, categoryToRestore]);
+        setAvailableCategories((prev: any) => 
+          prev.filter((cat: any) => cat.id !== id)
+        );
+      }
+      
+      await loadData(); // Ricarica per sicurezza
+      
       toast({
-        title: 'Errore',
-        description: 'Impossibile eliminare la categoria',
+        title: '❌ Errore',
+        description: 'Impossibile eliminare la categoria. Riprova.',
         variant: 'destructive',
+        duration: 4000,
       });
-      return false;
     }
   };
 

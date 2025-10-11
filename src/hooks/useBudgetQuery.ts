@@ -188,36 +188,86 @@ export const useBudgetQuery = () => {
   const deleteCategoryMutation = useMutation({
     mutationFn: (id: string) => budgetCategoriesApi.delete(id),
     onMutate: async (id) => {
+      // Cancella query per evitare conflitti
+      await queryClient.cancelQueries({ queryKey: budgetQueryKeys.vendors() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.categories() });
       await queryClient.cancelQueries({ queryKey: budgetQueryKeys.items() });
+      await queryClient.cancelQueries({ queryKey: [...budgetQueryKeys.categories(), 'available'] });
 
+      // Salva stato precedente per rollback
+      const previousVendors = queryClient.getQueryData(budgetQueryKeys.vendors());
       const previousCategories = queryClient.getQueryData(budgetQueryKeys.categories());
       const previousItems = queryClient.getQueryData(budgetQueryKeys.items());
+      const previousAvailableCategories = queryClient.getQueryData([...budgetQueryKeys.categories(), 'available']);
 
+      // Trova la categoria da eliminare
+      const categoryToDelete = queryClient.getQueryData<any[]>(budgetQueryKeys.categories())?.find(c => c.id === id);
+
+      // Aggiornamento ottimistico: rimuovi categoria, items E vendors
       queryClient.setQueryData(budgetQueryKeys.categories(), (old: any) =>
-        old ? old.filter((cat: any) => cat.id !== id) : [],
+        old ? old.filter((cat: any) => cat.id !== id) : []
       );
       queryClient.setQueryData(budgetQueryKeys.items(), (old: any) =>
-        old ? old.filter((item: any) => item.category_id !== id) : [],
+        old ? old.filter((item: any) => item.category_id !== id) : []
       );
+      queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
+        old ? old.filter((vendor: any) => vendor.category_id !== id) : []
+      );
+      
+      // Aggiungi categoria tornata disponibile (is_active = false)
+      if (categoryToDelete) {
+        queryClient.setQueryData([...budgetQueryKeys.categories(), 'available'], (old: any) =>
+          old ? [...old, { ...categoryToDelete, is_active: false, budgeted: 0, spent: 0 }] : [{ ...categoryToDelete, is_active: false, budgeted: 0, spent: 0 }]
+        );
+      }
 
-      return { previousCategories, previousItems };
+      return { previousVendors, previousCategories, previousItems, previousAvailableCategories };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Mostra toast con dettagli di cosa è stato eliminato
+      const itemsDeleted = result?.itemsDeleted || 0;
+      const vendorsDeleted = result?.vendorsDeleted || 0;
+
+      let description = "Categoria disattivata con successo";
+      if (vendorsDeleted > 0 || itemsDeleted > 0) {
+        const parts = [];
+        if (vendorsDeleted > 0) parts.push(`${vendorsDeleted} fornitore/i`);
+        if (itemsDeleted > 0) parts.push(`${itemsDeleted} spesa/e`);
+        description = `Categoria disattivata. Eliminati: ${parts.join(' e ')}`;
+      }
+
       toast({
-        title: "Categoria eliminata",
-        description: "Categoria e relative spese rimosse",
-        duration: 3000,
+        title: "✅ Categoria eliminata",
+        description,
+        duration: 4000,
       });
+
+      // Invalida tutte le query per ricaricare dati reali
+      queryClient.invalidateQueries({ queryKey: budgetQueryKeys.vendors() });
+      queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
+      queryClient.invalidateQueries({ queryKey: [...budgetQueryKeys.categories(), 'available'] });
     },
     onError: (err, variables, context) => {
-      queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
-      queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
+      // Ripristina stato precedente in caso di errore
+      if (context?.previousVendors) {
+        queryClient.setQueryData(budgetQueryKeys.vendors(), context.previousVendors);
+      }
+      if (context?.previousCategories) {
+        queryClient.setQueryData(budgetQueryKeys.categories(), context.previousCategories);
+      }
+      if (context?.previousItems) {
+        queryClient.setQueryData(budgetQueryKeys.items(), context.previousItems);
+      }
+      if (context?.previousAvailableCategories) {
+        queryClient.setQueryData([...budgetQueryKeys.categories(), 'available'], context.previousAvailableCategories);
+      }
+      
       toast({
-        title: "Errore",
-        description: "Impossibile eliminare la categoria",
+        title: "❌ Errore",
+        description: "Impossibile eliminare la categoria. Riprova.",
         variant: "destructive",
-        duration: 3000,
+        duration: 4000,
       });
     },
   });

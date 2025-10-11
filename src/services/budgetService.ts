@@ -203,20 +203,96 @@ export const budgetCategoriesApi = {
 
   async delete(id: string) {
     try {
-      const { error } = await supabase
-        .from('budget_categories')
-        .update({ is_active: false })
-        .eq('id', id);
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
 
-      if (error) {
-        console.error('Error deleting budget category:', error);
-        throw error;
+      // Step 1: Count items and vendors to be deleted (for dialog + toast)
+      const { count: itemsCount } = await supabase
+        .from('budget_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+      const { count: vendorsCount } = await supabase
+        .from('budget_vendors')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+      // Step 2: Delete all budget_items linked to this category
+      const { error: itemsDeleteError } = await supabase
+        .from('budget_items')
+        .delete()
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+      if (itemsDeleteError) {
+        console.error('Error deleting budget items:', itemsDeleteError);
+        throw itemsDeleteError;
       }
 
-      return true;
+      // Step 3: Delete all budget_vendors linked to this category
+      const { error: vendorsDeleteError } = await supabase
+        .from('budget_vendors')
+        .delete()
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+      if (vendorsDeleteError) {
+        console.error('Error deleting budget vendors:', vendorsDeleteError);
+        throw vendorsDeleteError;
+      }
+
+      // Step 4: Set category to is_active = false, budgeted and spent to 0
+      const { error: categoryError } = await supabase
+        .from('budget_categories')
+        .update({ is_active: false, budgeted: 0, spent: 0 })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (categoryError) {
+        console.error('Error deactivating budget category:', categoryError);
+        throw categoryError;
+      }
+
+      // Return counts for toast notification
+      return {
+        success: true,
+        itemsDeleted: itemsCount || 0,
+        vendorsDeleted: vendorsCount || 0,
+      };
     } catch (error) {
       console.error('Budget category delete error:', error);
-      return false;
+      throw error;
+    }
+  },
+
+  async getDeleteInfo(id: string) {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
+
+      // Get items count
+      const { count: itemsCount } = await supabase
+        .from('budget_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+      // Get vendors count
+      const { count: vendorsCount } = await supabase
+        .from('budget_vendors')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+      return {
+        itemsCount: itemsCount || 0,
+        vendorsCount: vendorsCount || 0,
+      };
+    } catch (error) {
+      console.error('Error getting delete info:', error);
+      return { itemsCount: 0, vendorsCount: 0 };
     }
   },
 

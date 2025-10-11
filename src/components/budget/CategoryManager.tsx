@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddVendorDialog from './AddVendorDialog';
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { budgetCategoriesApi } from "@/services/budgetService";
 
 // Icon mapping
 const ICON_OPTIONS = {
@@ -94,6 +96,14 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
   const [showVendorDialog, setShowVendorDialog] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<{
+    id: string;
+    name: string;
+    spent: number;
+    vendorsCount: number;
+    itemsCount: number;
+  } | null>(null);
   const addFormRef = useRef<HTMLDivElement>(null);
   const [newCategory, setNewCategory] = useState({
     categoryId: '',
@@ -145,7 +155,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     return <Badge variant="destructive">Budget superato</Badge>;
   };
 
-  // ✅ FUNZIONE CORRETTA - DENTRO IL COMPONENTE CON GESTIONE ERRORI
   const handleDeleteCategory = async (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
     if (!category) {
@@ -158,46 +167,50 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     }
 
     try {
-      // Controllo se ci sono spese associate
-      if (category.spent > 0) {
-        const confirmed = window.confirm(
-          `Attenzione! La categoria "${category.name}" ha spese registrate di €${category.spent.toLocaleString()}. 
-Eliminandola perderai tutti i dati associati. Vuoi continuare?`
-        );
-        if (!confirmed) return;
-      }
-
-      // Conferma finale
-      const finalConfirm = window.confirm(
-        `Sei sicuro di voler eliminare la categoria "${category.name}"? 
-Questa operazione non può essere annullata.`
-      );
+      // Fetch info su cosa verrà eliminato
+      const deleteInfo = await budgetCategoriesApi.getDeleteInfo(categoryId);
       
-      if (!finalConfirm) return;
-
-      // Imposta loading state
-      setDeletingCategory(categoryId);
-
-      // ✅ CHIAMATA CORRETTA - onDeleteCategory ritorna Promise<void>
-      await onDeleteCategory(categoryId);
-      
-      // Se arriviamo qui, l'operazione è riuscita
-      toast({
-        title: "Categoria eliminata",
-        description: `La categoria "${category.name}" è stata eliminata con successo`,
+      // Mostra dialog con i dettagli
+      setCategoryToDelete({
+        id: categoryId,
+        name: category.name,
+        spent: category.spent,
+        vendorsCount: deleteInfo.vendorsCount,
+        itemsCount: deleteInfo.itemsCount,
       });
-
+      setDeleteDialogOpen(true);
     } catch (error) {
-      // ✅ GESTIONE ERRORI APPROPRIATA
+      console.error('Errore durante il recupero delle informazioni:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile recuperare le informazioni sulla categoria",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      setDeletingCategory(categoryToDelete.id);
+      
+      // Esegui eliminazione
+      await onDeleteCategory(categoryToDelete.id);
+      
+      // Toast viene gestito da useBudgetQuery.ts con i dettagli corretti
+      
+    } catch (error) {
       console.error('Errore durante l\'eliminazione della categoria:', error);
       toast({
         title: "Errore durante l'eliminazione",
-        description: "Si è verificato un errore durante l'eliminazione della categoria. Riprova più tardi.",
+        description: "Si è verificato un errore. Riprova più tardi.",
         variant: "destructive"
       });
     } finally {
-      // Rimuovi loading state
       setDeletingCategory(null);
+      setCategoryToDelete(null);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -503,6 +516,58 @@ Questa operazione non può essere annullata.`
           );
         })}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="⚠️ Conferma Eliminazione Categoria"
+        description={
+          categoryToDelete ? (
+            <div className="space-y-3">
+              <p className="font-semibold text-gray-900">
+                Stai per eliminare la categoria "{categoryToDelete.name}"
+              </p>
+              
+              {categoryToDelete.spent > 0 && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800 font-medium">
+                    💰 Totale speso: €{categoryToDelete.spent.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              )}
+              
+              {(categoryToDelete.vendorsCount > 0 || categoryToDelete.itemsCount > 0) && (
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-1">
+                  <p className="text-sm text-orange-800 font-medium">
+                    Verranno eliminati definitivamente:
+                  </p>
+                  {categoryToDelete.vendorsCount > 0 && (
+                    <p className="text-sm text-orange-700">
+                      • {categoryToDelete.vendorsCount} fornitore/i
+                    </p>
+                  )}
+                  {categoryToDelete.itemsCount > 0 && (
+                    <p className="text-sm text-orange-700">
+                      • {categoryToDelete.itemsCount} spesa/e
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              <p className="text-sm text-gray-600 font-medium">
+                ⚠️ Questa operazione è irreversibile!
+              </p>
+            </div>
+          ) : (
+            "Confermi l'eliminazione?"
+          )
+        }
+        confirmText="Sì, elimina definitivamente"
+        cancelText="Annulla"
+        onConfirm={confirmDeleteCategory}
+        variant="destructive"
+      />
 
       {/* Vendor Dialog */}
       <AddVendorDialog
