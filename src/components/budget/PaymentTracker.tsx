@@ -301,133 +301,140 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                             : 'bg-white border-gray-200 hover:shadow-md'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <h4 className={`font-semibold text-lg ${
-                        payment.isPaid || isCompleted ? 'text-green-700' : 'text-gray-900'
-                      }`}>
-                        {payment.vendor}
-                      </h4>
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    {/* COLONNA SINISTRA */}
+                    <div className="flex-1 space-y-3">
+                      {/* Nome e Badge */}
+                      <div className="flex items-center gap-3">
+                        <h4 className={`font-semibold text-lg ${
+                          payment.isPaid || isCompleted ? 'text-green-700' : 'text-gray-900'
+                        }`}>
+                          {payment.vendor}
+                        </h4>
+                        
+                        {payment.isPaid && (
+                          <Badge className="bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Pagato
+                          </Badge>
+                        )}
+                        
+                        {!payment.isPaid && !isCompleted && getUrgencyBadge(daysUntilDue)}
+                        
+                        {!payment.isPaid && isCompleted && (
+                          <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Pagato
+                          </Badge>
+                        )}
+                      </div>
                       
+                      {/* Sezione Date e Info Pagamento */}
+                      <div className="flex items-center gap-4 text-sm">
+                        {payment.isPaid && payment.paymentDate && (
+                          <div className="flex items-center gap-1 text-green-600 font-medium">
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Pagato il {formatDate(payment.paymentDate)}</span>
+                          </div>
+                        )}
+                        
+                        {!payment.isPaid && !isCompleted && payment.dueDate && (
+                          <div className="flex items-center gap-1 text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            <span>Scadenza: {formatDate(payment.dueDate)}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Importo Totale Pagato per Fornitori Completati */}
                       {payment.isPaid && (
-                        <Badge className="bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Pagato
-                        </Badge>
+                        <div className="bg-green-100 border border-green-200 rounded-md p-2">
+                          <p className="text-sm text-green-700 font-medium">
+                            💰 Importo totale pagato: {formatCurrency(payment.amountPaid || payment.amount)}
+                          </p>
+                        </div>
                       )}
-                      
-                      {!payment.isPaid && !isCompleted && getUrgencyBadge(daysUntilDue)}
-                      
-                      {!payment.isPaid && isCompleted && (
-                        <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Pagato
-                        </Badge>
+
+                      {/* Messaggi di scadenza solo per fornitori NON pagati */}
+                      {!payment.isPaid && !isCompleted && daysUntilDue !== null && daysUntilDue >= 0 && (
+                        <p className="text-xs text-gray-500">
+                          {daysUntilDue === 0 
+                            ? "Scade oggi" 
+                            : daysUntilDue === 1 
+                              ? "Scade domani"
+                              : `Scade tra ${daysUntilDue} giorni`
+                          }
+                        </p>
+                      )}
+
+                      {!payment.isPaid && !isCompleted && daysUntilDue !== null && isOverdue && (
+                        <p className="text-xs text-red-500 font-medium">
+                          Scaduto da {Math.abs(daysUntilDue)} giorni
+                        </p>
+                      )}
+
+                      {!payment.isPaid && !isCompleted && daysUntilDue === null && (
+                        <p className="text-xs text-gray-500">
+                          Nessuna data di scadenza impostata
+                        </p>
+                      )}
+
+                      {/* Messaggio "Completamente Pagato" */}
+                      {payment.isPaid && (
+                        <div className="flex items-center gap-2 text-sm text-green-600">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span className="font-medium">Fornitore completamente pagato ✓</span>
+                        </div>
                       )}
                     </div>
                     
-                    <div className="text-right">
+                    {/* COLONNA DESTRA */}
+                    <div className="flex flex-col items-end gap-2 min-w-[200px]">
+                      {/* Importo */}
                       <p className={`text-xl font-bold ${
                         payment.isPaid || isCompleted ? 'text-green-600' : 'text-gray-900'
                       }`}>
                         {formatCurrency(payment.amount)}
                       </p>
-                    </div>
-                  </div>
                       
-                  {/* Sezione Date e Info Pagamento */}
-                  <div className="flex items-center gap-4 text-sm mb-2">
-                    {payment.isPaid && payment.paymentDate && (
-                      <div className="flex items-center gap-1 text-green-600 font-medium">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Pagato il {formatDate(payment.paymentDate)}</span>
-                      </div>
-                    )}
-                    
-                    {!payment.isPaid && !isCompleted && payment.dueDate && (
-                      <div className="flex items-center gap-1 text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>Scadenza: {formatDate(payment.dueDate)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Importo Totale Pagato per Fornitori Completati */}
-                  {payment.isPaid && (
-                    <div className="bg-green-100 border border-green-200 rounded-md p-2 mb-2">
-                      <p className="text-sm text-green-700 font-medium">
-                        💰 Importo totale pagato: {formatCurrency(payment.amountPaid || payment.amount)}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Messaggi di scadenza solo per fornitori NON pagati */}
-                  {!payment.isPaid && !isCompleted && daysUntilDue !== null && daysUntilDue >= 0 && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {daysUntilDue === 0 
-                        ? "Scade oggi" 
-                        : daysUntilDue === 1 
-                          ? "Scade domani"
-                          : `Scade tra ${daysUntilDue} giorni`
-                      }
-                    </p>
-                  )}
-
-                  {!payment.isPaid && !isCompleted && daysUntilDue !== null && isOverdue && (
-                    <p className="text-xs text-red-500 mt-1 font-medium">
-                      Scaduto da {Math.abs(daysUntilDue)} giorni
-                    </p>
-                  )}
-
-                  {!payment.isPaid && !isCompleted && daysUntilDue === null && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Nessuna data di scadenza impostata
-                    </p>
-                  )}
-
-                  {/* Pulsanti Azione - Nascosti per Fornitori Pagati */}
-                  <div className="flex gap-2 mt-3">
-                    {!payment.isPaid && !isCompleted && (
-                      <>
-                        <Button 
-                          size="sm" 
+                      {/* Bottoni Azione */}
+                      {!payment.isPaid && !isCompleted && (
+                        <div className="flex flex-col gap-2 w-full">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleSetReminder(payment)}
+                            className="w-full"
+                          >
+                            <Clock className="w-4 h-4 mr-1" />
+                            Promemoria
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleMarkAsPaid(payment.id)}
+                            className="bg-green-600 hover:bg-green-700 text-white w-full"
+                          >
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            Segna Come Pagato
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {!payment.isPaid && isCompleted && (
+                        <Button
                           variant="outline"
-                          onClick={() => handleSetReminder(payment)}
-                        >
-                          <Clock className="w-4 h-4 mr-1" />
-                          Promemoria
-                        </Button>
-                        <Button 
                           size="sm"
-                          onClick={() => handleMarkAsPaid(payment.id)}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => {
+                            const newCompleted = new Set(completedPayments);
+                            newCompleted.delete(payment.id);
+                            setCompletedPayments(newCompleted);
+                          }}
+                          className="w-full"
                         >
-                          <CheckCircle2 className="w-4 h-4 mr-1" />
-                          Segna Come Pagato
+                          Annulla
                         </Button>
-                      </>
-                    )}
-                    
-                    {payment.isPaid && (
-                      <div className="flex items-center gap-2 text-sm text-green-600">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <span className="font-medium">Fornitore completamente pagato ✓</span>
-                      </div>
-                    )}
-                    
-                    {!payment.isPaid && isCompleted && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const newCompleted = new Set(completedPayments);
-                          newCompleted.delete(payment.id);
-                          setCompletedPayments(newCompleted);
-                        }}
-                      >
-                        Annulla
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
                 );
