@@ -39,7 +39,7 @@ interface PaymentTrackerProps {
 
 const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
   const [completedPayments, setCompletedPayments] = useState(new Set());
-  const [paymentFilter, setPaymentFilter] = useState<'tutti' | 'pagati' | 'scaduti' | 'urgenti'>('tutti');
+  const [paymentFilter, setPaymentFilter] = useState<'tutti' | 'pagati' | 'da_pagare' | 'scaduti' | 'urgenti'>('tutti');
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
@@ -180,6 +180,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
   const filteredPayments = vendorBasedPayments.filter(payment => {
     if (paymentFilter === 'tutti') return true;
     if (paymentFilter === 'pagati') return payment.isPaid;
+    if (paymentFilter === 'da_pagare') return !payment.isPaid;
     if (paymentFilter === 'scaduti') return payment.isOverdue;
     if (paymentFilter === 'urgenti') return payment.isUrgent;
     return true;
@@ -265,6 +266,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="tutti">Tutti</SelectItem>
+                <SelectItem value="da_pagare">Da pagare</SelectItem>
                 <SelectItem value="pagati">Pagati</SelectItem>
                 <SelectItem value="scaduti">Scaduti</SelectItem>
                 <SelectItem value="urgenti">Urgenti</SelectItem>
