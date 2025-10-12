@@ -429,7 +429,6 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                       </Button>
                     )}
                   </div>
-                  </div>
                 </div>
                 );
               })}
