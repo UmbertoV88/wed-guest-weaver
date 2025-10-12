@@ -399,12 +399,12 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                       
                       {/* Bottoni Azione */}
                       {!payment.isPaid && !isCompleted && (
-                        <div className="flex flex-col gap-2 w-full">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full">
                           <Button 
                             size="sm" 
                             variant="outline"
                             onClick={() => handleSetReminder(payment)}
-                            className="w-full"
+                            className="flex-1"
                           >
                             <Clock className="w-4 h-4 mr-1" />
                             Promemoria
@@ -412,7 +412,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                           <Button 
                             size="sm"
                             onClick={() => handleMarkAsPaid(payment.id)}
-                            className="bg-green-600 hover:bg-green-700 text-white w-full"
+                            className="bg-green-600 hover:bg-green-700 text-white flex-1"
                           >
                             <CheckCircle2 className="w-4 h-4 mr-1" />
                             Segna Come Pagato
