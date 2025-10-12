@@ -401,7 +401,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                             </Button>
                             <Button
                               onClick={() => handleMarkAsPaid(payment.id)}
-                              className="bg-green-600 hover:bg-green-700 text-white flex-1 py-3 px-4 h-auto text-base"
+                              className="bg-green-600 hover:bg-green-700 text-white flex-1"
                             >
                               <CheckCircle2 className="w-4 h-4 mr-1" />
                               Segna Come Pagato
