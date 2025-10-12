@@ -117,7 +117,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
       return;
     }
 
-    const vendor = vendors.find(v => v.id === payment.id);
+    const vendor = vendors.find((v) => v.id === payment.id);
     if (!vendor) {
       toast({
         title: "Errore",
@@ -139,12 +139,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
       return;
     }
 
-    onMarkAsPaid(
-      vendor.id,
-      remainingAmount,
-      vendor.category_id,
-      `Pagamento completo - ${vendor.name}`
-    );
+    onMarkAsPaid(vendor.id, remainingAmount, vendor.category_id, `Pagamento completo - ${vendor.name}`);
   };
 
   const handleSetReminder = (payment: any) => {
@@ -332,9 +327,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
                         {/* Nome e Badge */}
                         <div className="flex items-center gap-3">
                           <h4
-                            className={`font-semibold text-lg ${
-                              payment.isPaid ? "text-green-700" : "text-gray-900"
-                            }`}
+                            className={`font-semibold text-lg ${payment.isPaid ? "text-green-700" : "text-gray-900"}`}
                           >
                             {payment.vendor}
                           </h4>
@@ -406,11 +399,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
                       {/* COLONNA DESTRA */}
                       <div className="flex flex-col items-end gap-2 min-w-[200px]">
                         {/* Importo */}
-                        <p
-                          className={`text-xl font-bold ${
-                            payment.isPaid ? "text-green-600" : "text-gray-900"
-                          }`}
-                        >
+                        <p className={`text-xl font-bold ${payment.isPaid ? "text-green-600" : "text-gray-900"}`}>
                           {formatCurrency(payment.amount)}
                         </p>
 
@@ -423,7 +412,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
                             </Button>
                             <Button
                               onClick={() => handleMarkAsPaid(payment)}
-                              className="bg-green-600 hover:bg-green-700 text-white flex-1 py-3 px-4 h-auto text-base"
+                              className="bg-green-600 hover:bg-green-700 text-white flex-1"
                             >
                               <CheckCircle2 className="w-4 h-4 mr-1" />
                               Segna Come Pagato
