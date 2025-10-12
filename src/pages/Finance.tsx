@@ -17,11 +17,15 @@ import BudgetOverview from '@/components/budget/BudgetOverview';
 import CategoryManager from '@/components/budget/CategoryManager';
 import VendorManager from '@/components/budget/VendorManager';
 import PaymentTracker from '@/components/budget/PaymentTracker';
-
 const FinanceLayout = () => {
-  const { user, signOut, loading: authLoading } = useAuth();
-  const { profile } = useProfile();
-
+  const {
+    user,
+    signOut,
+    loading: authLoading
+  } = useAuth();
+  const {
+    profile
+  } = useProfile();
   const BudgetCalculator = () => {
     // *** REACT QUERY HOOK ***
     const {
@@ -38,27 +42,26 @@ const FinanceLayout = () => {
       remainingAfterSpent,
       spentPercentage,
       daysToWedding,
-      
-    // Actions
-    updateTotalBudget,
-    addCategory,
-    updateCategory,
-    deleteCategory,
-    addItem,
-    toggleItemPaid,
-    addVendorPayment,
-
-    // Helper functions
-    getItemsByCategory,
-    getVendorsByCategory,
-  } = useBudgetQuery();
+      // Actions
+      updateTotalBudget,
+      addCategory,
+      updateCategory,
+      deleteCategory,
+      addItem,
+      toggleItemPaid,
+      addVendorPayment,
+      // Helper functions
+      getItemsByCategory,
+      getVendorsByCategory
+    } = useBudgetQuery();
 
     // Local UI state
     const [activeTab, setActiveTab] = useState(() => {
       return localStorage.getItem('finance-active-tab') || "overview";
     });
-    const { toast } = useToast();
-
+    const {
+      toast
+    } = useToast();
     useEffect(() => {
       localStorage.setItem('finance-active-tab', activeTab);
     }, [activeTab]);
@@ -69,65 +72,44 @@ const FinanceLayout = () => {
       value: cat.budgeted,
       budgeted: cat.budgeted,
       spent: cat.spent,
-      percentage: totalBudget > 0 ? ((cat.budgeted / totalBudget) * 100).toFixed(1) : 0,
+      percentage: totalBudget > 0 ? (cat.budgeted / totalBudget * 100).toFixed(1) : 0,
       color: cat.color
     }));
 
     // Loading state
     if (loading) {
-      return (
-        <div className="container mx-auto p-6">
+      return <div className="container mx-auto p-6">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Caricamento budget...</p>
             </div>
           </div>
-        </div>
-      );
+        </div>;
     }
-
-    return (
-      <div className="container mx-auto p-6 space-y-6">
+    return <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-gold bg-clip-text text-transparent">
               Budget Matrimonio
             </h1>
-            <p className="text-muted-foreground">
-              Gestisci il budget per il tuo giorno speciale - React Query
-            </p>
+            <p className="text-muted-foreground">Gestisci il budget per il tuo giorno speciale</p>
           </div>
         </div>
 
         {/* *** ALERT PER SFORAMENTI *** */}
-        {(remainingToAllocate < 0 || remainingAfterSpent < 0) && (
-          <Alert variant="destructive">
+        {(remainingToAllocate < 0 || remainingAfterSpent < 0) && <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              {remainingToAllocate < 0 && (
-                <div>Budget allocato supera il totale di €{Math.abs(remainingToAllocate).toLocaleString()}</div>
-              )}
-              {remainingAfterSpent < 0 && (
-                <div>Spese superano il budget totale di €{Math.abs(remainingAfterSpent).toLocaleString()}</div>
-              )}
+              {remainingToAllocate < 0 && <div>Budget allocato supera il totale di €{Math.abs(remainingToAllocate).toLocaleString()}</div>}
+              {remainingAfterSpent < 0 && <div>Spese superano il budget totale di €{Math.abs(remainingAfterSpent).toLocaleString()}</div>}
             </AlertDescription>
-          </Alert>
-        )}
+          </Alert>}
 
         {/* *** BUDGET OVERVIEW CARDS *** */}
-        <BudgetOverview
-          totalBudget={totalBudget}
-          totalSpent={totalSpent}
-          remainingBudget={remainingAfterSpent}
-          percentageSpent={spentPercentage}
-          daysToWedding={daysToWedding}
-          vendorsPaid={3}
-          vendorsTotal={categories.length}
-          onBudgetChange={(newBudget) => {
-            updateTotalBudget(newBudget);
-          }}
-        />
+        <BudgetOverview totalBudget={totalBudget} totalSpent={totalSpent} remainingBudget={remainingAfterSpent} percentageSpent={spentPercentage} daysToWedding={daysToWedding} vendorsPaid={3} vendorsTotal={categories.length} onBudgetChange={newBudget => {
+        updateTotalBudget(newBudget);
+      }} />
 
         {/* *** TABS *** */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -155,10 +137,7 @@ const FinanceLayout = () => {
             </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <BudgetChart 
-              categories={categories}
-              totalBudget={totalBudget}
-            />
+            <BudgetChart categories={categories} totalBudget={totalBudget} />
 
             {/* Quick Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
@@ -210,34 +189,28 @@ const FinanceLayout = () => {
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-4">
-            <CategoryManager
-              categories={categories}
-              availableCategories={availableCategories}
-              items={items}
-              vendors={vendors}
-              totalBudget={totalBudget}
-              remainingToAllocate={remainingToAllocate}
-              getItemsByCategory={getItemsByCategory}
-              getVendorsByCategory={getVendorsByCategory}
-              onAddCategory={(categoryId: string, budget: number) => {
-                addCategory({ categoryId, budgeted: budget });
-                return Promise.resolve(true);
-              }}
-              onUpdateCategory={(id: string, updates: { budgeted?: number; name?: string; color?: string; icon?: string }) => {
-                updateCategory(id, updates);
-                return Promise.resolve();
-              }}
-              onDeleteCategory={(id: string) => {
-                deleteCategory(id);
-                return Promise.resolve();
-              }}
-            />
+            <CategoryManager categories={categories} availableCategories={availableCategories} items={items} vendors={vendors} totalBudget={totalBudget} remainingToAllocate={remainingToAllocate} getItemsByCategory={getItemsByCategory} getVendorsByCategory={getVendorsByCategory} onAddCategory={(categoryId: string, budget: number) => {
+            addCategory({
+              categoryId,
+              budgeted: budget
+            });
+            return Promise.resolve(true);
+          }} onUpdateCategory={(id: string, updates: {
+            budgeted?: number;
+            name?: string;
+            color?: string;
+            icon?: string;
+          }) => {
+            updateCategory(id, updates);
+            return Promise.resolve();
+          }} onDeleteCategory={(id: string) => {
+            deleteCategory(id);
+            return Promise.resolve();
+          }} />
           </TabsContent>
           
           <TabsContent value="vendors" className="space-y-4">
-            <VendorManager
-              categories={categories}
-            />
+            <VendorManager categories={categories} />
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-4">
@@ -251,10 +224,7 @@ const FinanceLayout = () => {
                 <CardDescription>Statistiche dettagliate - Budget Totale: €{totalBudget.toLocaleString()}</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer
-                  config={{}}
-                  className="h-[400px]"
-                >
+                <ChartContainer config={{}} className="h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categories}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -265,19 +235,10 @@ const FinanceLayout = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-    );
+      </div>;
   };
-
-  return (
-    <div className="flex min-h-screen w-full">
-      <DashboardSidebar 
-        user={user}
-        profile={profile}
-        isWeddingOrganizer={true}
-        onSignOut={signOut}
-        signingOut={authLoading}
-      />
+  return <div className="flex min-h-screen w-full">
+      <DashboardSidebar user={user} profile={profile} isWeddingOrganizer={true} onSignOut={signOut} signingOut={authLoading} />
       
       <SidebarInset className="flex-1 flex flex-col">
         <CommonHeader showSidebarTrigger={true} />
@@ -286,14 +247,11 @@ const FinanceLayout = () => {
           <BudgetCalculator />
         </main>
       </SidebarInset>
-    </div>
-  );
+    </div>;
 };
-
 const Finance = () => {
   useEffect(() => {
     document.title = "Budget Matrimonio - Gestisci le finanze del tuo matrimonio";
-    
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con React Query. Imposta un budget totale e alloca le risorse nelle diverse categorie.');
@@ -304,12 +262,8 @@ const Finance = () => {
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
   }, []);
-
-  return (
-    <SidebarProvider>
+  return <SidebarProvider>
       <FinanceLayout />
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 };
-
 export default Finance;
