@@ -35,10 +35,10 @@ const mockUpcomingPayments = [
 interface PaymentTrackerProps {
   payments?: any[];
   vendors?: any[];
+  onMarkAsPaid?: (vendorId: string, amount: number, categoryId: string, notes?: string) => void;
 }
 
-const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
-  const [completedPayments, setCompletedPayments] = useState(new Set());
+const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsPaid }) => {
   const [paymentFilter, setPaymentFilter] = useState<"tutti" | "pagati" | "da_pagare" | "scaduti" | "urgenti">("tutti");
   const { toast } = useToast();
 
@@ -107,12 +107,44 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
     }
   };
 
-  const handleMarkAsPaid = (paymentId: number) => {
-    setCompletedPayments((prev) => new Set([...prev, paymentId]));
-    toast({
-      title: "Successo",
-      description: "Pagamento contrassegnato come completato!",
-    });
+  const handleMarkAsPaid = (payment: any) => {
+    if (!onMarkAsPaid) {
+      toast({
+        title: "Errore",
+        description: "Funzione di pagamento non disponibile",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const vendor = vendors.find(v => v.id === payment.id);
+    if (!vendor) {
+      toast({
+        title: "Errore",
+        description: "Fornitore non trovato",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalCost = vendor.default_cost || 0;
+    const alreadyPaid = vendor.amount_paid || 0;
+    const remainingAmount = totalCost - alreadyPaid;
+
+    if (remainingAmount <= 0) {
+      toast({
+        title: "Già Pagato",
+        description: "Questo pagamento è già stato completato",
+      });
+      return;
+    }
+
+    onMarkAsPaid(
+      vendor.id,
+      remainingAmount,
+      vendor.category_id,
+      `Pagamento completo - ${vendor.name}`
+    );
   };
 
   const handleSetReminder = (payment: any) => {
@@ -278,7 +310,6 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
             <div className="space-y-4">
               {sortedFilteredPayments.map((payment) => {
                 const daysUntilDue = payment.daysUntilDue;
-                const isCompleted = completedPayments.has(payment.id);
                 const isOverdue = payment.isOverdue;
                 const isUrgent = payment.isUrgent;
 
@@ -288,13 +319,11 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                     className={`p-4 rounded-lg border-2 transition-all duration-300 ${
                       payment.isPaid
                         ? "bg-green-50 border-green-200"
-                        : isCompleted
-                          ? "bg-green-50 border-green-200 opacity-75"
-                          : isOverdue
-                            ? "bg-red-50 border-red-200"
-                            : isUrgent
-                              ? "bg-orange-50 border-orange-200"
-                              : "bg-white border-gray-200 hover:shadow-md"
+                        : isOverdue
+                          ? "bg-red-50 border-red-200"
+                          : isUrgent
+                            ? "bg-orange-50 border-orange-200"
+                            : "bg-white border-gray-200 hover:shadow-md"
                     }`}
                   >
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -304,7 +333,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                         <div className="flex items-center gap-3">
                           <h4
                             className={`font-semibold text-lg ${
-                              payment.isPaid || isCompleted ? "text-green-700" : "text-gray-900"
+                              payment.isPaid ? "text-green-700" : "text-gray-900"
                             }`}
                           >
                             {payment.vendor}
@@ -317,14 +346,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                             </Badge>
                           )}
 
-                          {!payment.isPaid && !isCompleted && getUrgencyBadge(daysUntilDue)}
-
-                          {!payment.isPaid && isCompleted && (
-                            <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />
-                              Pagato
-                            </Badge>
-                          )}
+                          {!payment.isPaid && getUrgencyBadge(daysUntilDue)}
                         </div>
 
                         {/* Sezione Date e Info Pagamento */}
@@ -336,7 +358,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                             </div>
                           )}
 
-                          {!payment.isPaid && !isCompleted && payment.dueDate && (
+                          {!payment.isPaid && payment.dueDate && (
                             <div className="flex items-center gap-1 text-gray-600">
                               <Calendar className="w-4 h-4" />
                               <span>Scadenza: {formatDate(payment.dueDate)}</span>
@@ -354,7 +376,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                         )}
 
                         {/* Messaggi di scadenza solo per fornitori NON pagati */}
-                        {!payment.isPaid && !isCompleted && daysUntilDue !== null && daysUntilDue >= 0 && (
+                        {!payment.isPaid && daysUntilDue !== null && daysUntilDue >= 0 && (
                           <p className="text-xs text-gray-500">
                             {daysUntilDue === 0
                               ? "Scade oggi"
@@ -364,11 +386,11 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                           </p>
                         )}
 
-                        {!payment.isPaid && !isCompleted && daysUntilDue !== null && isOverdue && (
+                        {!payment.isPaid && daysUntilDue !== null && isOverdue && (
                           <p className="text-xs text-red-500 font-medium">Scaduto da {Math.abs(daysUntilDue)} giorni</p>
                         )}
 
-                        {!payment.isPaid && !isCompleted && daysUntilDue === null && (
+                        {!payment.isPaid && daysUntilDue === null && (
                           <p className="text-xs text-gray-500">Nessuna data di scadenza impostata</p>
                         )}
 
@@ -386,42 +408,27 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                         {/* Importo */}
                         <p
                           className={`text-xl font-bold ${
-                            payment.isPaid || isCompleted ? "text-green-600" : "text-gray-900"
+                            payment.isPaid ? "text-green-600" : "text-gray-900"
                           }`}
                         >
                           {formatCurrency(payment.amount)}
                         </p>
 
                         {/* Bottoni Azione */}
-                        {!payment.isPaid && !isCompleted && (
+                        {!payment.isPaid && (
                           <div className="flex flex-col lg:flex-row gap-2 w-full">
                             <Button variant="outline" onClick={() => handleSetReminder(payment)} className="flex-1">
                               <Clock className="w-4 h-4 mr-1" />
                               Promemoria
                             </Button>
                             <Button
-                              onClick={() => handleMarkAsPaid(payment.id)}
-                              className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                              onClick={() => handleMarkAsPaid(payment)}
+                              className="bg-green-600 hover:bg-green-700 text-white flex-1 py-3 px-4 h-auto text-base"
                             >
                               <CheckCircle2 className="w-4 h-4 mr-1" />
                               Segna Come Pagato
                             </Button>
                           </div>
-                        )}
-
-                        {!payment.isPaid && isCompleted && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const newCompleted = new Set(completedPayments);
-                              newCompleted.delete(payment.id);
-                              setCompletedPayments(newCompleted);
-                            }}
-                            className="w-full"
-                          >
-                            Annulla
-                          </Button>
                         )}
                       </div>
                     </div>

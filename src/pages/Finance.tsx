@@ -39,18 +39,19 @@ const FinanceLayout = () => {
       spentPercentage,
       daysToWedding,
       
-      // Actions
-      updateTotalBudget,
-      addCategory,
-      updateCategory,
-      deleteCategory,
-      addItem,
-      toggleItemPaid,
+    // Actions
+    updateTotalBudget,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    addItem,
+    toggleItemPaid,
+    addVendorPayment,
 
-      // Helper functions
-      getItemsByCategory,
-      getVendorsByCategory,
-    } = useBudgetQuery();
+    // Helper functions
+    getItemsByCategory,
+    getVendorsByCategory,
+  } = useBudgetQuery();
 
     // Local UI state
     const [activeTab, setActiveTab] = useState(() => {
@@ -240,7 +241,7 @@ const FinanceLayout = () => {
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-4">
-            <PaymentTracker vendors={vendors} />
+            <PaymentTracker vendors={vendors} onMarkAsPaid={addVendorPayment} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
