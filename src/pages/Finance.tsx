@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, TrendingUp, AlertTriangle, Calendar, PieChart, Settings, Users, CreditCard, BarChart3 } from "lucide-react";
+import { DollarSign, TrendingUp, AlertTriangle, Calendar, PieChart, Settings, Users, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ChartContainer } from "@/components/ui/chart";
-import { ResponsiveContainer, BarChart, CartesianGrid } from "recharts";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import CommonHeader from "@/components/CommonHeader";
@@ -113,7 +111,7 @@ const FinanceLayout = () => {
 
         {/* *** TABS *** */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">
                 <PieChart className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Panoramica</span>
@@ -129,10 +127,6 @@ const FinanceLayout = () => {
               <TabsTrigger value="payments">
                 <CreditCard className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Pagamenti</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics">
-                <BarChart3 className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Analisi</span>
               </TabsTrigger>
             </TabsList>
 
@@ -217,23 +211,6 @@ const FinanceLayout = () => {
             <PaymentTracker vendors={vendors} onMarkAsPaid={addVendorPayment} />
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analisi del Budget</CardTitle>
-                <CardDescription>Statistiche dettagliate - Budget Totale: €{totalBudget.toLocaleString()}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={{}} className="h-[400px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={categories}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>;
   };
