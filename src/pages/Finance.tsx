@@ -74,6 +74,48 @@ const FinanceLayout = () => {
       color: cat.color
     }));
 
+    // Helper per formattare la data in formato "DD MMM"
+    const formatPaymentDate = (dateString: string | null) => {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+      return `${date.getDate()} ${months[date.getMonth()]}`;
+    };
+
+    // Calcolare il prossimo pagamento
+    const getNextPayment = () => {
+      // Filtra solo i vendor con pagamenti non completati e con data di scadenza
+      const unpaidVendors = vendors.filter(v => 
+        !v.complete_payment_date && 
+        v.payment_due_date && 
+        v.default_cost > 0
+      );
+
+      if (unpaidVendors.length === 0) return null;
+
+      // Ordina per data di scadenza più vicina
+      const sortedByDate = [...unpaidVendors].sort((a, b) => {
+        const dateA = new Date(a.payment_due_date!);
+        const dateB = new Date(b.payment_due_date!);
+        return dateA.getTime() - dateB.getTime();
+      });
+
+      const nextVendor = sortedByDate[0];
+      const remainingAmount = (nextVendor.default_cost || 0) - (nextVendor.amount_paid || 0);
+
+      // Trova la categoria per il nome
+      const category = categories.find(c => c.id === nextVendor.category_id);
+
+      return {
+        date: formatPaymentDate(nextVendor.payment_due_date),
+        vendor: nextVendor.name,
+        category: category?.name || 'Non categorizzato',
+        amount: remainingAmount
+      };
+    };
+
+    const nextPayment = getNextPayment();
+
     // Loading state
     if (loading) {
       return <div className="container mx-auto p-6">
@@ -157,8 +199,19 @@ const FinanceLayout = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-green-700">Prossimo pagamento</p>
-                      <p className="text-2xl font-bold text-green-900">20 Mag</p>
-                      <p className="text-sm text-green-600">Catering - €5.800</p>
+                      {nextPayment ? (
+                        <>
+                          <p className="text-2xl font-bold text-green-900">{nextPayment.date}</p>
+                          <p className="text-sm text-green-600">
+                            {nextPayment.vendor} - €{nextPayment.amount.toLocaleString()}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-2xl font-bold text-green-900">--</p>
+                          <p className="text-sm text-green-600">Nessun pagamento in sospeso</p>
+                        </>
+                      )}
                     </div>
                     <Calendar className="h-8 w-8 text-green-600" />
                   </div>
