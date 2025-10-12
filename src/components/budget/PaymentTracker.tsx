@@ -401,18 +401,16 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                       {!payment.isPaid && !isCompleted && (
                         <div className="flex flex-col lg:flex-row gap-2 w-full">
                           <Button 
-                            size="sm" 
                             variant="outline"
                             onClick={() => handleSetReminder(payment)}
-                            className="flex-1"
+                            className="flex-1 py-3 px-4 h-auto text-base"
                           >
                             <Clock className="w-4 h-4 mr-1" />
                             Promemoria
                           </Button>
                           <Button 
-                            size="sm"
                             onClick={() => handleMarkAsPaid(payment.id)}
-                            className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                            className="bg-green-600 hover:bg-green-700 text-white flex-1 py-3 px-4 h-auto text-base"
                           >
                             <CheckCircle2 className="w-4 h-4 mr-1" />
                             Segna Come Pagato
