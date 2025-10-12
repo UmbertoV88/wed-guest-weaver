@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Calendar, Euro, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar, Euro, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock payments data dal Budget-calculator
 const mockUpcomingPayments = [
@@ -14,22 +14,22 @@ const mockUpcomingPayments = [
     vendor: "Catering Il Convivio",
     amount: 5800,
     dueDate: "2024-05-20",
-    category: "Catering"
+    category: "Catering",
   },
   {
     id: 2,
     vendor: "Villa San Martino (saldo)",
     amount: 5000,
-    dueDate: "2024-06-15", 
-    category: "Location"
+    dueDate: "2024-06-15",
+    category: "Location",
   },
   {
     id: 3,
     vendor: "Studio Fotografico Luce",
     amount: 2400,
     dueDate: "2024-07-01",
-    category: "Fotografia"
-  }
+    category: "Fotografia",
+  },
 ];
 
 interface PaymentTrackerProps {
@@ -39,21 +39,21 @@ interface PaymentTrackerProps {
 
 const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
   const [completedPayments, setCompletedPayments] = useState(new Set());
-  const [paymentFilter, setPaymentFilter] = useState<'tutti' | 'pagati' | 'da_pagare' | 'scaduti' | 'urgenti'>('tutti');
+  const [paymentFilter, setPaymentFilter] = useState<"tutti" | "pagati" | "da_pagare" | "scaduti" | "urgenti">("tutti");
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('it-IT', {
-      style: 'currency',
-      currency: 'EUR'
+    return new Intl.NumberFormat("it-IT", {
+      style: "currency",
+      currency: "EUR",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('it-IT', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
+    return new Date(dateString).toLocaleDateString("it-IT", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
     });
   };
 
@@ -68,75 +68,83 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
 
   const getUrgencyBadge = (daysUntilDue: number | null) => {
     if (daysUntilDue === null) {
-      return <Badge variant="secondary" className="flex items-center gap-1">
-        <Calendar className="w-3 h-3" />
-        Nessuna Scadenza
-      </Badge>;
+      return (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Calendar className="w-3 h-3" />
+          Nessuna Scadenza
+        </Badge>
+      );
     }
-    
+
     if (daysUntilDue < 0) {
-      return <Badge variant="destructive" className="flex items-center gap-1">
-        <AlertTriangle className="w-3 h-3" />
-        Scaduto
-      </Badge>;
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <AlertTriangle className="w-3 h-3" />
+          Scaduto
+        </Badge>
+      );
     } else if (daysUntilDue <= 7) {
-      return <Badge className="bg-orange-100 text-orange-800 flex items-center gap-1">
-        <Clock className="w-3 h-3" />
-        Urgente
-      </Badge>;
+      return (
+        <Badge className="bg-orange-100 text-orange-800 flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          Urgente
+        </Badge>
+      );
     } else if (daysUntilDue <= 30) {
-      return <Badge className="bg-yellow-100 text-yellow-800 flex items-center gap-1">
-        <Clock className="w-3 h-3" />
-        Prossimo
-      </Badge>;
+      return (
+        <Badge className="bg-yellow-100 text-yellow-800 flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          Prossimo
+        </Badge>
+      );
     } else {
-      return <Badge variant="secondary" className="flex items-center gap-1">
-        <Calendar className="w-3 h-3" />
-        Pianificato
-      </Badge>;
+      return (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Calendar className="w-3 h-3" />
+          Pianificato
+        </Badge>
+      );
     }
   };
 
   const handleMarkAsPaid = (paymentId: number) => {
-    setCompletedPayments(prev => new Set([...prev, paymentId]));
+    setCompletedPayments((prev) => new Set([...prev, paymentId]));
     toast({
       title: "Successo",
-      description: "Pagamento contrassegnato come completato!"
+      description: "Pagamento contrassegnato come completato!",
     });
   };
 
   const handleSetReminder = (payment: any) => {
     toast({
       title: "Promemoria impostato",
-      description: `Ti ricorderemo 3 giorni prima della scadenza per ${payment.vendor}`
+      description: `Ti ricorderemo 3 giorni prima della scadenza per ${payment.vendor}`,
     });
   };
 
   // Calcoli basati sui fornitori reali
-  const vendorPayments = vendors.map(vendor => {
+  const vendorPayments = vendors.map((vendor) => {
     const totalCost = vendor.default_cost || 0;
     const paid = vendor.amount_paid || 0;
     const remaining = totalCost - paid;
-    
+
     return {
       vendor,
       totalCost,
       paid,
       remaining,
-      isPending: remaining > 0
+      isPending: remaining > 0,
     };
   });
 
   // Totale da pagare = somma di tutti i "rimanenti"
-  const totalRemainingFromVendors = vendorPayments
-    .filter(v => v.isPending)
-    .reduce((sum, v) => sum + v.remaining, 0);
+  const totalRemainingFromVendors = vendorPayments.filter((v) => v.isPending).reduce((sum, v) => sum + v.remaining, 0);
 
   // Conteggio fornitori con pagamenti in sospeso
-  const pendingVendorsCount = vendorPayments.filter(v => v.isPending).length;
+  const pendingVendorsCount = vendorPayments.filter((v) => v.isPending).length;
 
   // Fornitori con pagamenti scaduti
-  const overdueVendors = vendorPayments.filter(v => {
+  const overdueVendors = vendorPayments.filter((v) => {
     if (!v.isPending || !v.vendor.payment_due_date) return false;
     const daysUntilDue = getDaysUntilDue(v.vendor.payment_due_date);
     return daysUntilDue < 0;
@@ -146,7 +154,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
   const overdueCount = overdueVendors.length;
 
   // Fornitori con pagamenti urgenti (prossimi 7 giorni)
-  const urgentVendors = vendorPayments.filter(v => {
+  const urgentVendors = vendorPayments.filter((v) => {
     if (!v.isPending || !v.vendor.payment_due_date) return false;
     const daysUntilDue = getDaysUntilDue(v.vendor.payment_due_date);
     return daysUntilDue >= 0 && daysUntilDue <= 7;
@@ -156,36 +164,36 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
   const urgentCount = urgentVendors.length;
 
   // Prepara i pagamenti dai fornitori reali - INCLUDE TUTTI I FORNITORI
-  const vendorBasedPayments = vendorPayments.filter(v => v.vendor.default_cost && v.vendor.default_cost > 0).map(v => {
-    // Calcola se completamente pagato usando complete_payment_date
-    const isPaid = !!v.vendor.complete_payment_date || v.remaining <= 0;
-    
-    const daysUntilDue = v.vendor.payment_due_date 
-      ? getDaysUntilDue(v.vendor.payment_due_date) 
-      : null;
-    
-    return {
-      id: v.vendor.id,
-      vendor: v.vendor.name,
-      amount: isPaid ? v.totalCost : v.remaining,
-      amountPaid: v.vendor.amount_paid,
-      paymentDate: v.vendor.complete_payment_date,
-      dueDate: v.vendor.payment_due_date,
-      category: v.vendor.category_id,
-      daysUntilDue,
-      isOverdue: !isPaid && daysUntilDue !== null && daysUntilDue < 0,
-      isUrgent: !isPaid && daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue <= 7,
-      isPaid
-    };
-  });
+  const vendorBasedPayments = vendorPayments
+    .filter((v) => v.vendor.default_cost && v.vendor.default_cost > 0)
+    .map((v) => {
+      // Calcola se completamente pagato usando complete_payment_date
+      const isPaid = !!v.vendor.complete_payment_date || v.remaining <= 0;
+
+      const daysUntilDue = v.vendor.payment_due_date ? getDaysUntilDue(v.vendor.payment_due_date) : null;
+
+      return {
+        id: v.vendor.id,
+        vendor: v.vendor.name,
+        amount: isPaid ? v.totalCost : v.remaining,
+        amountPaid: v.vendor.amount_paid,
+        paymentDate: v.vendor.complete_payment_date,
+        dueDate: v.vendor.payment_due_date,
+        category: v.vendor.category_id,
+        daysUntilDue,
+        isOverdue: !isPaid && daysUntilDue !== null && daysUntilDue < 0,
+        isUrgent: !isPaid && daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue <= 7,
+        isPaid,
+      };
+    });
 
   // Applica il filtro selezionato
-  const filteredPayments = vendorBasedPayments.filter(payment => {
-    if (paymentFilter === 'tutti') return true;
-    if (paymentFilter === 'pagati') return payment.isPaid;
-    if (paymentFilter === 'da_pagare') return !payment.isPaid;
-    if (paymentFilter === 'scaduti') return payment.isOverdue;
-    if (paymentFilter === 'urgenti') return payment.isUrgent;
+  const filteredPayments = vendorBasedPayments.filter((payment) => {
+    if (paymentFilter === "tutti") return true;
+    if (paymentFilter === "pagati") return payment.isPaid;
+    if (paymentFilter === "da_pagare") return !payment.isPaid;
+    if (paymentFilter === "scaduti") return payment.isOverdue;
+    if (paymentFilter === "urgenti") return payment.isUrgent;
     return true;
   });
 
@@ -210,11 +218,9 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
             <CardTitle className="text-lg text-blue-700">Totale da Pagare</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-900">
-              {formatCurrency(totalRemainingFromVendors)}
-            </div>
+            <div className="text-3xl font-bold text-blue-900">{formatCurrency(totalRemainingFromVendors)}</div>
             <p className="text-sm text-blue-600 mt-1">
-              {pendingVendorsCount} {pendingVendorsCount === 1 ? 'pagamento rimanente' : 'pagamenti rimanenti'}
+              {pendingVendorsCount} {pendingVendorsCount === 1 ? "pagamento rimanente" : "pagamenti rimanenti"}
             </p>
           </CardContent>
         </Card>
@@ -224,14 +230,9 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
             <CardTitle className="text-lg text-red-700">Pagamenti Scaduti</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-900">
-              {overdueCount}
-            </div>
+            <div className="text-3xl font-bold text-red-900">{overdueCount}</div>
             <p className="text-sm text-red-600 mt-1">
-              {overdueCount > 0 
-                ? `${formatCurrency(overdueAmount)} totali`
-                : "Nessun pagamento scaduto"
-              }
+              {overdueCount > 0 ? `${formatCurrency(overdueAmount)} totali` : "Nessun pagamento scaduto"}
             </p>
           </CardContent>
         </Card>
@@ -241,14 +242,9 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
             <CardTitle className="text-lg text-orange-700">Urgenti (7 giorni)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-900">
-              {urgentCount}
-            </div>
+            <div className="text-3xl font-bold text-orange-900">{urgentCount}</div>
             <p className="text-sm text-orange-600 mt-1">
-              {urgentCount > 0
-                ? `${formatCurrency(urgentAmount)} totali`
-                : "Nessun pagamento urgente"
-              }
+              {urgentCount > 0 ? `${formatCurrency(urgentAmount)} totali` : "Nessun pagamento urgente"}
             </p>
           </CardContent>
         </Card>
@@ -262,7 +258,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
               <Calendar className="w-5 h-5" />
               Cronologia Pagamenti
             </CardTitle>
-            
+
             <Select value={paymentFilter} onValueChange={(value) => setPaymentFilter(value as any)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filtra pagamenti" />
@@ -281,160 +277,155 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
           <ScrollArea className="h-[600px] pr-4">
             <div className="space-y-4">
               {sortedFilteredPayments.map((payment) => {
-              const daysUntilDue = payment.daysUntilDue;
-              const isCompleted = completedPayments.has(payment.id);
-              const isOverdue = payment.isOverdue;
-              const isUrgent = payment.isUrgent;
+                const daysUntilDue = payment.daysUntilDue;
+                const isCompleted = completedPayments.has(payment.id);
+                const isOverdue = payment.isOverdue;
+                const isUrgent = payment.isUrgent;
 
-              return (
-                <div 
-                  key={payment.id}
-                  className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                    payment.isPaid
-                      ? 'bg-green-50 border-green-200'
-                      : isCompleted 
-                        ? 'bg-green-50 border-green-200 opacity-75' 
-                        : isOverdue 
-                          ? 'bg-red-50 border-red-200' 
-                          : isUrgent 
-                            ? 'bg-orange-50 border-orange-200' 
-                            : 'bg-white border-gray-200 hover:shadow-md'
-                  }`}
-                >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    {/* COLONNA SINISTRA */}
-                    <div className="flex-1 space-y-3">
-                      {/* Nome e Badge */}
-                      <div className="flex items-center gap-3">
-                        <h4 className={`font-semibold text-lg ${
-                          payment.isPaid || isCompleted ? 'text-green-700' : 'text-gray-900'
-                        }`}>
-                          {payment.vendor}
-                        </h4>
-                        
+                return (
+                  <div
+                    key={payment.id}
+                    className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                      payment.isPaid
+                        ? "bg-green-50 border-green-200"
+                        : isCompleted
+                          ? "bg-green-50 border-green-200 opacity-75"
+                          : isOverdue
+                            ? "bg-red-50 border-red-200"
+                            : isUrgent
+                              ? "bg-orange-50 border-orange-200"
+                              : "bg-white border-gray-200 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      {/* COLONNA SINISTRA */}
+                      <div className="flex-1 space-y-3">
+                        {/* Nome e Badge */}
+                        <div className="flex items-center gap-3">
+                          <h4
+                            className={`font-semibold text-lg ${
+                              payment.isPaid || isCompleted ? "text-green-700" : "text-gray-900"
+                            }`}
+                          >
+                            {payment.vendor}
+                          </h4>
+
+                          {payment.isPaid && (
+                            <Badge className="bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Pagato
+                            </Badge>
+                          )}
+
+                          {!payment.isPaid && !isCompleted && getUrgencyBadge(daysUntilDue)}
+
+                          {!payment.isPaid && isCompleted && (
+                            <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Pagato
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Sezione Date e Info Pagamento */}
+                        <div className="flex items-center gap-4 text-sm">
+                          {payment.isPaid && payment.paymentDate && (
+                            <div className="flex items-center gap-1 text-green-600 font-medium">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>Pagato il {formatDate(payment.paymentDate)}</span>
+                            </div>
+                          )}
+
+                          {!payment.isPaid && !isCompleted && payment.dueDate && (
+                            <div className="flex items-center gap-1 text-gray-600">
+                              <Calendar className="w-4 h-4" />
+                              <span>Scadenza: {formatDate(payment.dueDate)}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Importo Totale Pagato per Fornitori Completati */}
                         {payment.isPaid && (
-                          <Badge className="bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Pagato
-                          </Badge>
-                        )}
-                        
-                        {!payment.isPaid && !isCompleted && getUrgencyBadge(daysUntilDue)}
-                        
-                        {!payment.isPaid && isCompleted && (
-                          <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Pagato
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      {/* Sezione Date e Info Pagamento */}
-                      <div className="flex items-center gap-4 text-sm">
-                        {payment.isPaid && payment.paymentDate && (
-                          <div className="flex items-center gap-1 text-green-600 font-medium">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>Pagato il {formatDate(payment.paymentDate)}</span>
+                          <div className="bg-green-100 border border-green-200 rounded-md p-2">
+                            <p className="text-sm text-green-700 font-medium">
+                              💰 Importo totale pagato: {formatCurrency(payment.amountPaid || payment.amount)}
+                            </p>
                           </div>
                         )}
-                        
-                        {!payment.isPaid && !isCompleted && payment.dueDate && (
-                          <div className="flex items-center gap-1 text-gray-600">
-                            <Calendar className="w-4 h-4" />
-                            <span>Scadenza: {formatDate(payment.dueDate)}</span>
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Importo Totale Pagato per Fornitori Completati */}
-                      {payment.isPaid && (
-                        <div className="bg-green-100 border border-green-200 rounded-md p-2">
-                          <p className="text-sm text-green-700 font-medium">
-                            💰 Importo totale pagato: {formatCurrency(payment.amountPaid || payment.amount)}
+                        {/* Messaggi di scadenza solo per fornitori NON pagati */}
+                        {!payment.isPaid && !isCompleted && daysUntilDue !== null && daysUntilDue >= 0 && (
+                          <p className="text-xs text-gray-500">
+                            {daysUntilDue === 0
+                              ? "Scade oggi"
+                              : daysUntilDue === 1
+                                ? "Scade domani"
+                                : `Scade tra ${daysUntilDue} giorni`}
                           </p>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Messaggi di scadenza solo per fornitori NON pagati */}
-                      {!payment.isPaid && !isCompleted && daysUntilDue !== null && daysUntilDue >= 0 && (
-                        <p className="text-xs text-gray-500">
-                          {daysUntilDue === 0 
-                            ? "Scade oggi" 
-                            : daysUntilDue === 1 
-                              ? "Scade domani"
-                              : `Scade tra ${daysUntilDue} giorni`
-                          }
-                        </p>
-                      )}
+                        {!payment.isPaid && !isCompleted && daysUntilDue !== null && isOverdue && (
+                          <p className="text-xs text-red-500 font-medium">Scaduto da {Math.abs(daysUntilDue)} giorni</p>
+                        )}
 
-                      {!payment.isPaid && !isCompleted && daysUntilDue !== null && isOverdue && (
-                        <p className="text-xs text-red-500 font-medium">
-                          Scaduto da {Math.abs(daysUntilDue)} giorni
-                        </p>
-                      )}
+                        {!payment.isPaid && !isCompleted && daysUntilDue === null && (
+                          <p className="text-xs text-gray-500">Nessuna data di scadenza impostata</p>
+                        )}
 
-                      {!payment.isPaid && !isCompleted && daysUntilDue === null && (
-                        <p className="text-xs text-gray-500">
-                          Nessuna data di scadenza impostata
-                        </p>
-                      )}
+                        {/* Messaggio "Completamente Pagato" */}
+                        {payment.isPaid && (
+                          <div className="flex items-center gap-2 text-sm text-green-600">
+                            <CheckCircle2 className="w-5 h-5" />
+                            <span className="font-medium">Fornitore completamente pagato ✓</span>
+                          </div>
+                        )}
+                      </div>
 
-                      {/* Messaggio "Completamente Pagato" */}
-                      {payment.isPaid && (
-                        <div className="flex items-center gap-2 text-sm text-green-600">
-                          <CheckCircle2 className="w-5 h-5" />
-                          <span className="font-medium">Fornitore completamente pagato ✓</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* COLONNA DESTRA */}
-                    <div className="flex flex-col items-end gap-2 min-w-[200px]">
-                      {/* Importo */}
-                      <p className={`text-xl font-bold ${
-                        payment.isPaid || isCompleted ? 'text-green-600' : 'text-gray-900'
-                      }`}>
-                        {formatCurrency(payment.amount)}
-                      </p>
-                      
-                      {/* Bottoni Azione */}
-                      {!payment.isPaid && !isCompleted && (
-                        <div className="flex flex-col lg:flex-row gap-2 w-full">
-                          <Button 
-                            variant="outline"
-                            onClick={() => handleSetReminder(payment)}
-                            className="flex-1 py-3 px-4 h-auto text-base"
-                          >
-                            <Clock className="w-4 h-4 mr-1" />
-                            Promemoria
-                          </Button>
-                          <Button 
-                            onClick={() => handleMarkAsPaid(payment.id)}
-                            className="bg-green-600 hover:bg-green-700 text-white flex-1 py-3 px-4 h-auto text-base"
-                          >
-                            <CheckCircle2 className="w-4 h-4 mr-1" />
-                            Segna Come Pagato
-                          </Button>
-                        </div>
-                      )}
-                      
-                      {!payment.isPaid && isCompleted && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const newCompleted = new Set(completedPayments);
-                            newCompleted.delete(payment.id);
-                            setCompletedPayments(newCompleted);
-                          }}
-                          className="w-full"
+                      {/* COLONNA DESTRA */}
+                      <div className="flex flex-col items-end gap-2 min-w-[200px]">
+                        {/* Importo */}
+                        <p
+                          className={`text-xl font-bold ${
+                            payment.isPaid || isCompleted ? "text-green-600" : "text-gray-900"
+                          }`}
                         >
-                          Annulla
-                        </Button>
-                      )}
+                          {formatCurrency(payment.amount)}
+                        </p>
+
+                        {/* Bottoni Azione */}
+                        {!payment.isPaid && !isCompleted && (
+                          <div className="flex flex-col lg:flex-row gap-2 w-full">
+                            <Button variant="outline" onClick={() => handleSetReminder(payment)} className="flex-1">
+                              <Clock className="w-4 h-4 mr-1" />
+                              Promemoria
+                            </Button>
+                            <Button
+                              onClick={() => handleMarkAsPaid(payment.id)}
+                              className="bg-green-600 hover:bg-green-700 text-white flex-1 py-3 px-4 h-auto text-base"
+                            >
+                              <CheckCircle2 className="w-4 h-4 mr-1" />
+                              Segna Come Pagato
+                            </Button>
+                          </div>
+                        )}
+
+                        {!payment.isPaid && isCompleted && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newCompleted = new Set(completedPayments);
+                              newCompleted.delete(payment.id);
+                              setCompletedPayments(newCompleted);
+                            }}
+                            className="w-full"
+                          >
+                            Annulla
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
                 );
               })}
             </div>
