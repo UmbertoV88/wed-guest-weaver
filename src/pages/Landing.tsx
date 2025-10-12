@@ -2,683 +2,328 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Heart, Users, Calendar, CheckCircle, Star, Clock, Shield, Sparkles } from "lucide-react";
+import { Heart, Users, Calendar, CheckCircle, Star, Clock, Shield, Sparkles, ChevronDown, TrendingUp, Award, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import CommonHeader from "@/components/CommonHeader";
 
 const Landing = () => {
   const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     document.title = "Sistema Gestione Invitati Matrimonio - Organizza il Tuo Giorno Perfetto";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Sistema completo per gestire invitati matrimonio in 7 giorni. Addio liste Excel caotiche, benvenuto matrimonio perfetto!');
+      metaDescription.setAttribute('content', 'Sistema completo per gestire invitati matrimonio in 7 giorni. Trasforma il caos in eleganza con il nostro sistema intelligente.');
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    console.log("Email submitted:", email);
   };
 
   return (
-    <div className="min-h-screen bg-elegant">
+    <div className="min-h-screen bg-background">
       <CommonHeader showAuthButtons={true} />
 
-      {/* Hero Section */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-gold/10 to-primary-deep/20"></div>
-        <div className="relative container mx-auto px-4 py-16 text-center">
-          <div className="flex items-center justify-center gap-3 mb-6 animate-fade-in-up">
-            <Heart className="w-12 h-12 text-primary animate-heartbeat" fill="currentColor" />
-            <Sparkles className="w-8 h-8 text-gold animate-sparkle" />
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary-deep to-gold bg-clip-text text-transparent">
-            TRASFORMA IL CAOS IN ELEGANZA
-          </h1>
-          
-          <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-primary-deep">
-            Come Organizzare Un Matrimonio Perfetto E Gestire Tutti Gli Invitati In Soli 7 Giorni
-          </h2>
-          
-          <p className="text-lg mb-8 text-muted-foreground max-w-2xl mx-auto">
-            (anche se finora hai usato solo liste Excel caotiche e telefonate infinite)
-          </p>
-          
-          <Button size="lg" className="bg-gold hover:bg-gold/90 text-primary-deep text-xl px-12 py-6 rounded-full shadow-elegant animate-pulse">
-            ACCEDI ORA - Solo €97
-          </Button>
-          
-          <p className="mt-4 text-sm text-muted-foreground">
-            🔥 OFFERTA LIMITATA (Prezzo normale €297)
-          </p>
+      {/* Hero Section with Video Background */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover opacity-0"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          >
+            <source src="/videos/wedding-hero.mp4" type="video/mp4" />
+          </video>
+          {/* Fallback gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-deep via-primary to-gold"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
         </div>
-      </header>
 
-      {/* Problem Section */}
-      <section className="py-16 bg-white/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-8 text-primary-deep">
-              Il Sistema Che Sta Trasformando Lo Stress Matrimoniale In Serenità Organizzativa In Soli 7 Giorni
-            </h2>
+        {/* Hero Content */}
+        <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
+          <div className="animate-fade-in-up">
+            <Heart className="w-16 h-16 mx-auto mb-6 text-gold animate-heartbeat" fill="currentColor" />
             
-            <blockquote className="text-2xl italic mb-12 text-primary font-medium">
-              "Non riesco più a tenere traccia di chi viene, chi conferma, chi ha allergie... È un incubo!"
-            </blockquote>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              TRASFORMA IL CAOS<br />
+              <span className="text-gold">IN ELEGANZA</span>
+            </h1>
             
-            <div className="text-left max-w-3xl mx-auto mb-12">
-              <p className="text-lg mb-6">
-                Ricordo ancora quando mia sorella stava organizzando il suo matrimonio. Aveva liste Excel sparse ovunque, 
-                post-it attaccati al frigo, e passava le serate al telefono cercando di capire chi avesse confermato la presenza.
-              </p>
-              
-              <p className="text-lg mb-8">
-                Due settimane prima del matrimonio, si rese conto che aveva perso traccia di 15 invitati e non sapeva 
-                quante persone sarebbero effettivamente venute. Il catering doveva sapere i numeri esatti...
-              </p>
-              
-              <h3 className="text-xl font-semibold mb-6 text-primary-deep">
-                La sua lotta quotidiana con la gestione invitati includeva:
-              </h3>
-              
-              <ul className="space-y-4 text-lg">
-                <li className="flex items-start gap-3">
-                  <span className="text-destructive font-bold">✗</span>
-                  Liste Excel confuse con versioni multiple e contraddittorie
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-destructive font-bold">✗</span>
-                  Telefonate infinite per confermare le presenze, spesso senza risposta
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-destructive font-bold">✗</span>
-                  Allergie e intolleranze dimenticate o perse tra le note
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-destructive font-bold">✗</span>
-                  Impossibilità di sapere in tempo reale quanti invitati avrebbero partecipato
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-destructive font-bold">✗</span>
-                  Stress continuo per la paura di dimenticare qualcuno o qualche dettaglio importante
-                </li>
-              </ul>
-            </div>
+            <p className="text-xl md:text-2xl mb-8 text-white/90">
+              Organizza il matrimonio perfetto e gestisci tutti gli invitati in soli 7 giorni
+            </p>
             
-            <div className="bg-card/50 p-8 rounded-lg shadow-soft mb-12">
-              <p className="text-lg mb-6">
-                Provò tutto quello che wedding planner e forum suggerivano:
-              </p>
-              
-              <ul className="space-y-4 text-left max-w-2xl mx-auto">
-                <li><strong>App generiche per eventi</strong> (troppo complicate e non specifiche per matrimoni)</li>
-                <li><strong>Fogli Google condivisi</strong> (caos totale con troppe persone che modificavano)</li>
-                <li><strong>Software professionali costosi</strong> (€500+ al mese, troppo complessi)</li>
-                <li><strong>Notebook cartacei</strong> (impossibili da condividere o aggiornare in tempo reale)</li>
-                <li><strong>WhatsApp e messaggi</strong> (informazioni perse tra centinaia di chat)</li>
-              </ul>
-            </div>
+            <p className="text-lg mb-8 text-white/80">
+              (anche se finora hai usato solo liste Excel caotiche)
+            </p>
             
-            <p className="text-xl font-semibold text-primary-deep mb-8">
-              Tre giorni prima del matrimonio, era sull'orlo di una crisi nervosa...
+            <Link to="/auth">
+              <Button 
+                size="lg" 
+                className="bg-gold hover:bg-gold/90 text-primary-deep text-xl px-12 py-7 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
+              >
+                <span className="flex items-center gap-3">
+                  INIZIA SUBITO - Solo €97
+                  <Sparkles className="w-5 h-5" />
+                </span>
+              </Button>
+            </Link>
+            
+            <p className="mt-6 text-white/70 text-sm">
+              🔥 OFFERTA LIMITATA - Prezzo normale €297
             </p>
           </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+          <ChevronDown className="w-8 h-8 text-white/60" />
         </div>
       </section>
 
-      {/* Discovery Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-gold/5">
+      {/* Come Funziona - 3 Step Timeline */}
+      <section className="py-24 bg-gradient-to-b from-white to-primary/5">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-primary-deep">
-              Poi Scoprii Qualcosa Che Cambiò Tutto...
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
+              Il Tuo Matrimonio Perfetto<br />
+              <span className="text-primary">In 3 Semplici Step</span>
             </h2>
-            
-            <div className="bg-white p-8 rounded-lg shadow-elegant mb-12">
-              <p className="text-lg mb-6">
-                Durante le mie ricerche per aiutarla, mi imbattei in uno studio dell'Associazione Wedding Planner Italiani 
-                che rivelava dati scioccanti:
-              </p>
-              
-              <div className="bg-primary/10 p-6 rounded-lg mb-6">
-                <p className="text-lg font-semibold">
-                  Secondo l'AWPI, l'89% delle coppie italiane vive stress estremo nella gestione degli invitati, 
-                  e il 67% commette errori critici che rovinano l'esperienza del matrimonio.
-                </p>
-              </div>
-              
-              <h3 className="text-xl font-semibold mb-4 text-primary-deep">Quello che scoprii mi lasciò senza parole:</h3>
-              
-              <ul className="space-y-3 text-lg mb-8">
-                <li>• Il 73% delle coppie perde traccia di almeno 10 invitati durante l'organizzazione</li>
-                <li>• Il 84% non riesce a gestire correttamente allergie e intolleranze alimentari</li>
-                <li>• Il 91% non sa in tempo reale quante persone parteciperanno effettivamente</li>
-                <li>• Il 56% scopre problemi critici solo negli ultimi giorni prima del matrimonio</li>
-              </ul>
-              
-              <div className="bg-destructive/10 p-6 rounded-lg">
-                <p className="text-lg font-semibold text-destructive-foreground">
-                  Ma la cosa più allarmante di tutte: La maggior parte delle coppie sta inconsapevolmente 
-                  sabotando la propria serenità matrimoniale usando metodi obsoleti e disorganizzati.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Dimentica Excel e liste caotiche. Il nostro sistema ti guida passo dopo passo.
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-12">
+            {/* Step 1 */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-gold/20 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
+              <div className="relative bg-card p-8 rounded-2xl shadow-elegant">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-deep rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6 mx-auto">
+                  1
+                </div>
+                <Users className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-center mb-4">Aggiungi Invitati</h3>
+                <p className="text-muted-foreground text-center">
+                  Inserisci rapidamente tutti i tuoi invitati con il wizard guidato
                 </p>
               </div>
             </div>
-            
-            <p className="text-lg text-center mb-8">
-              Lo sapevo perché stavo commettendo gli stessi errori aiutando mia sorella...
-            </p>
-            
-            <div className="text-center">
-              <p className="text-lg mb-6">
-                Attraverso ricerche approfondite e consultazioni con:
-              </p>
-              <ul className="text-lg space-y-2 mb-8">
-                <li><strong>Wedding Planner Professionisti</strong></li>
-                <li><strong>Esperti di Project Management</strong></li>
-                <li><strong>Sviluppatori di Software Gestionali</strong></li>
-              </ul>
-              
-              <p className="text-xl font-semibold text-primary-deep mb-8">
-                Scoprii PERCHÉ gli approcci tradizionali falliscono - e soprattutto, cosa funziona davvero.
-              </p>
-              
-              <div className="bg-gold/20 p-8 rounded-lg shadow-soft">
-                <h3 className="text-2xl font-bold mb-4 text-primary-deep">
-                  Lo chiamo il "Sistema Matrimonio Perfetto"
-                </h3>
-                
-                <p className="text-lg mb-6">
-                  Attraverso la gestione digitale intelligente degli invitati, riuscii ad aiutare mia sorella a:
+
+            {/* Step 2 */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-gold/20 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
+              <div className="relative bg-card p-8 rounded-2xl shadow-elegant">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-deep rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6 mx-auto">
+                  2
+                </div>
+                <CheckCircle className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-center mb-4">Traccia Conferme</h3>
+                <p className="text-muted-foreground text-center">
+                  Monitora in tempo reale chi ha confermato, chi è in attesa
                 </p>
-                
-                <ul className="space-y-3 text-lg text-left max-w-2xl mx-auto">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    Organizzare tutti gli invitati in categorie chiare e gestibili
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    Tracciare automaticamente conferme e stati di ogni singolo invitato
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    Gestire allergie e intolleranze senza dimenticare nessun dettaglio
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    Avere statistiche in tempo reale su partecipanti confermati
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    Dormire sonni tranquilli sapendo che tutto era sotto controllo
-                  </li>
-                </ul>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-gold/20 rounded-2xl transform group-hover:scale-105 transition-transform duration-300"></div>
+              <div className="relative bg-card p-8 rounded-2xl shadow-elegant">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-deep rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6 mx-auto">
+                  3
+                </div>
+                <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-center mb-4">Giorno Perfetto</h3>
+                <p className="text-muted-foreground text-center">
+                  Goditi il tuo matrimonio senza preoccupazioni organizzative
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features vs Traditional */}
-      <section className="py-16 bg-white">
+      {/* Features Section - Cards Interattive */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-primary-deep">
-              Le 4 Caratteristiche Essenziali Che Separano Un Matrimonio Perfetto Dal Caos Organizzativo
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
+              Tutto Quello Che Ti Serve<br />
+              <span className="text-primary">In Un Solo Sistema</span>
             </h2>
-            
-            <p className="text-xl text-center mb-12 text-muted-foreground">
-              Le 4 Funzionalità Fondamentali Che Ogni Coppia Deve Avere (Che Excel e WhatsApp Non Possono Fornire)
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card className="p-6 shadow-elegant">
-                <div className="flex items-center gap-3 mb-4">
+          </div>
+
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Feature 1 */}
+            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="relative p-6 text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Users className="w-8 h-8 text-primary" />
-                  <h3 className="text-xl font-bold text-primary-deep">Gestione Invitati Intelligente</h3>
                 </div>
-                <p className="text-lg mb-4">
-                  Sistema completo per organizzare invitati principali e accompagnatori - 
-                  mantieni tutto organizzato senza perdere mai traccia di nessuno.
+                <h3 className="text-lg font-bold mb-2">Gestione Invitati</h3>
+                <p className="text-sm text-muted-foreground">
+                  Organizza invitati e accompagnatori senza sforzo
                 </p>
-                <p className="text-destructive font-medium">
-                  (senza questo, rischi di dimenticare invitati importanti e creare imbarazzo)
-                </p>
-              </Card>
-              
-              <Card className="p-6 shadow-elegant">
-                <div className="flex items-center gap-3 mb-4">
-                  <CheckCircle className="w-8 h-8 text-primary" />
-                  <h3 className="text-xl font-bold text-primary-deep">Tracciamento Stati Real-Time</h3>
+              </CardContent>
+            </Card>
+
+            {/* Feature 2 */}
+            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="relative p-6 text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
-                <p className="text-lg mb-4">
-                  Monitora automaticamente chi ha confermato, chi è in attesa, chi ha rifiutato - 
-                  statistiche sempre aggiornate a portata di mano.
+                <h3 className="text-lg font-bold mb-2">Statistiche Real-Time</h3>
+                <p className="text-sm text-muted-foreground">
+                  Monitora conferme e presenze in tempo reale
                 </p>
-                <p className="text-destructive font-medium">
-                  (senza questo, arrivi al matrimonio senza sapere quante persone verranno davvero)
-                </p>
-              </Card>
-              
-              <Card className="p-6 shadow-elegant">
-                <div className="flex items-center gap-3 mb-4">
+              </CardContent>
+            </Card>
+
+            {/* Feature 3 */}
+            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="relative p-6 text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Shield className="w-8 h-8 text-primary" />
-                  <h3 className="text-xl font-bold text-primary-deep">Gestione Allergie e Intolleranze</h3>
                 </div>
-                <p className="text-lg mb-4">
-                  Registra e traccia automaticamente tutte le esigenze alimentari speciali - 
-                  nessun invitato verrà dimenticato dal catering.
+                <h3 className="text-lg font-bold mb-2">Allergie & Intolleranze</h3>
+                <p className="text-sm text-muted-foreground">
+                  Traccia tutte le esigenze alimentari speciali
                 </p>
-                <p className="text-destructive font-medium">
-                  (senza questo, rischi emergenze alimentari che possono rovinare il matrimonio)
-                </p>
-              </Card>
-              
-              <Card className="p-6 shadow-elegant">
-                <div className="flex items-center gap-3 mb-4">
+              </CardContent>
+            </Card>
+
+            {/* Feature 4 */}
+            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardContent className="relative p-6 text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Calendar className="w-8 h-8 text-primary" />
-                  <h3 className="text-xl font-bold text-primary-deep">Categorie Personalizzabili</h3>
                 </div>
-                <p className="text-lg mb-4">
-                  Organizza gli invitati per famiglia, amici, colleghi, o qualsiasi categoria - 
-                  mantieni tutto ordinato e facilmente accessibile.
+                <h3 className="text-lg font-bold mb-2">Categorie Custom</h3>
+                <p className="text-sm text-muted-foreground">
+                  Organizza per famiglia, amici, colleghi e altro
                 </p>
-                <p className="text-destructive font-medium">
-                  (senza questo, perdi tempo prezioso cercando informazioni tra liste caotiche)
-                </p>
-              </Card>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Statistics Section - Numeri Impattanti */}
+      <section className="py-24 bg-gradient-to-br from-primary to-primary-deep text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-5xl font-bold mb-2 text-gold">500+</div>
+              <div className="text-white/80">Matrimoni Organizzati</div>
             </div>
-            
-            <div className="text-center mt-12">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white text-xl px-12 py-6 rounded-full shadow-elegant">
-                ACCEDI AL SISTEMA - Solo €97
-              </Button>
-              <p className="mt-4 text-sm text-muted-foreground">
-                🔥 OFFERTA LIMITATA (Prezzo normale €297)
+            <div>
+              <div className="text-5xl font-bold mb-2 text-gold">15K+</div>
+              <div className="text-white/80">Invitati Gestiti</div>
+            </div>
+            <div>
+              <div className="text-5xl font-bold mb-2 text-gold">98%</div>
+              <div className="text-white/80">Soddisfazione Clienti</div>
+            </div>
+            <div>
+              <div className="text-5xl font-bold mb-2 text-gold">7 Giorni</div>
+              <div className="text-white/80">Setup Completo</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials - Design Card Moderno */}
+      <section className="py-24 bg-gradient-to-b from-primary/5 to-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
+              Cosa Dicono<br />
+              <span className="text-primary">Le Coppie Felici</span>
+            </h2>
+          </div>
+
+          <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <Card className="relative p-8 shadow-elegant hover:shadow-2xl transition-shadow duration-300">
+              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gold rounded-full flex items-center justify-center">
+                <Star className="w-6 h-6 text-white fill-current" />
+              </div>
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-gold fill-current" />
+                ))}
+              </div>
+              <p className="text-muted-foreground italic mb-6">
+                "Incredibile! In una settimana abbiamo organizzato tutto. Non più notti insonni preoccupandoci di chi ha confermato. Il sistema è semplicemente perfetto!"
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Before/After Transformation */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-gold/5">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-primary-deep">
-              La Trasformazione Che Puoi Aspettarti
-            </h2>
-            
-            <p className="text-xl text-center mb-12 text-muted-foreground">
-              Non lasciare che il caos organizzativo continui a dominare il tuo matrimonio. 
-              La tua serenità può essere più bella che mai - hai solo bisogno del sistema giusto per realizzarla.
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card className="p-8 bg-destructive/5 border-destructive/20">
-                <h3 className="text-2xl font-bold mb-6 text-destructive text-center">
-                  PRIMA del Sistema Matrimonio Perfetto:
-                </h3>
-                <ul className="space-y-4 text-lg">
-                  <li className="flex items-start gap-3">
-                    <span className="text-destructive font-bold">✗</span>
-                    Notti insonni preoccupandoti di aver dimenticato qualcuno
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-destructive font-bold">✗</span>
-                    Liste Excel confuse e contraddittorie ovunque
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-destructive font-bold">✗</span>
-                    Telefonate infinite senza riuscire a parlare con tutti
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-destructive font-bold">✗</span>
-                    Ansia costante per allergie e intolleranze dimenticate
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-destructive font-bold">✗</span>
-                    Impossibilità di sapere quante persone verranno realmente
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-destructive font-bold">✗</span>
-                    Stress che rovina la gioia dell'organizzazione matrimoniale
-                  </li>
-                </ul>
-              </Card>
-              
-              <Card className="p-8 bg-primary/5 border-primary/20">
-                <h3 className="text-2xl font-bold mb-6 text-primary text-center">
-                  DOPO il Sistema Matrimonio Perfetto:
-                </h3>
-                <ul className="space-y-4 text-lg">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                    Serenità totale sapendo che ogni dettaglio è tracciato
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                    Tutti gli invitati organizzati in un sistema chiaro e preciso
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                    Conferme automatiche e stati sempre aggiornati
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                    Zero allergie dimenticate, catering sempre informato
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                    Statistiche in tempo reale su partecipanti confermati
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                    Gioia pura nel pianificare il tuo giorno più bello
-                  </li>
-                </ul>
-              </Card>
-            </div>
-            
-            <div className="text-center mt-12">
-              <Button size="lg" className="bg-gold hover:bg-gold/90 text-primary-deep text-xl px-12 py-6 rounded-full shadow-elegant">
-                INIZIA LA TUA TRASFORMAZIONE - Solo €97
-              </Button>
-              <p className="mt-4 text-sm text-muted-foreground">
-                🔥 OFFERTA LIMITATA (Prezzo normale €297)
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* System Components */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-primary-deep">
-              Il Tuo Percorso Verso Il Matrimonio Perfetto Inizia Qui
-            </h2>
-            
-            <p className="text-xl text-center mb-12 text-muted-foreground">
-              I 5 Moduli Che Trasformano Il Tuo Stress Matrimoniale
-            </p>
-            
-            <div className="space-y-8">
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">1</div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-primary-deep">Wizard di Inserimento Intelligente (Giorno 1)</h3>
-                    <p className="text-muted-foreground">Setup iniziale guidato passo dopo passo</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Users className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-lg mb-4">
-                  Serenità immediata - questo wizard ti guida attraverso l'inserimento di ogni invitato 
-                  in modo sistematico e organizzato, senza dimenticare nulla.
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Form guidato in 5 passaggi per dati completi</li>
-                  <li>Gestione automatica di invitato principale e accompagnatori</li>
-                  <li>Categorizzazione immediata per organizzazione perfetta</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">2</div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-primary-deep">Sistema Stati Avanzato (Giorni 2-3)</h3>
-                    <p className="text-muted-foreground">Tracciamento automatico delle conferme</p>
-                  </div>
-                </div>
-                <p className="text-lg mb-4">
-                  Controllo totale - il nostro sistema ti permette di tracciare ogni invitato 
-                  attraverso stati chiari mentre gestisci conferme e rifiuti.
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>5 stati chiari: Da Confermare, Confermato, Rifiutato, Forse, Eliminato</li>
-                  <li>Transizioni intelligenti tra stati con un click</li>
-                  <li>Statistiche real-time per decisioni immediate</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">3</div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-primary-deep">Gestione Allergie Intelligente (Giorno 4)</h3>
-                    <p className="text-muted-foreground">Sicurezza alimentare garantita</p>
-                  </div>
-                </div>
-                <p className="text-lg mb-4">
-                  Tranquillità assoluta - il nostro modulo ti aiuta a registrare e tracciare 
-                  ogni allergia e intolleranza senza dimenticare nessun dettaglio critico.
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Database completo di allergie e intolleranze comuni</li>
-                  <li>Note personalizzate per esigenze specifiche</li>
-                  <li>Report automatici per il catering</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">4</div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-primary-deep">Dashboard Statistiche Live (Giorno 5)</h3>
-                    <p className="text-muted-foreground">Controllo completo in tempo reale</p>
-                  </div>
-                </div>
-                <p className="text-lg mb-4">
-                  Visibilità completa - la nostra dashboard ti fornisce una panoramica istantanea 
-                  di tutti i tuoi invitati mentre prendi decisioni informate.
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Statistiche live su confermati, in attesa, rifiutati</li>
-                  <li>Breakdown per categorie e accompagnatori</li>
-                  <li>Grafici visivi per comprensione immediata</li>
-                </ul>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">5</div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-primary-deep">Interfaccia Elegante e Sicura (Giorni 6-7)</h3>
-                    <p className="text-muted-foreground">Design su misura per matrimoni</p>
-                  </div>
-                </div>
-                <p className="text-lg mb-4">
-                  Esperienza premium - la nostra interfaccia elegante ti accompagna 
-                  con stile mentre organizzi il tuo giorno più importante.
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Design romantico ed elegante specifico per matrimoni</li>
-                  <li>Autenticazione sicura per proteggere i tuoi dati</li>
-                  <li>Interfaccia responsive per gestione da qualsiasi dispositivo</li>
-                </ul>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-gold/5">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-primary-deep">
-              Ma non fidarti solo delle mie parole. Ascolta questi sposi felici:
-            </h2>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-gold fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <blockquote className="text-lg italic mb-6">
-                  "Dopo aver provato Excel per mesi senza successo, questo sistema ha risolto tutto in una settimana. 
-                  Ora so esattamente chi viene, chi ha allergie, e posso dormire tranquilla. Il mio matrimonio è stato perfetto!"
-                </blockquote>
-                <footer className="text-muted-foreground">
-                  — Sofia M., Sposata a Giugno 2024
-                </footer>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-gold fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <blockquote className="text-lg italic mb-6">
-                  "Gestivamo 200 invitati e pensavamo fosse impossibile. Con questo sistema abbiamo organizzato tutto 
-                  in modo impeccabile. Le statistiche in tempo reale sono state fondamentali per il catering!"
-                </blockquote>
-                <footer className="text-muted-foreground">
-                  — Marco & Giulia R., Sposati a Settembre 2024
-                </footer>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-gold fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <blockquote className="text-lg italic mb-6">
-                  "La gestione delle allergie è stata un salvavita! Avevamo 8 invitati con esigenze diverse 
-                  e il sistema ci ha permesso di non dimenticare nessuno. Zero emergenze, massima serenità."
-                </blockquote>
-                <footer className="text-muted-foreground">
-                  — Elena T., Wedding Planner Professionale
-                </footer>
-              </Card>
-              
-              <Card className="p-8 shadow-elegant">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-gold fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <blockquote className="text-lg italic mb-6">
-                  "Come sviluppatore, apprezzo la semplicità e l'efficacia. Ma come sposo, questo sistema 
-                  mi ha dato la tranquillità di godermi davvero l'organizzazione del matrimonio!"
-                </blockquote>
-                <footer className="text-muted-foreground">
-                  — Alessandro P., Sposato ad Agosto 2024
-                </footer>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-8 text-primary-deep">
-              Ottieni Il Sistema Matrimonio Perfetto Ora
-            </h2>
-            
-            <p className="text-xl mb-12 text-muted-foreground">
-              Mentre altre coppie lottano con liste Excel caotiche, tu potrai goderti la serenità 
-              di un matrimonio perfettamente organizzato usando il nostro sistema collaudato.
-            </p>
-            
-            <Card className="p-8 shadow-elegant mb-12 bg-gradient-to-br from-gold/10 to-primary/10">
-              <h3 className="text-2xl font-bold mb-6 text-primary-deep">
-                Ecco tutto quello che ricevi con il Sistema Matrimonio Perfetto oggi:
-              </h3>
-              
-              <div className="text-left max-w-2xl mx-auto space-y-4 mb-8">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <strong>Il Sistema Completo Matrimonio Perfetto:</strong> 5 moduli provati che risolvono 
-                    il caos degli invitati e garantiscono serenità totale
-                  </div>
-                </div>
-                
-                <div className="bg-gold/20 p-6 rounded-lg">
-                  <h4 className="text-lg font-bold mb-4 text-primary-deep">🎁 Plus questi 5 Bonus Esclusivi 🎁</h4>
-                  <ul className="space-y-3">
-                    <li><strong>"Template Categorie Matrimonio"</strong> - 15 categorie pre-impostate per organizzazione immediata</li>
-                    <li><strong>"Checklist Allergie Complete"</strong> - Database completo di 50+ allergie e intolleranze</li> 
-                    <li><strong>"Guida Setup Rapido"</strong> - Video tutorial per iniziare in 10 minuti</li>
-                    <li><strong>"Supporto Email Prioritario"</strong> - Assistenza dedicata per 30 giorni</li>
-                    <li><strong>"Template Comunicazione Invitati"</strong> - Modelli professionali per conferme</li>
-                  </ul>
+                <div>
+                  <div className="font-semibold text-sm">Sofia & Marco</div>
+                  <div className="text-xs text-muted-foreground">Sposati a Giugno 2024</div>
                 </div>
               </div>
-              
-              <div className="text-center">
-                <p className="text-2xl mb-4">
-                  <span className="line-through text-muted-foreground">Normalmente: €297</span>
-                </p>
-                <p className="text-4xl font-bold text-primary mb-8">
-                  Oggi Solo: €97
-                </p>
-                
-                <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-8">
-                  <div className="flex gap-4">
-                    <Input
-                      type="email"
-                      placeholder="La tua email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="flex-1"
-                    />
-                    <Button type="submit" size="lg" className="bg-gold hover:bg-gold/90 text-primary-deep font-bold">
-                      ACCEDI ORA
-                    </Button>
-                  </div>
-                </form>
-                
-                {isSubmitted && (
-                  <div className="bg-primary/10 p-6 rounded-lg mb-8">
-                    <h4 className="text-lg font-bold text-primary mb-2">🎉 Grazie per il tuo interesse!</h4>
-                    <p className="text-muted-foreground mb-4">
-                      Per vedere il sistema in azione, puoi accedere alla demo completa:
-                    </p>
-                    <Link to="/auth">
-                      <Button className="bg-primary hover:bg-primary/90 text-white">
-                        Prova il Sistema Ora
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-                
-                <p className="text-sm text-muted-foreground mb-4">
-                  🔥 OFFERTA LIMITATA - Solo per le prime 100 coppie
-                </p>
-                
-                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4" />
-                    Pagamento Sicuro
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Accesso Immediato
-                  </div>
+            </Card>
+
+            {/* Testimonial 2 */}
+            <Card className="relative p-8 shadow-elegant hover:shadow-2xl transition-shadow duration-300">
+              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gold rounded-full flex items-center justify-center">
+                <Star className="w-6 h-6 text-white fill-current" />
+              </div>
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-gold fill-current" />
+                ))}
+              </div>
+              <p className="text-muted-foreground italic mb-6">
+                "Dopo mesi di caos con Excel, questo sistema ci ha salvato. Tutte le allergie tracciate, statistiche in tempo reale. Consigliato a tutti!"
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Users className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">Laura & Andrea</div>
+                  <div className="text-xs text-muted-foreground">Sposati a Settembre 2024</div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Testimonial 3 */}
+            <Card className="relative p-8 shadow-elegant hover:shadow-2xl transition-shadow duration-300">
+              <div className="absolute -top-4 -left-4 w-12 h-12 bg-gold rounded-full flex items-center justify-center">
+                <Award className="w-6 h-6 text-white fill-current" />
+              </div>
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-gold fill-current" />
+                ))}
+              </div>
+              <p className="text-muted-foreground italic mb-6">
+                "Come wedding planner, lo consiglio a tutte le mie coppie. Risparmia ore di lavoro e stress. Il miglior investimento per un matrimonio sereno."
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Award className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">Francesca R.</div>
+                  <div className="text-xs text-muted-foreground">Wedding Planner Professionale</div>
                 </div>
               </div>
             </Card>
@@ -686,36 +331,91 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-primary-deep text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <Heart className="w-8 h-8 text-gold animate-heartbeat" fill="currentColor" />
-            <h3 className="text-2xl font-bold">Sistema Matrimonio Perfetto</h3>
-          </div>
+      {/* Final CTA - Design Impattante */}
+      <section className="py-24 bg-gradient-to-br from-primary-deep via-primary to-primary-deep text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <Sparkles className="absolute top-10 left-10 w-20 h-20 animate-sparkle" />
+          <Heart className="absolute bottom-10 right-10 w-24 h-24 animate-heartbeat" fill="currentColor" />
+          <Zap className="absolute top-1/2 right-1/4 w-16 h-16 animate-pulse" />
+        </div>
+
+        <div className="relative container mx-auto px-4 text-center max-w-4xl">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            Pronto Per Il Tuo<br />
+            <span className="text-gold">Matrimonio Perfetto?</span>
+          </h2>
           
-          <div className="flex flex-wrap justify-center gap-8 text-sm mb-8">
-            <a href="#" className="hover:text-gold transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-gold transition-colors">Termini & Condizioni</a>
-            <a href="#" className="hover:text-gold transition-colors">Supporto</a>
-          </div>
-          
-          <p className="text-xs text-muted-foreground mb-4">
-            COPYRIGHT 2025 | SISTEMA MATRIMONIO PERFETTO
+          <p className="text-xl mb-12 text-white/90">
+            Unisciti a centinaia di coppie che hanno trasformato lo stress in serenità
           </p>
-          
-          <div className="max-w-4xl mx-auto text-xs text-muted-foreground space-y-4">
-            <p>
-              <strong>DISCLAIMER:</strong> I risultati possono variare. Il tuo successo dipenderà da molti fattori 
-              inclusi ma non limitati al tuo impegno, esperienza e livello di organizzazione. Tutti i matrimoni 
-              comportano stress e richiedono sforzo e azione costanti.
-            </p>
+
+          <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl mb-8">
+            <div className="text-3xl font-bold mb-2">
+              <span className="line-through text-white/60">€297</span>
+            </div>
+            <div className="text-6xl font-bold text-gold mb-6">
+              €97
+            </div>
+            <div className="text-white/80 mb-8">
+              🔥 Offerta limitata - Solo per le prime 100 coppie
+            </div>
             
-            <p>
-              <strong>NON FACEBOOK/META:</strong> Questo sito web non fa parte di Meta o Meta Platforms, Inc. 
-              Inoltre, questo sito NON è approvato da Meta in alcun modo. META è un marchio registrato di Meta Platforms, Inc.
-            </p>
+            <Link to="/auth">
+              <Button 
+                size="lg" 
+                className="bg-gold hover:bg-gold/90 text-primary-deep text-2xl px-16 py-8 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full md:w-auto"
+              >
+                INIZIA ORA
+              </Button>
+            </Link>
           </div>
+
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-white/70 mb-12">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Pagamento Sicuro
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Accesso Immediato
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Garanzia 30 Giorni
+            </div>
+          </div>
+
+          {/* Email capture form */}
+          <div className="max-w-md mx-auto">
+            <p className="text-white/80 mb-4">Oppure ricevi più informazioni via email:</p>
+            <form onSubmit={handleEmailSubmit} className="flex gap-2">
+              <Input 
+                type="email" 
+                placeholder="La tua email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+              />
+              <Button type="submit" variant="secondary" className="bg-gold hover:bg-gold/90 text-primary-deep">
+                Invia
+              </Button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 bg-primary-deep text-white/60 text-center text-sm">
+        <div className="container mx-auto px-4">
+          <p className="mb-4">© 2024 Sistema Matrimonio Perfetto. Tutti i diritti riservati.</p>
+          <div className="flex justify-center gap-6">
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Termini di Servizio</a>
+            <a href="#" className="hover:text-white transition-colors">Contatti</a>
+          </div>
+          <p className="mt-4 text-xs">
+            I risultati possono variare. Il sistema è uno strumento di supporto all'organizzazione del matrimonio.
+          </p>
         </div>
       </footer>
     </div>
