@@ -19,6 +19,7 @@ export type Database = {
           budgeted: number
           color: string
           created_at: string
+          icon: string | null
           id: string
           is_active: boolean
           name: string
@@ -31,6 +32,7 @@ export type Database = {
           budgeted?: number
           color?: string
           created_at?: string
+          icon?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -43,6 +45,7 @@ export type Database = {
           budgeted?: number
           color?: string
           created_at?: string
+          icon?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -138,6 +141,7 @@ export type Database = {
           address: string | null
           amount_paid: number
           category_id: string | null
+          complete_payment_date: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
@@ -155,6 +159,7 @@ export type Database = {
           address?: string | null
           amount_paid?: number
           category_id?: string | null
+          complete_payment_date?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -172,6 +177,7 @@ export type Database = {
           address?: string | null
           amount_paid?: number
           category_id?: string | null
+          complete_payment_date?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string

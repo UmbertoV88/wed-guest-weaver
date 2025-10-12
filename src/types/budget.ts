@@ -54,6 +54,7 @@ export interface BudgetVendor {
   payment_due_date?: string;
   default_cost?: number | null;
   amount_paid: number;
+  complete_payment_date?: string;
   created_at: string;
   updated_at: string;
 }
