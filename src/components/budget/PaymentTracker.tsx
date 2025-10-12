@@ -399,7 +399,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
                       
                       {/* Bottoni Azione */}
                       {!payment.isPaid && !isCompleted && (
-                        <div className="flex flex-col sm:flex-row gap-2 w-full">
+                        <div className="flex flex-col lg:flex-row gap-2 w-full">
                           <Button 
                             size="sm" 
                             variant="outline"
