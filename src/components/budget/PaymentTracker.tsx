@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Calendar, Euro, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -35,8 +37,9 @@ interface PaymentTrackerProps {
   vendors?: any[];
 }
 
-const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcomingPayments, vendors = [] }) => {
+const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [] }) => {
   const [completedPayments, setCompletedPayments] = useState(new Set());
+  const [paymentFilter, setPaymentFilter] = useState<'tutti' | 'pagati' | 'scaduti' | 'urgenti'>('tutti');
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
@@ -54,7 +57,8 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
     });
   };
 
-  const getDaysUntilDue = (dateString: string) => {
+  const getDaysUntilDue = (dateString: string | null) => {
+    if (!dateString) return null;
     const today = new Date();
     const dueDate = new Date(dateString);
     const diffTime = dueDate.getTime() - today.getTime();
@@ -62,7 +66,14 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
     return diffDays;
   };
 
-  const getUrgencyBadge = (daysUntilDue: number) => {
+  const getUrgencyBadge = (daysUntilDue: number | null) => {
+    if (daysUntilDue === null) {
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Calendar className="w-3 h-3" />
+        Nessuna Scadenza
+      </Badge>;
+    }
+    
     if (daysUntilDue < 0) {
       return <Badge variant="destructive" className="flex items-center gap-1">
         <AlertTriangle className="w-3 h-3" />
@@ -100,10 +111,6 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
       description: `Ti ricorderemo 3 giorni prima della scadenza per ${payment.vendor}`
     });
   };
-
-  const sortedPayments = [...payments].sort((a, b) => 
-    new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-  );
 
   // Calcoli basati sui fornitori reali
   const vendorPayments = vendors.map(vendor => {
@@ -148,17 +155,41 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
   const urgentAmount = urgentVendors.reduce((sum, v) => sum + v.remaining, 0);
   const urgentCount = urgentVendors.length;
 
-  const totalUpcoming = payments
-    .filter(p => !completedPayments.has(p.id))
-    .reduce((sum, p) => sum + p.amount, 0);
+  // Prepara i pagamenti dai fornitori reali
+  const vendorBasedPayments = vendorPayments
+    .filter(v => v.isPending)
+    .map(v => {
+      const daysUntilDue = v.vendor.payment_due_date 
+        ? getDaysUntilDue(v.vendor.payment_due_date) 
+        : null;
+      
+      return {
+        id: v.vendor.id,
+        vendor: v.vendor.name,
+        amount: v.remaining,
+        dueDate: v.vendor.payment_due_date,
+        category: v.vendor.category_id,
+        daysUntilDue,
+        isOverdue: daysUntilDue !== null && daysUntilDue < 0,
+        isUrgent: daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue <= 7,
+        isPaid: false
+      };
+    });
 
-  const overduePayments = payments.filter(p => 
-    getDaysUntilDue(p.dueDate) < 0 && !completedPayments.has(p.id)
-  );
+  // Applica il filtro selezionato
+  const filteredPayments = vendorBasedPayments.filter(payment => {
+    if (paymentFilter === 'tutti') return true;
+    if (paymentFilter === 'pagati') return payment.isPaid;
+    if (paymentFilter === 'scaduti') return payment.isOverdue;
+    if (paymentFilter === 'urgenti') return payment.isUrgent;
+    return true;
+  });
 
-  const urgentPayments = payments.filter(p => {
-    const days = getDaysUntilDue(p.dueDate);
-    return days >= 0 && days <= 7 && !completedPayments.has(p.id);
+  // Ordina per data di scadenza
+  const sortedFilteredPayments = filteredPayments.sort((a, b) => {
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
   });
 
   return (
@@ -222,18 +253,33 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
       {/* Payments Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Cronologia Pagamenti
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Cronologia Pagamenti
+            </CardTitle>
+            
+            <Select value={paymentFilter} onValueChange={(value) => setPaymentFilter(value as any)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filtra pagamenti" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tutti">Tutti</SelectItem>
+                <SelectItem value="pagati">Pagati</SelectItem>
+                <SelectItem value="scaduti">Scaduti</SelectItem>
+                <SelectItem value="urgenti">Urgenti</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {sortedPayments.map((payment) => {
-              const daysUntilDue = getDaysUntilDue(payment.dueDate);
+          <ScrollArea className="h-[600px] pr-4">
+            <div className="space-y-4">
+              {sortedFilteredPayments.map((payment) => {
+              const daysUntilDue = payment.daysUntilDue;
               const isCompleted = completedPayments.has(payment.id);
-              const isOverdue = daysUntilDue < 0;
-              const isUrgent = daysUntilDue >= 0 && daysUntilDue <= 7;
+              const isOverdue = payment.isOverdue;
+              const isUrgent = payment.isUrgent;
 
               return (
                 <div 
@@ -268,16 +314,15 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
                           <Euro className="w-4 h-4" />
                           {formatCurrency(payment.amount)}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(payment.dueDate)}
-                        </span>
-                        <Badge variant="outline" className="text-xs">
-                          {payment.category}
-                        </Badge>
+                        {payment.dueDate && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(payment.dueDate)}
+                          </span>
+                        )}
                       </div>
 
-                      {daysUntilDue >= 0 && !isCompleted && (
+                      {daysUntilDue !== null && daysUntilDue >= 0 && !isCompleted && (
                         <p className="text-xs text-gray-500 mt-1">
                           {daysUntilDue === 0 
                             ? "Scade oggi" 
@@ -288,9 +333,15 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
                         </p>
                       )}
                       
-                      {isOverdue && !isCompleted && (
+                      {daysUntilDue !== null && isOverdue && !isCompleted && (
                         <p className="text-xs text-red-500 mt-1 font-medium">
                           Scaduto da {Math.abs(daysUntilDue)} giorni
+                        </p>
+                      )}
+
+                      {daysUntilDue === null && !isCompleted && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Nessuna data di scadenza impostata
                         </p>
                       )}
                     </div>
@@ -319,11 +370,12 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ payments = mockUpcoming
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
 
-          {sortedPayments.length === 0 && (
+          {sortedFilteredPayments.length === 0 && (
             <div className="text-center py-8">
               <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 text-lg">Nessun pagamento programmato</p>
