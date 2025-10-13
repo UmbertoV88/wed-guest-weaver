@@ -82,7 +82,7 @@ const SeatingEditor = () => {
             <div className="space-y-4">
               <Label htmlFor="capacity">Capienza massima per tavolo</Label>
               
-              <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
                 <Input
                   id="capacity"
                   type="number"
@@ -92,7 +92,7 @@ const SeatingEditor = () => {
                   className="w-20"
                 />
                 
-                <div className="flex flex-col sm:flex-row gap-2 lg:flex-1">
+                <div className="flex flex-col sm:flex-row gap-2 sm:flex-1">
                   <Button
                     onClick={handleAddTable}
                     disabled={isAddingTable}
@@ -107,7 +107,7 @@ const SeatingEditor = () => {
                     Aggiungi Tavolo
                   </Button>
                   
-                  <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
                     <Button onClick={exportCSV} variant="outline" className="w-full sm:w-auto">
                       <Download className="h-4 w-4 mr-2" />
                       Scarica CSV
