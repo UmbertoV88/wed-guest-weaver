@@ -79,9 +79,10 @@ const SeatingEditor = () => {
             <CardTitle>Impostazioni Tavoli</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-              <div className="space-y-2">
-                <Label htmlFor="capacity">Capienza massima per tavolo</Label>
+            <div className="space-y-4">
+              <Label htmlFor="capacity">Capienza massima per tavolo</Label>
+              
+              <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
                 <Input
                   id="capacity"
                   type="number"
@@ -90,31 +91,34 @@ const SeatingEditor = () => {
                   onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
                   className="w-20"
                 />
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={handleAddTable}
-                  disabled={isAddingTable}
-                  variant="default"
-                >
-                  {isAddingTable ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Plus className="h-4 w-4 mr-2" />
-                  )}
-                  Aggiungi Tavolo
-                </Button>
                 
-                <Button onClick={exportCSV} variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Scarica CSV
-                </Button>
-                
-                <Button onClick={handleReset} variant="outline">
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 lg:flex-1">
+                  <Button
+                    onClick={handleAddTable}
+                    disabled={isAddingTable}
+                    variant="default"
+                    className="w-full sm:w-auto"
+                  >
+                    {isAddingTable ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Plus className="h-4 w-4 mr-2" />
+                    )}
+                    Aggiungi Tavolo
+                  </Button>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto">
+                    <Button onClick={exportCSV} variant="outline" className="w-full sm:w-auto">
+                      <Download className="h-4 w-4 mr-2" />
+                      Scarica CSV
+                    </Button>
+                    
+                    <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Reset
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
