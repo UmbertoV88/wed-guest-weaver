@@ -82,17 +82,20 @@ const SeatingEditor = () => {
             <div className="space-y-4">
               <Label htmlFor="capacity">Capienza massima per tavolo</Label>
               
-              <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
-                <Input
-                  id="capacity"
-                  type="number"
-                  min="1"
-                  value={newCapacity}
-                  onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
-                  className="w-20"
-                />
+              {/* Container principale: colonna su mobile/tablet, riga su desktop */}
+              <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
                 
-                <div className="flex flex-col sm:flex-row gap-2 sm:flex-1">
+                {/* GRUPPO 1: Input + Aggiungi Tavolo */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 sm:items-end">
+                  <Input
+                    id="capacity"
+                    type="number"
+                    min="1"
+                    value={newCapacity}
+                    onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
+                    className="w-20"
+                  />
+                  
                   <Button
                     onClick={handleAddTable}
                     disabled={isAddingTable}
@@ -106,19 +109,21 @@ const SeatingEditor = () => {
                     )}
                     Aggiungi Tavolo
                   </Button>
-                  
-                  <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
-                    <Button onClick={exportCSV} variant="outline" className="w-full sm:w-auto">
-                      <Download className="h-4 w-4 mr-2" />
-                      Scarica CSV
-                    </Button>
-                    
-                    <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset
-                    </Button>
-                  </div>
                 </div>
+                
+                {/* GRUPPO 2: Scarica CSV + Reset */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button onClick={exportCSV} variant="outline" className="w-full sm:w-auto">
+                    <Download className="h-4 w-4 mr-2" />
+                    Scarica CSV
+                  </Button>
+                  
+                  <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset
+                  </Button>
+                </div>
+                
               </div>
             </div>
           </CardContent>
