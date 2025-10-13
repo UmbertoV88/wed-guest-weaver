@@ -162,10 +162,10 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
         </div>
 
         {/* Filtro per gruppo */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <label className="text-sm font-medium">Filtra per gruppo:</label>
           <Select value={groupFilter} onValueChange={setGroupFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
