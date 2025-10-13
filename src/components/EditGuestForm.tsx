@@ -408,9 +408,10 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
         onClick={() => setIsOpen(true)}
         size="sm"
         variant="ghost"
-        className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
       >
-        <Edit className="w-3 h-3" />
+        <Edit className="w-4 h-4" />
+        <span className="hidden sm:inline sm:ml-1">Modifica</span>
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

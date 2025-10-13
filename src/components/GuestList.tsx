@@ -252,98 +252,101 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
             >
               <div className="flex flex-col gap-4">
                 <div className="flex-1">
-                  {/* Mobile-first responsive header with name and badges */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                    <div className="flex flex-col gap-2">
-                      <h3 className="text-lg font-semibold text-foreground break-words">
+                {/* Mobile: nome + icone | Desktop: come prima */}
+                  <div className="flex flex-col gap-2 mb-3">
+                    {/* Prima riga: Nome + Icone */}
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-lg font-semibold text-foreground break-words flex-1 min-w-0">
                         {guest.name}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {CATEGORY_LABELS[guest.category]}
-                        </Badge>
-                        {guest.ageGroup && (
-                          <Badge variant="outline" className="text-xs">
-                            {AGE_GROUP_LABELS[guest.ageGroup]}
-                          </Badge>
-                        )}
-                      </div>
+                      
+                      {/* Action buttons - sempre sulla stessa linea del nome */}
+                      {guest.containsPrimary && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {/* Edit button - available for all statuses */}
+                          <EditGuestForm guest={guest} updateGuest={updateGuest} />
+                          
+                          {guest.status === 'pending' && (
+                            <>
+                              <Button
+                                onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs bg-success/10 hover:bg-success/20 text-success"
+                              >
+                                <UserCheck className="w-4 h-4" />
+                                <span className="hidden sm:inline sm:ml-1">Conferma</span>
+                              </Button>
+                              <Button
+                                onClick={() => handleDelete(guest.id, guest.name)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                              </Button>
+                            </>
+                          )}
+                          {guest.status === 'confirmed' && (
+                            <>
+                              <Button
+                                onClick={() => handleRevertMainOnly(guest.id, guest.name)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                                <span className="hidden sm:inline sm:ml-1">Ripristina</span>
+                              </Button>
+                              <Button
+                                onClick={() => handleDelete(guest.id, guest.name)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                              </Button>
+                            </>
+                          )}
+                          {type === "deleted" && guest.status === 'deleted' && (
+                            <>
+                              <Button
+                                onClick={() => handleRestore(guest.id, guest.name)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                                <span className="hidden sm:inline sm:ml-1">Ripristina</span>
+                              </Button>
+                              <Button
+                                onClick={() => handlePermanentDelete(guest.id, guest.name)}
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Action buttons - responsive layout */}
-                    {guest.containsPrimary && (
-                      <div className="flex items-center gap-1 flex-wrap sm:ml-auto mt-2 sm:mt-0">
-                        {/* Edit button - available for all statuses */}
-                        <EditGuestForm guest={guest} updateGuest={updateGuest} />
-                        
-                        {guest.status === 'pending' && (
-                          <>
-                            <Button
-                              onClick={() => handleConfirmMainOnly(guest.id, guest.name)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-xs bg-success/10 hover:bg-success/20 text-success"
-                            >
-                              <UserCheck className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Conferma</span>
-                            </Button>
-                            <Button
-                              onClick={() => handleDelete(guest.id, guest.name)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Elimina</span>
-                            </Button>
-                          </>
-                        )}
-                        {guest.status === 'confirmed' && (
-                          <>
-                            <Button
-                              onClick={() => handleRevertMainOnly(guest.id, guest.name)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-xs text-primary hover:bg-primary/10"
-                            >
-                              <RotateCcw className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Ripristina</span>
-                            </Button>
-                            <Button
-                              onClick={() => handleDelete(guest.id, guest.name)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Elimina</span>
-                            </Button>
-                          </>
-                        )}
-                        {type === "deleted" && guest.status === 'deleted' && (
-                          <>
-                            <Button
-                              onClick={() => handleRestore(guest.id, guest.name)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-xs text-primary hover:bg-primary/10"
-                            >
-                              <RotateCcw className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Ripristina</span>
-                            </Button>
-                            <Button
-                              onClick={() => handlePermanentDelete(guest.id, guest.name)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Elimina</span>
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    )}
+                    {/* Seconda riga: Badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {CATEGORY_LABELS[guest.category]}
+                      </Badge>
+                      {guest.ageGroup && (
+                        <Badge variant="outline" className="text-xs">
+                          {AGE_GROUP_LABELS[guest.ageGroup]}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="space-y-2 text-sm">
@@ -355,7 +358,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                         </div>
                         <div className="pl-3 sm:pl-5 space-y-3">
                           {guest.companions.map(companion => (
-                            <div key={companion.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+                            <div key={companion.id} className="flex items-start justify-between gap-2">
                               <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0 flex-1">
                                 <span className="text-sm font-medium break-words">{companion.name}</span>
                                 <div className="flex flex-wrap items-center gap-2">
@@ -386,21 +389,21 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         onClick={() => confirmCompanion(guest.id, companion.id)}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-8 px-3 text-xs bg-success/10 hover:bg-success/20 text-success"
+                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs bg-success/10 hover:bg-success/20 text-success"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <UserCheck className="w-3 h-3 sm:mr-1" />
-                                        <span className="hidden sm:inline">Conferma</span>
+                                        <UserCheck className="w-4 h-4" />
+                                        <span className="hidden sm:inline sm:ml-1">Conferma</span>
                                       </Button>
                                       <Button
                                         onClick={() => deleteCompanion(guest.id, companion.id)}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-8 px-3 text-xs text-destructive hover:bg-destructive/10"
+                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <Trash2 className="w-3 h-3 sm:mr-1" />
-                                        <span className="hidden sm:inline">Elimina</span>
+                                        <Trash2 className="w-4 h-4" />
+                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
                                       </Button>
                                     </>
                                   )}
@@ -414,20 +417,21 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         }}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-8 px-3 text-xs text-primary hover:bg-primary/10"
+                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <RotateCcw className="w-3 h-3 sm:mr-1" />
-                                        <span className="hidden sm:inline">Ripristina</span>
+                                        <RotateCcw className="w-4 h-4" />
+                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
                                       </Button>
                                       <Button
                                         onClick={() => deleteCompanion(guest.id, companion.id)}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 className="w-4 h-4" />
+                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
                                       </Button>
                                     </>
                                   )}
@@ -438,10 +442,11 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         onClick={() => restoreCompanion(guest.id, companion.id)}
                                         size="sm"
                                         variant="ghost"
-                                        className="h-6 px-2 text-xs text-primary hover:bg-primary/10"
+                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <RotateCcw className="w-3 h-3" />
+                                        <RotateCcw className="w-4 h-4" />
+                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
                                       </Button>
                                        <Button
                                          onClick={() => {
@@ -454,10 +459,11 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                          }}
                                          size="sm"
                                          variant="ghost"
-                                         className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10"
+                                         className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
                                          disabled={companionLoading === companion.id}
                                        >
-                                         <Trash2 className="w-3 h-3" />
+                                         <Trash2 className="w-4 h-4" />
+                                         <span className="hidden sm:inline sm:ml-1">Elimina</span>
                                        </Button>
                                     </>
                                   )}
