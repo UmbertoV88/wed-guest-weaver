@@ -79,21 +79,20 @@ const SeatingEditor = () => {
             <CardTitle>Impostazioni Tavoli</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {/* Capacità e Aggiungi Tavolo */}
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">Capienza massima per tavolo</Label>
-                  <Input
-                    id="capacity"
-                    type="number"
-                    min="1"
-                    value={newCapacity}
-                    onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
-                    className="w-20"
-                  />
-                </div>
-                
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+              <div className="space-y-2">
+                <Label htmlFor="capacity">Capienza massima per tavolo</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  min="1"
+                  value={newCapacity}
+                  onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
+                  className="w-20"
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={handleAddTable}
                   disabled={isAddingTable}
@@ -106,10 +105,7 @@ const SeatingEditor = () => {
                   )}
                   Aggiungi Tavolo
                 </Button>
-              </div>
-              
-              {/* Altri bottoni */}
-              <div className="flex flex-wrap gap-2">
+                
                 <Button onClick={exportCSV} variant="outline">
                   <Download className="h-4 w-4 mr-2" />
                   Scarica CSV
