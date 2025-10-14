@@ -1,4 +1,4 @@
-import { Guest, CATEGORY_LABELS, STATUS_LABELS, GuestCategory } from "@/types/guest";
+import { Guest, CATEGORY_LABELS, STATUS_LABELS, GuestCategory, GuestStatus, AgeGroup } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
   // Ordine delle categorie
@@ -12,10 +12,48 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
   // Filtra gli ospiti eliminati
   const activeGuests = guests.filter(guest => guest.status !== "deleted");
   
-  // Raggruppa gli ospiti per categoria e ordina per status e nome
+  // Espandi gli ospiti con gli accompagnatori come righe separate
+  interface ExpandedGuest {
+    name: string;
+    category: GuestCategory;
+    status: GuestStatus;
+    ageGroup?: AgeGroup;
+    allergies?: string;
+    companionOf: string; // Nome dell'ospite principale (vuoto se è un ospite principale)
+  }
+  
+  const expandedGuests: ExpandedGuest[] = [];
+  
+  activeGuests.forEach(guest => {
+    // Aggiungi l'ospite principale
+    expandedGuests.push({
+      name: guest.name,
+      category: guest.category,
+      status: guest.status,
+      ageGroup: guest.ageGroup,
+      allergies: guest.allergies,
+      companionOf: "" // Vuoto perché è l'ospite principale
+    });
+    
+    // Aggiungi tutti gli accompagnatori (esclusi quelli eliminati)
+    guest.companions
+      .filter(c => c.status !== "deleted")
+      .forEach(companion => {
+        expandedGuests.push({
+          name: companion.name,
+          category: guest.category, // Eredita categoria
+          status: companion.status,
+          ageGroup: companion.ageGroup,
+          allergies: companion.allergies,
+          companionOf: guest.name // Nome dell'ospite principale
+        });
+      });
+  });
+  
+  // Raggruppa per categoria e ordina per status e nome
   const guestsByCategory = categoryOrder.reduce((acc, category) => {
-    acc[category] = activeGuests
-      .filter(guest => guest.category === category)
+    acc[category] = expandedGuests
+      .filter(item => item.category === category)
       .sort((a, b) => {
         // Prima ordina per status (confirmed prima di pending)
         if (a.status !== b.status) {
@@ -25,7 +63,7 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
         return a.name.localeCompare(b.name, 'it-IT', { sensitivity: 'base' });
       });
     return acc;
-  }, {} as Record<GuestCategory, Guest[]>);
+  }, {} as Record<GuestCategory, ExpandedGuest[]>);
   
   // Create CSV headers
   const headers = [
@@ -34,41 +72,34 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Status",
     "Fascia Età",
     "Allergie",
-    "Accompagnatori",
-    "Data Creazione"
+    "Accompagnatore di"
   ];
   
   // Costruisci il contenuto CSV
   const csvLines: string[] = [headers.join(",")];
   
   categoryOrder.forEach((category, index) => {
-    const categoryGuests = guestsByCategory[category];
+    const categoryItems = guestsByCategory[category];
     
     // Salta le categorie vuote
-    if (categoryGuests.length === 0) return;
+    if (categoryItems.length === 0) return;
     
-    // Aggiungi le righe degli ospiti
-    categoryGuests.forEach(guest => {
-      const companionNames = guest.companions
-        .filter(c => c.status !== "deleted")
-        .map(c => `${c.name} (${STATUS_LABELS[c.status]})`)
-        .join("; ");
-      
+    // Aggiungi le righe (ospiti + accompagnatori)
+    categoryItems.forEach(item => {
       const row = [
-        guest.name,
-        CATEGORY_LABELS[guest.category],
-        STATUS_LABELS[guest.status],
-        guest.ageGroup || "",
-        guest.allergies || "",
-        companionNames || "Nessuno",
-        guest.createdAt.toLocaleDateString("it-IT")
+        item.name,
+        CATEGORY_LABELS[item.category],
+        STATUS_LABELS[item.status],
+        item.ageGroup || "",
+        item.allergies || "",
+        item.companionOf || ""
       ];
       
       csvLines.push(row.map(field => `"${field}"`).join(","));
     });
     
     // Aggiungi riga vuota dopo ogni categoria (tranne l'ultima)
-    if (index < categoryOrder.length - 1 && categoryGuests.length > 0) {
+    if (index < categoryOrder.length - 1 && categoryItems.length > 0) {
       csvLines.push("");
     }
   });
