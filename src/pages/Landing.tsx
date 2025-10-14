@@ -35,7 +35,7 @@ const Landing = () => {
             loop 
             muted 
             playsInline
-            className="w-full h-full object-cover opacity-0"
+            className="w-full h-full object-cover opacity-70"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
