@@ -352,16 +352,26 @@ export const useSeating = () => {
 
   // Export CSV
   const exportCSV = useCallback(() => {
-    const rows = ['Numero tavolo,Nome ospite'];
+    const rows: string[] = [];
     
-    tables.forEach((table) => {
+    tables.forEach((table, tableIndex) => {
+      // Aggiungi riga vuota tra i tavoli (non per il primo)
+      if (tableIndex > 0) {
+        rows.push('');
+      }
+      
+      // Aggiungi intestazione del tavolo
+      rows.push(`=== ${table.nome_tavolo || 'Tavolo ' + table.id} ===`);
+      rows.push('Nome ospite');
+      
+      // Trova gli ospiti di questo tavolo
       const tableGuests = guests.filter((guest) => guest.tableId === table.id);
       
       if (tableGuests.length === 0) {
-        rows.push(`"${table.nome_tavolo || 'Tavolo ' + table.id}","Tavolo vuoto"`);
+        rows.push('Tavolo vuoto');
       } else {
-        tableGuests.forEach((guest, index) => {
-          rows.push(`"${table.nome_tavolo || 'Tavolo ' + table.id}","${guest.nome_visualizzato}"`);
+        tableGuests.forEach((guest) => {
+          rows.push(`"${guest.nome_visualizzato}"`);
         });
       }
     });
