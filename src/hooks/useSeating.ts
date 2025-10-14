@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 const supabaseClient: any = supabase;
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export interface Table {
   id: number;
@@ -352,78 +352,103 @@ export const useSeating = () => {
   }, [user?.id, toast]);
 
   // Export Excel
-  const exportExcel = useCallback(() => {
-    // Crea un nuovo workbook
-    const wb = XLSX.utils.book_new();
-    
-    // Prepara i dati per il foglio
-    const wsData: any[][] = [];
-    
-    tables.forEach((table, tableIndex) => {
-      // Aggiungi riga vuota tra i tavoli (non per il primo)
-      if (tableIndex > 0) {
-        wsData.push([]);
-      }
+  const exportExcel = useCallback(async () => {
+    try {
+      // Crea un nuovo workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Disposizione Tavoli');
       
-      // Aggiungi intestazione del tavolo
-      const tableName = `*** ${(table.nome_tavolo || 'TAVOLO ' + table.id).toUpperCase()} ***`;
-      wsData.push([tableName]);
+      // Imposta la larghezza della colonna
+      worksheet.getColumn(1).width = 35;
       
-      // Trova gli ospiti di questo tavolo
-      const tableGuests = guests.filter((guest) => guest.tableId === table.id);
+      let currentRow = 1;
       
-      if (tableGuests.length === 0) {
-        wsData.push(['Tavolo vuoto']);
-      } else {
-        tableGuests.forEach((guest) => {
-          wsData.push([guest.nome_visualizzato]);
-        });
-      }
-    });
-    
-    // Crea il foglio di lavoro
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    
-    // Applica la formattazione alle intestazioni dei tavoli
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-      const cellAddress = XLSX.utils.encode_cell({ r: R, c: 0 });
-      const cell = ws[cellAddress];
-      
-      if (cell && cell.v && typeof cell.v === 'string' && cell.v.startsWith('***')) {
-        // Applica formattazione alle intestazioni dei tavoli
-        cell.s = {
-          fill: {
-            fgColor: { rgb: "4A90E2" } // Azzurro/blu
-          },
-          font: {
-            bold: true,
-            sz: 14, // Dimensione font 14
-            color: { rgb: "FFFFFF" } // Testo bianco
-          },
-          alignment: {
-            horizontal: "center",
-            vertical: "center"
-          }
+      tables.forEach((table, tableIndex) => {
+        // Aggiungi riga vuota tra i tavoli (non per il primo)
+        if (tableIndex > 0) {
+          currentRow++;
+        }
+        
+        // Aggiungi intestazione del tavolo
+        const tableName = `*** ${(table.nome_tavolo || 'TAVOLO ' + table.id).toUpperCase()} ***`;
+        const headerCell = worksheet.getCell(currentRow, 1);
+        headerCell.value = tableName;
+        
+        // Applica formattazione all'intestazione
+        headerCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4A90E2' } // Azzurro (ARGB format)
         };
-      }
+        headerCell.font = {
+          bold: true,
+          size: 14,
+          color: { argb: 'FFFFFFFF' } // Bianco
+        };
+        headerCell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle'
+        };
+        headerCell.border = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
+        
+        currentRow++;
+        
+        // Trova gli ospiti di questo tavolo
+        const tableGuests = guests.filter((guest) => guest.tableId === table.id);
+        
+        if (tableGuests.length === 0) {
+          const emptyCell = worksheet.getCell(currentRow, 1);
+          emptyCell.value = 'Tavolo vuoto';
+          emptyCell.font = { italic: true, color: { argb: 'FF999999' } };
+          currentRow++;
+        } else {
+          tableGuests.forEach((guest) => {
+            const guestCell = worksheet.getCell(currentRow, 1);
+            guestCell.value = guest.nome_visualizzato;
+            guestCell.font = { size: 11 };
+            guestCell.alignment = { horizontal: 'left', vertical: 'middle' };
+            currentRow++;
+          });
+        }
+      });
+      
+      // Genera il file Excel
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      // Scarica il file
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = `disposizione_tavoli_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        a.remove();
+      }, 1000);
+      
+      toast({
+        title: "Excel esportato",
+        description: "Il file della disposizione tavoli è stato scaricato con formattazione.",
+      });
+    } catch (error) {
+      console.error('Errore durante l\'esportazione:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'esportazione del file.",
+        variant: "destructive",
+      });
     }
-    
-    // Imposta la larghezza della colonna
-    ws['!cols'] = [{ wch: 30 }];
-    
-    // Aggiungi il foglio al workbook
-    XLSX.utils.book_append_sheet(wb, ws, "Disposizione Tavoli");
-    
-    // Genera e scarica il file
-    const fileName = `disposizione_tavoli_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-
-    toast({
-      title: "Excel esportato",
-      description: "Il file della disposizione tavoli è stato scaricato.",
-    });
   }, [tables, guests, toast]);
 
   return {
