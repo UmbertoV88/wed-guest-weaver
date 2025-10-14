@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Guest, GuestStatus } from "@/types/guest";
-import { exportGuestsToCSV } from "@/services/csvExport";
+import { exportGuestsToExcel } from "@/services/excelExport";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExportButtonProps {
@@ -12,14 +12,14 @@ interface ExportButtonProps {
 const ExportButton = ({ getAllGuests, getGuestsByStatus }: ExportButtonProps) => {
   const { toast } = useToast();
 
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
       const allGuests = getAllGuests();
-      exportGuestsToCSV(allGuests, "lista_invitati_completa");
+      await exportGuestsToExcel(allGuests, "lista_invitati_completa");
       
       toast({
         title: "Export completato!",
-        description: `Esportati ${allGuests.length} invitati in formato CSV`,
+        description: `Esportati ${allGuests.length} invitati in formato Excel`,
       });
     } catch (error) {
       toast({
@@ -37,7 +37,7 @@ const ExportButton = ({ getAllGuests, getGuestsByStatus }: ExportButtonProps) =>
       className="flex items-center gap-2 text-primary hover:bg-primary hover:text-primary-foreground transition-romantic"
     >
       <Download className="w-4 h-4" />
-      Esporta CSV
+      Esporta Excel
     </Button>
   );
 };
