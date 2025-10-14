@@ -352,16 +352,16 @@ export const useSeating = () => {
 
   // Export CSV
   const exportCSV = useCallback(() => {
-    const rows = ['table_id,table_name,seat_position,guest_id,guest_name'];
+    const rows = ['Numero tavolo,Nome ospite'];
     
     tables.forEach((table) => {
       const tableGuests = guests.filter((guest) => guest.tableId === table.id);
       
       if (tableGuests.length === 0) {
-        rows.push(`${table.id},"${table.nome_tavolo || 'Tavolo ' + table.id}",0,,"Tavolo vuoto"`);
+        rows.push(`"${table.nome_tavolo || 'Tavolo ' + table.id}","Tavolo vuoto"`);
       } else {
         tableGuests.forEach((guest, index) => {
-          rows.push(`${table.id},"${table.nome_tavolo || 'Tavolo ' + table.id}",${index + 1},${guest.id},"${guest.nome_visualizzato}"`);
+          rows.push(`"${table.nome_tavolo || 'Tavolo ' + table.id}","${guest.nome_visualizzato}"`);
         });
       }
     });
