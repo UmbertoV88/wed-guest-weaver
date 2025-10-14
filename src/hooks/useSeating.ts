@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 const supabaseClient: any = supabase;
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import * as XLSX from 'xlsx';
 
 export interface Table {
   id: number;
@@ -350,46 +351,77 @@ export const useSeating = () => {
     }
   }, [user?.id, toast]);
 
-  // Export CSV
-  const exportCSV = useCallback(() => {
-    const rows: string[] = [];
+  // Export Excel
+  const exportExcel = useCallback(() => {
+    // Crea un nuovo workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Prepara i dati per il foglio
+    const wsData: any[][] = [];
     
     tables.forEach((table, tableIndex) => {
       // Aggiungi riga vuota tra i tavoli (non per il primo)
       if (tableIndex > 0) {
-        rows.push('');
+        wsData.push([]);
       }
       
       // Aggiungi intestazione del tavolo
-      rows.push(`=== ${table.nome_tavolo || 'Tavolo ' + table.id} ===`);
-      rows.push('Nome ospite');
+      const tableName = `*** ${(table.nome_tavolo || 'TAVOLO ' + table.id).toUpperCase()} ***`;
+      wsData.push([tableName]);
       
       // Trova gli ospiti di questo tavolo
       const tableGuests = guests.filter((guest) => guest.tableId === table.id);
       
       if (tableGuests.length === 0) {
-        rows.push('Tavolo vuoto');
+        wsData.push(['Tavolo vuoto']);
       } else {
         tableGuests.forEach((guest) => {
-          rows.push(`"${guest.nome_visualizzato}"`);
+          wsData.push([guest.nome_visualizzato]);
         });
       }
     });
-
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'disposizione_tavoli.csv';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-      a.remove();
-    }, 1000);
+    
+    // Crea il foglio di lavoro
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+    // Applica la formattazione alle intestazioni dei tavoli
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      const cellAddress = XLSX.utils.encode_cell({ r: R, c: 0 });
+      const cell = ws[cellAddress];
+      
+      if (cell && cell.v && typeof cell.v === 'string' && cell.v.startsWith('***')) {
+        // Applica formattazione alle intestazioni dei tavoli
+        cell.s = {
+          fill: {
+            fgColor: { rgb: "4A90E2" } // Azzurro/blu
+          },
+          font: {
+            bold: true,
+            sz: 14, // Dimensione font 14
+            color: { rgb: "FFFFFF" } // Testo bianco
+          },
+          alignment: {
+            horizontal: "center",
+            vertical: "center"
+          }
+        };
+      }
+    }
+    
+    // Imposta la larghezza della colonna
+    ws['!cols'] = [{ wch: 30 }];
+    
+    // Aggiungi il foglio al workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Disposizione Tavoli");
+    
+    // Genera e scarica il file
+    const fileName = `disposizione_tavoli_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
 
     toast({
-      title: "CSV esportato",
+      title: "Excel esportato",
       description: "Il file della disposizione tavoli è stato scaricato.",
     });
   }, [tables, guests, toast]);
@@ -405,6 +437,6 @@ export const useSeating = () => {
     moveGuest,
     updateGlobalCapacity,
     assignMultipleGuests,
-    exportCSV,
+    exportExcel,
   };
 };

@@ -24,7 +24,7 @@ const SeatingEditor = () => {
     moveGuest,
     updateGlobalCapacity,
     assignMultipleGuests,
-    exportCSV,
+    exportExcel,
   } = useSeating();
 
   const [newCapacity, setNewCapacity] = useState(globalCapacity);
@@ -113,9 +113,9 @@ const SeatingEditor = () => {
                 
                 {/* GRUPPO 2: Scarica CSV + Reset */}
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button onClick={exportCSV} variant="outline" className="w-full sm:w-auto">
+                  <Button onClick={exportExcel} variant="outline" className="w-full sm:w-auto">
                     <Download className="h-4 w-4 mr-2" />
-                    Scarica CSV
+                    Esporta Excel
                   </Button>
                   
                   <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
