@@ -12,9 +12,11 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
   // Filtra gli ospiti eliminati
   const activeGuests = guests.filter(guest => guest.status !== "deleted");
   
-  // Raggruppa gli ospiti per categoria
+  // Raggruppa gli ospiti per categoria e ordina alfabeticamente per nome
   const guestsByCategory = categoryOrder.reduce((acc, category) => {
-    acc[category] = activeGuests.filter(guest => guest.category === category);
+    acc[category] = activeGuests
+      .filter(guest => guest.category === category)
+      .sort((a, b) => a.name.localeCompare(b.name, 'it-IT', { sensitivity: 'base' }));
     return acc;
   }, {} as Record<GuestCategory, Guest[]>);
   
