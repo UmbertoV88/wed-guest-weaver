@@ -2,7 +2,20 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Heart, Users, Calendar, CheckCircle, Star, Clock, Shield, Sparkles, ChevronDown, TrendingUp, Award, Zap } from "lucide-react";
+import {
+  Heart,
+  Users,
+  Calendar,
+  CheckCircle,
+  Star,
+  Clock,
+  Shield,
+  Sparkles,
+  ChevronDown,
+  TrendingUp,
+  Award,
+  Zap,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import CommonHeader from "@/components/CommonHeader";
 
@@ -13,7 +26,10 @@ const Landing = () => {
     document.title = "Sistema Gestione Invitati Matrimonio - Organizza il Tuo Giorno Perfetto";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Sistema completo per gestire invitati matrimonio in 7 giorni. Trasforma il caos in eleganza con il nostro sistema intelligente.');
+      metaDescription.setAttribute(
+        "content",
+        "Sistema completo per gestire invitati matrimonio in 7 giorni. Trasforma il caos in eleganza con il nostro sistema intelligente.",
+      );
     }
   }, []);
 
@@ -30,44 +46,43 @@ const Landing = () => {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Video Background */}
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
+          {/* Fallback gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-deep via-primary to-gold"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
+          <video
+            autoPlay
+            loop
+            muted
             playsInline
             className="w-full h-full object-cover opacity-70"
             onError={(e) => {
-              e.currentTarget.style.display = 'none';
+              e.currentTarget.style.display = "none";
             }}
           >
             <source src="/videos/wedding-hero.mp4" type="video/mp4" />
           </video>
-          {/* Fallback gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-deep via-primary to-gold"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
         </div>
 
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
           <div className="animate-fade-in-up">
             <Heart className="w-16 h-16 mx-auto mb-6 text-gold animate-heartbeat" fill="currentColor" />
-            
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              TRASFORMA IL CAOS<br />
+              TRASFORMA IL CAOS
+              <br />
               <span className="text-gold">IN ELEGANZA</span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl mb-8 text-white/90">
               Organizza il matrimonio perfetto e gestisci tutti gli invitati in soli 7 giorni
             </p>
-            
-            <p className="text-lg mb-8 text-white/80">
-              (anche se finora hai usato solo liste Excel caotiche)
-            </p>
-            
+
+            <p className="text-lg mb-8 text-white/80">(anche se finora hai usato solo liste Excel caotiche)</p>
+
             <Link to="/auth">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-gold hover:bg-gold/90 text-primary-deep text-xl px-12 py-7 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
               >
                 <span className="flex items-center gap-3">
@@ -76,10 +91,8 @@ const Landing = () => {
                 </span>
               </Button>
             </Link>
-            
-            <p className="mt-6 text-white/70 text-sm">
-              🔥 OFFERTA LIMITATA - Prezzo normale €297
-            </p>
+
+            <p className="mt-6 text-white/70 text-sm">🔥 OFFERTA LIMITATA - Prezzo normale €297</p>
           </div>
         </div>
 
@@ -94,7 +107,8 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
-              Il Tuo Matrimonio Perfetto<br />
+              Il Tuo Matrimonio Perfetto
+              <br />
               <span className="text-primary">In 3 Semplici Step</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -156,7 +170,8 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
-              Tutto Quello Che Ti Serve<br />
+              Tutto Quello Che Ti Serve
+              <br />
               <span className="text-primary">In Un Solo Sistema</span>
             </h2>
           </div>
@@ -170,9 +185,7 @@ const Landing = () => {
                   <Users className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">Gestione Invitati</h3>
-                <p className="text-sm text-muted-foreground">
-                  Organizza invitati e accompagnatori senza sforzo
-                </p>
+                <p className="text-sm text-muted-foreground">Organizza invitati e accompagnatori senza sforzo</p>
               </CardContent>
             </Card>
 
@@ -184,9 +197,7 @@ const Landing = () => {
                   <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">Statistiche Real-Time</h3>
-                <p className="text-sm text-muted-foreground">
-                  Monitora conferme e presenze in tempo reale
-                </p>
+                <p className="text-sm text-muted-foreground">Monitora conferme e presenze in tempo reale</p>
               </CardContent>
             </Card>
 
@@ -198,9 +209,7 @@ const Landing = () => {
                   <Shield className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">Allergie & Intolleranze</h3>
-                <p className="text-sm text-muted-foreground">
-                  Traccia tutte le esigenze alimentari speciali
-                </p>
+                <p className="text-sm text-muted-foreground">Traccia tutte le esigenze alimentari speciali</p>
               </CardContent>
             </Card>
 
@@ -212,9 +221,7 @@ const Landing = () => {
                   <Calendar className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">Categorie Custom</h3>
-                <p className="text-sm text-muted-foreground">
-                  Organizza per famiglia, amici, colleghi e altro
-                </p>
+                <p className="text-sm text-muted-foreground">Organizza per famiglia, amici, colleghi e altro</p>
               </CardContent>
             </Card>
           </div>
@@ -250,7 +257,8 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
-              Cosa Dicono<br />
+              Cosa Dicono
+              <br />
               <span className="text-primary">Le Coppie Felici</span>
             </h2>
           </div>
@@ -267,7 +275,8 @@ const Landing = () => {
                 ))}
               </div>
               <p className="text-muted-foreground italic mb-6">
-                "Incredibile! In una settimana abbiamo organizzato tutto. Non più notti insonni preoccupandoci di chi ha confermato. Il sistema è semplicemente perfetto!"
+                "Incredibile! In una settimana abbiamo organizzato tutto. Non più notti insonni preoccupandoci di chi ha
+                confermato. Il sistema è semplicemente perfetto!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -291,7 +300,8 @@ const Landing = () => {
                 ))}
               </div>
               <p className="text-muted-foreground italic mb-6">
-                "Dopo mesi di caos con Excel, questo sistema ci ha salvato. Tutte le allergie tracciate, statistiche in tempo reale. Consigliato a tutti!"
+                "Dopo mesi di caos con Excel, questo sistema ci ha salvato. Tutte le allergie tracciate, statistiche in
+                tempo reale. Consigliato a tutti!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -315,7 +325,8 @@ const Landing = () => {
                 ))}
               </div>
               <p className="text-muted-foreground italic mb-6">
-                "Come wedding planner, lo consiglio a tutte le mie coppie. Risparmia ore di lavoro e stress. Il miglior investimento per un matrimonio sereno."
+                "Come wedding planner, lo consiglio a tutte le mie coppie. Risparmia ore di lavoro e stress. Il miglior
+                investimento per un matrimonio sereno."
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -341,10 +352,11 @@ const Landing = () => {
 
         <div className="relative container mx-auto px-4 text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            Pronto Per Il Tuo<br />
+            Pronto Per Il Tuo
+            <br />
             <span className="text-gold">Matrimonio Perfetto?</span>
           </h2>
-          
+
           <p className="text-xl mb-12 text-white/90">
             Unisciti a centinaia di coppie che hanno trasformato lo stress in serenità
           </p>
@@ -353,16 +365,12 @@ const Landing = () => {
             <div className="text-3xl font-bold mb-2">
               <span className="line-through text-white/60">€297</span>
             </div>
-            <div className="text-6xl font-bold text-gold mb-6">
-              €97
-            </div>
-            <div className="text-white/80 mb-8">
-              🔥 Offerta limitata - Solo per le prime 100 coppie
-            </div>
-            
+            <div className="text-6xl font-bold text-gold mb-6">€97</div>
+            <div className="text-white/80 mb-8">🔥 Offerta limitata - Solo per le prime 100 coppie</div>
+
             <Link to="/auth">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-gold hover:bg-gold/90 text-primary-deep text-2xl px-16 py-8 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full md:w-auto"
               >
                 INIZIA ORA
@@ -389,9 +397,9 @@ const Landing = () => {
           <div className="max-w-md mx-auto">
             <p className="text-white/80 mb-4">Oppure ricevi più informazioni via email:</p>
             <form onSubmit={handleEmailSubmit} className="flex gap-2">
-              <Input 
-                type="email" 
-                placeholder="La tua email" 
+              <Input
+                type="email"
+                placeholder="La tua email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
@@ -409,9 +417,15 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <p className="mb-4">© 2024 Sistema Matrimonio Perfetto. Tutti i diritti riservati.</p>
           <div className="flex justify-center gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Termini di Servizio</a>
-            <a href="#" className="hover:text-white transition-colors">Contatti</a>
+            <a href="#" className="hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:text-white transition-colors">
+              Termini di Servizio
+            </a>
+            <a href="#" className="hover:text-white transition-colors">
+              Contatti
+            </a>
           </div>
           <p className="mt-4 text-xs">
             I risultati possono variare. Il sistema è uno strumento di supporto all'organizzazione del matrimonio.
