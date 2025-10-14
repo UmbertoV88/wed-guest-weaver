@@ -1,23 +1,6 @@
-import { Guest, CATEGORY_LABELS, STATUS_LABELS, GuestCategory } from "@/types/guest";
+import { Guest, CATEGORY_LABELS, STATUS_LABELS } from "@/types/guest";
 
 export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_matrimonio") => {
-  // Ordine delle categorie
-  const categoryOrder: GuestCategory[] = [
-    "family-his",
-    "family-hers", 
-    "friends",
-    "colleagues"
-  ];
-  
-  // Filtra gli ospiti eliminati
-  const activeGuests = guests.filter(guest => guest.status !== "deleted");
-  
-  // Raggruppa gli ospiti per categoria
-  const guestsByCategory = categoryOrder.reduce((acc, category) => {
-    acc[category] = activeGuests.filter(guest => guest.category === category);
-    return acc;
-  }, {} as Record<GuestCategory, Guest[]>);
-  
   // Create CSV headers
   const headers = [
     "Nome",
@@ -28,49 +11,28 @@ export const exportGuestsToCSV = (guests: Guest[], filename: string = "invitati_
     "Accompagnatori",
     "Data Creazione"
   ];
-  
-  // Costruisci il contenuto CSV
-  const csvLines: string[] = [headers.join(",")];
-  
-  categoryOrder.forEach((category, index) => {
-    const categoryGuests = guestsByCategory[category];
+
+  // Create CSV rows
+  const rows = guests.map(guest => {
+    const companionNames = guest.companions.map(c => `${c.name} (${STATUS_LABELS[c.status]})`).join("; ");
     
-    // Salta le categorie vuote
-    if (categoryGuests.length === 0) return;
-    
-    // Aggiungi intestazione della categoria
-    const categoryHeader = `--- ${CATEGORY_LABELS[category].toUpperCase()} ---`;
-    csvLines.push(`"${categoryHeader}"`);
-    
-    // Aggiungi le righe degli ospiti
-    categoryGuests.forEach(guest => {
-      const companionNames = guest.companions
-        .filter(c => c.status !== "deleted")
-        .map(c => `${c.name} (${STATUS_LABELS[c.status]})`)
-        .join("; ");
-      
-      const row = [
-        guest.name,
-        CATEGORY_LABELS[guest.category],
-        STATUS_LABELS[guest.status],
-        guest.ageGroup || "",
-        guest.allergies || "",
-        companionNames || "Nessuno",
-        guest.createdAt.toLocaleDateString("it-IT")
-      ];
-      
-      csvLines.push(row.map(field => `"${field}"`).join(","));
-    });
-    
-    // Aggiungi riga vuota dopo ogni categoria (tranne l'ultima)
-    if (index < categoryOrder.length - 1) {
-      csvLines.push("");
-    }
+    return [
+      guest.name,
+      CATEGORY_LABELS[guest.category],
+      STATUS_LABELS[guest.status],
+      guest.ageGroup || "",
+      guest.allergies || "",
+      companionNames || "Nessuno",
+      guest.createdAt.toLocaleDateString("it-IT")
+    ];
   });
-  
-  // Converti a stringa CSV
-  const csvContent = csvLines.join("\n");
-  
+
+  // Convert to CSV format
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.map(field => `"${field}"`).join(","))
+  ].join("\n");
+
   // Create and download file
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
