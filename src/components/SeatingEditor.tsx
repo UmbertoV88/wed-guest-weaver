@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Download, RotateCcw } from "lucide-react";
 import TableCard from "./TableCard";
 import UnassignedGuests from "./UnassignedGuests";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 //import TrashZone from "./TrashZone";
 
 const SeatingEditor = () => {
@@ -29,6 +30,7 @@ const SeatingEditor = () => {
 
   const [newCapacity, setNewCapacity] = useState(globalCapacity);
   const [isAddingTable, setIsAddingTable] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
 
   const handleCapacityChange = (value: number) => {
     if (value >= 1) {
@@ -48,14 +50,15 @@ const SeatingEditor = () => {
   };
 
   const handleReset = () => {
-    if (confirm('Vuoi davvero resettare tutte le assegnazioni dei tavoli?')) {
-      // Move all guests back to unassigned
-      guests.forEach(guest => {
-        if (guest.tableId) {
-          moveGuest(guest.id);
-        }
-      });
-    }
+    setShowResetDialog(true);
+  };
+
+  const handleConfirmReset = () => {
+    guests.forEach(guest => {
+      if (guest.tableId) {
+        moveGuest(guest.id);
+      }
+    });
   };
 
   // Get unassigned guests
@@ -191,6 +194,25 @@ const SeatingEditor = () => {
           </CardContent>
         </Card>
       </div>
+      
+      <ConfirmDialog
+        open={showResetDialog}
+        onOpenChange={setShowResetDialog}
+        title="Reset Assegnazioni"
+        description={
+          <>
+            <p>Sei sicuro di voler resettare tutte le assegnazioni dei tavoli?</p>
+            <p className="mt-2 font-semibold">Tutti gli ospiti torneranno nella lista "Non Assegnati".</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Questa azione non può essere annullata.
+            </p>
+          </>
+        }
+        confirmText="Reset"
+        cancelText="Annulla"
+        onConfirm={handleConfirmReset}
+        variant="destructive"
+      />
     </DndProvider>
   );
 };

@@ -35,6 +35,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 //import { useBudget } from '@/hooks/useBudget';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
 
@@ -55,6 +56,10 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
+  
+  // Delete dialog state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState<string | null>(null);
   const [newVendor, setNewVendor] = useState({
     name: '',
     category_id: '',
@@ -248,9 +253,15 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
 
 
-  const handleDeleteVendor = async (vendorId: string) => {
-    if (window.confirm('Sei sicuro di voler eliminare questo fornitore? Questa azione non può essere annullata.')) {
-      await deleteVendor(vendorId);
+  const handleDeleteVendor = (vendorId: string) => {
+    setVendorToDelete(vendorId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDeleteVendor = async () => {
+    if (vendorToDelete) {
+      await deleteVendor(vendorToDelete);
+      setVendorToDelete(null);
     }
   };
 
@@ -1061,6 +1072,27 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Elimina Fornitore"
+        description={
+          <>
+            <p>Sei sicuro di voler eliminare questo fornitore?</p>
+            <p className="mt-2 font-semibold text-destructive">
+              Questa azione non può essere annullata.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tutti i dati associati (pagamenti, note, ecc.) saranno eliminati definitivamente.
+            </p>
+          </>
+        }
+        confirmText="Elimina"
+        cancelText="Annulla"
+        onConfirm={handleConfirmDeleteVendor}
+        variant="destructive"
+      />
     </div>
   );
 };
