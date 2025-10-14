@@ -369,8 +369,13 @@ export const useSeating = () => {
           currentRow++;
         }
         
-        // Aggiungi intestazione del tavolo
-        const tableName = `*** ${(table.nome_tavolo || 'TAVOLO ' + table.id).toUpperCase()} ***`;
+        // Trova gli ospiti di questo tavolo
+        const tableGuests = guests.filter((guest) => guest.tableId === table.id);
+        const occupiedSeats = tableGuests.length;
+        const maxCapacity = table.capacita_max;
+        
+        // Aggiungi intestazione del tavolo con conteggio
+        const tableName = `${(table.nome_tavolo || 'TAVOLO ' + table.id).toUpperCase()} - ${occupiedSeats}/${maxCapacity} 👤`;
         const headerCell = worksheet.getCell(currentRow, 1);
         headerCell.value = tableName;
         
@@ -398,23 +403,14 @@ export const useSeating = () => {
         
         currentRow++;
         
-        // Trova gli ospiti di questo tavolo
-        const tableGuests = guests.filter((guest) => guest.tableId === table.id);
-        
-        if (tableGuests.length === 0) {
-          const emptyCell = worksheet.getCell(currentRow, 1);
-          emptyCell.value = 'Tavolo vuoto';
-          emptyCell.font = { italic: true, color: { argb: 'FF999999' } };
+        // Aggiungi gli ospiti (anche se il tavolo è vuoto)
+        tableGuests.forEach((guest) => {
+          const guestCell = worksheet.getCell(currentRow, 1);
+          guestCell.value = guest.nome_visualizzato;
+          guestCell.font = { size: 11 };
+          guestCell.alignment = { horizontal: 'left', vertical: 'middle' };
           currentRow++;
-        } else {
-          tableGuests.forEach((guest) => {
-            const guestCell = worksheet.getCell(currentRow, 1);
-            guestCell.value = guest.nome_visualizzato;
-            guestCell.font = { size: 11 };
-            guestCell.alignment = { horizontal: 'left', vertical: 'middle' };
-            currentRow++;
-          });
-        }
+        });
       });
       
       // Genera il file Excel
