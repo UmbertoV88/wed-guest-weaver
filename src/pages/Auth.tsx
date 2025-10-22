@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import CommonHeader from '@/components/CommonHeader';
+import { signInSchema, signUpSchema, SignInInput, SignUpInput } from '@/schemas/authSchema';
 
 const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { user, signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -20,17 +20,33 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'signup' ? 'signup' : 'signin';
 
+  const {
+    register: registerSignIn,
+    handleSubmit: handleSubmitSignIn,
+    formState: { errors: signInErrors }
+  } = useForm<SignInInput>({
+    resolver: zodResolver(signInSchema)
+  });
+
+  const {
+    register: registerSignUp,
+    handleSubmit: handleSubmitSignUp,
+    formState: { errors: signUpErrors },
+    reset: resetSignUp
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema)
+  });
+
   useEffect(() => {
     if (user) {
       navigate('/dashboard');
     }
   }, [user, navigate]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSignIn = handleSubmitSignIn(async (data) => {
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(data.email, data.password);
 
     if (error) {
       toast({
@@ -48,13 +64,12 @@ const Auth = () => {
     }
 
     setLoading(false);
-  };
+  });
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSignUp = handleSubmitSignUp(async (data) => {
     setLoading(true);
 
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(data.email, data.password, data.fullName);
 
     if (error) {
       toast({
@@ -69,10 +84,11 @@ const Auth = () => {
         title: "Registrazione completata!",
         description: "Controlla la tua email per confermare l'account.",
       });
+      resetSignUp();
     }
 
     setLoading(false);
-  };
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50">
@@ -98,28 +114,30 @@ const Auth = () => {
                 </TabsList>
                 
                 <TabsContent value="signin">
-                  <form onSubmit={handleSignIn} className="space-y-4">
+                  <form onSubmit={onSignIn} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signin-email">Email</Label>
                       <Input
+                        {...registerSignIn("email")}
                         id="signin-email"
                         type="email"
                         placeholder="tua@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
                       />
+                      {signInErrors.email && (
+                        <p className="text-destructive text-sm">{signInErrors.email.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signin-password">Password</Label>
                       <Input
+                        {...registerSignIn("password")}
                         id="signin-password"
                         type="password"
                         placeholder="La tua password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
                       />
+                      {signInErrors.password && (
+                        <p className="text-destructive text-sm">{signInErrors.password.message}</p>
+                      )}
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? "Accesso in corso..." : "Accedi"}
@@ -128,40 +146,45 @@ const Auth = () => {
                 </TabsContent>
                 
                 <TabsContent value="signup">
-                  <form onSubmit={handleSignUp} className="space-y-4">
+                  <form onSubmit={onSignUp} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">Nome completo</Label>
                       <Input
+                        {...registerSignUp("fullName")}
                         id="signup-name"
                         type="text"
                         placeholder="Il tuo nome completo"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
                       />
+                      {signUpErrors.fullName && (
+                        <p className="text-destructive text-sm">{signUpErrors.fullName.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
                       <Input
+                        {...registerSignUp("email")}
                         id="signup-email"
                         type="email"
                         placeholder="tua@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
                       />
+                      {signUpErrors.email && (
+                        <p className="text-destructive text-sm">{signUpErrors.email.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
                       <Input
+                        {...registerSignUp("password")}
                         id="signup-password"
                         type="password"
-                        placeholder="Crea una password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        minLength={6}
+                        placeholder="Crea una password (min. 8 caratteri)"
                       />
+                      {signUpErrors.password && (
+                        <p className="text-destructive text-sm">{signUpErrors.password.message}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un carattere speciale
+                      </p>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? "Registrazione in corso..." : "Registrati"}
