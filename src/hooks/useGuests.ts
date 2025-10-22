@@ -184,7 +184,9 @@ export const useGuests = () => {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'invitati' },
         (payload) => {
-          console.log('Realtime event received:', payload);
+          if (import.meta.env.DEV) {
+            console.log('Realtime event:', payload.eventType, payload.table);
+          }
           loadGuests();
         }
       )

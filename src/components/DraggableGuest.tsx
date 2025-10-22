@@ -19,7 +19,9 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
   onMoveGuest,
   showRemoveButton = true,
 }) => {
-  console.log('DraggableGuest - guest object:', guest);
+  if (import.meta.env.DEV) {
+    console.log('DraggableGuest - guest:', guest.id, guest.nome_visualizzato);
+  }
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   
   const [{ isDragging }, drag] = useDrag({
