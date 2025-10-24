@@ -49,7 +49,7 @@ export const useGuests = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading invitati:', error);
+        console.error('Error loading guests');
         return;
       }
 
@@ -167,7 +167,7 @@ export const useGuests = () => {
 
       setGuests(transformed);
     } catch (err) {
-      console.error('Error loading guests (mapped from invitati):', err);
+      console.error('Error loading guests');
     } finally {
       setLoading(false);
     }
@@ -183,10 +183,7 @@ export const useGuests = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'invitati' },
-        (payload) => {
-          if (import.meta.env.DEV) {
-            console.log('Realtime event:', payload.eventType, payload.table);
-          }
+        () => {
           loadGuests();
         }
       )
@@ -279,7 +276,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       
       return newGuest;
     } catch (error) {
-      console.error('Error adding guest (invitati):', error);
+      console.error('Error adding guest');
       throw error;
     }
   };
@@ -378,7 +375,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Reload guests to reflect changes
       await loadGuests();
     } catch (error) {
-      console.error('Error updating guest:', error);
+      console.error('Error updating guest');
       throw error;
     }
   };
@@ -429,7 +426,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Refresh immediately after group status update to realign UI
       await loadGuests();
     } catch (error) {
-      console.error('Error updating guest status (invitati):', error);
+      console.error('Error updating guest status');
       // Revert optimistic update on error
       if (previousState) {
         setGuests((prev) =>
@@ -464,7 +461,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Reload to get the latest state and fix companion status display
       await loadGuests();
     } catch (error) {
-      console.error('Error restoring guest (invitati):', error);
+      console.error('Error restoring guest');
       // Revert optimistic update on error
       if (previousState) {
         setGuests((prev) => prev.map((g) => g.id === guestId ? previousState : g));
@@ -502,7 +499,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Reload to get the latest state
       loadGuests();
     } catch (error) {
-      console.error('Error confirming main guest only:', error);
+      console.error('Error confirming guest');
       // Revert optimistic update on error
       const previousState = guests.find(g => g.id === guestId);
       if (previousState) {
@@ -540,7 +537,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Reload to get the latest state
       loadGuests();
     } catch (error) {
-      console.error('Error reverting main guest only:', error);
+      console.error('Error reverting guest');
       // Revert optimistic update on error
       const previousState = guests.find(g => g.id === guestId);
       if (previousState) {
@@ -564,7 +561,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
         await confirmCompanion(guestId, companion.id);
       }
     } catch (error) {
-      console.error('Error confirming guest and all companions:', error);
+      console.error('Error confirming guest and companions');
       throw error;
     }
   };
@@ -586,7 +583,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Optionally remove the unit itself
       await supabase.from('unita_invito').delete().eq('id', unitId);
     } catch (error) {
-      console.error('Error permanently deleting guest (invitati):', error);
+      console.error('Error deleting guest');
       // Revert optimistic update on error
       if (previousState) {
         setGuests((prev) => [...prev, previousState]);
@@ -621,7 +618,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Force immediate refresh instead of relying on realtime
       await loadGuests();
     } catch (error) {
-      console.error('Error updating companion status:', error);
+      console.error('Error updating companion status');
       throw error;
     } finally {
       setCompanionLoading(null);
@@ -649,7 +646,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Force immediate refresh instead of relying on realtime
       await loadGuests();
     } catch (error) {
-      console.error('Error restoring companion:', error);
+      console.error('Error restoring companion');
       throw error;
     } finally {
       setCompanionLoading(null);
@@ -671,7 +668,7 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
       // Force immediate refresh instead of relying on realtime
       await loadGuests();
     } catch (error) {
-      console.error('Error permanently deleting companion:', error);
+      console.error('Error deleting companion');
       throw error;
     } finally {
       setCompanionLoading(null);

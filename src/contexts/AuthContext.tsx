@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.location.href = '/';
       
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error');
       
       // Even if logout fails, clear local state and redirect
       setSession(null);
