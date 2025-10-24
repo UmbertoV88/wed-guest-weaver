@@ -301,7 +301,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
           </div>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[600px] pr-4">
+          <ScrollArea className="max-h-[1080px] pr-4">
             <div className="space-y-4">
               {sortedFilteredPayments.map((payment) => {
                 const daysUntilDue = payment.daysUntilDue;
