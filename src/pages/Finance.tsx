@@ -127,6 +127,13 @@ const FinanceLayout = () => {
           </div>
         </div>;
     }
+
+    // Calcola statistiche fornitori reali
+    const totalVendors = vendors.filter(v => v.is_active).length;
+    const paidVendors = vendors.filter(v => 
+      v.is_active && v.complete_payment_date !== null
+    ).length;
+
     return <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -147,7 +154,7 @@ const FinanceLayout = () => {
           </Alert>}
 
         {/* *** BUDGET OVERVIEW CARDS *** */}
-        <BudgetOverview totalBudget={totalBudget} totalSpent={totalSpent} remainingBudget={remainingAfterSpent} percentageSpent={spentPercentage} daysToWedding={daysToWedding} vendorsPaid={3} vendorsTotal={categories.length} onBudgetChange={newBudget => {
+        <BudgetOverview totalBudget={totalBudget} totalSpent={totalSpent} remainingBudget={remainingAfterSpent} percentageSpent={spentPercentage} daysToWedding={daysToWedding} vendorsPaid={paidVendors} vendorsTotal={totalVendors} onBudgetChange={newBudget => {
         updateTotalBudget(newBudget);
       }} />
 
