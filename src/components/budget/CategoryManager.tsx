@@ -7,6 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Package,
   MapPin,
   UtensilsCrossed,
@@ -318,8 +324,13 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
         Budget totale disponibile: €{totalBudget.toLocaleString()} | Da allocare: €{remainingToAllocate.toLocaleString()}
       </div>
 
-      {/* Enhanced Category Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Enhanced Category Accordion */}
+      <Accordion 
+        type="single" 
+        collapsible 
+        defaultValue={categories[0]?.id}
+        className="space-y-2"
+      >
         {categories.map((category) => {
           const IconComponent = ICON_OPTIONS[category.icon as keyof typeof ICON_OPTIONS] || Package;
           const isEditing = editingCategory === category.id;
@@ -328,10 +339,14 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
           const categoryPercentage = totalBudget > 0 ? ((category.budgeted / totalBudget) * 100).toFixed(1) : 0;
 
           return (
-            <Card key={category.id} className="shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+            <AccordionItem 
+              key={category.id} 
+              value={category.id}
+              className="border rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <AccordionTrigger className="hover:no-underline px-6 py-4 hover:bg-muted/50">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-4">
                     <div 
                       className="p-2 rounded-full"
                       style={{ backgroundColor: `${category.color}20` }}
@@ -341,16 +356,29 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                         style={{ color: category.color }}
                       />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{category.name}</CardTitle>
-                      <p className="text-sm text-gray-600">{categoryPercentage}% del budget totale</p>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-base">{category.name}</h3>
+                      <p className="text-xs text-muted-foreground">{categoryPercentage}% del budget</p>
                     </div>
                   </div>
-                  {getStatusBadge(category.spent, category.budgeted)}
+                  
+                  <div className="flex items-center gap-6">
+                    {getStatusBadge(category.spent, category.budgeted)}
+                    
+                    <div className="text-right hidden sm:block">
+                      <p className="font-semibold text-sm">
+                        {formatCurrency(category.spent)} / {formatCurrency(category.budgeted)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {Math.round(progressPercentage)}% utilizzato
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </CardHeader>
+              </AccordionTrigger>
               
-              <CardContent className="space-y-4">
+              <AccordionContent className="px-6 pb-4">
+                <div className="space-y-4 pt-4">
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
@@ -511,11 +539,12 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           );
         })}
-      </div>
+      </Accordion>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
