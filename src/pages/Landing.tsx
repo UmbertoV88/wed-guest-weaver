@@ -35,7 +35,7 @@ const Landing = () => {
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Email handling logic would go here
+    console.log("Email submitted:", email);
   };
 
   return (

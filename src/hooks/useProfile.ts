@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserRoles } from './useUserRoles';
 
 export interface UserProfile {
   id: string;
@@ -18,7 +17,6 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { isWeddingOrganizer: roleBasedOrganizer, loading: rolesLoading } = useUserRoles();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -112,9 +110,8 @@ export const useProfile = () => {
 
   return {
     profile,
-    loading: loading || rolesLoading,
-    // Use role-based check (secure) with fallback to profile field (backward compatibility)
-    isWeddingOrganizer: roleBasedOrganizer || profile?.is_wedding_organizer || false,
+    loading,
+    isWeddingOrganizer: profile?.is_wedding_organizer || false,
     promoteToWeddingOrganizer,
     updateWeddingDate
   };

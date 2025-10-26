@@ -155,11 +155,9 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
           <div className="text-2xl font-bold text-purple-600">
             {daysToWedding}
           </div>
-            {vendorsTotal > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {vendorsPaid}/{vendorsTotal} fornitori pagati
-              </p>
-            )}
+          <p className="text-xs text-muted-foreground">
+            {vendorsPaid}/{vendorsTotal} fornitori pagati
+          </p>
         </CardContent>
       </Card>
     </div>

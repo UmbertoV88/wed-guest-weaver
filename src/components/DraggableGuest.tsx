@@ -19,6 +19,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
   onMoveGuest,
   showRemoveButton = true,
 }) => {
+  console.log('DraggableGuest - guest object:', guest);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   
   const [{ isDragging }, drag] = useDrag({
