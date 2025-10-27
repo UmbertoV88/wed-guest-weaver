@@ -422,7 +422,6 @@ export const useBudgetQuery = () => {
       return { previousVendors, tempVendor };
     },
     onSuccess: (result, variables, context) => {
-      console.log(result);
       queryClient.setQueryData(budgetQueryKeys.vendors(), (old: any) =>
         old ? old.map((vendor: any) => (vendor.id === context?.tempVendor.id ? result : vendor)) : [result],
       );
@@ -689,7 +688,7 @@ export const useBudgetQuery = () => {
     onSuccess: (result, id, context) => {
       // Delete items in background
       context?.vendorItems.forEach((item: any) => {
-        budgetItemsApi.delete(item.id).catch(console.error);
+        budgetItemsApi.delete(item.id).catch(() => {});
       });
 
       toast({

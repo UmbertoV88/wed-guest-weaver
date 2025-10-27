@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { 
   Plus, 
   User, 
@@ -15,71 +16,70 @@ import {
   Check,
   X
 } from "lucide-react";
-import { GuestFormData, CATEGORY_LABELS, GuestCategory, Guest, AGE_GROUP_LABELS, AgeGroup } from "@/types/guest";
+import { Guest, CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
+import { guestFormSchema, GuestFormInput } from "@/schemas/guestSchema";
 
 interface AddGuestFormProps {
-  addGuest: (formData: GuestFormData) => Promise<Guest>;
+  addGuest: (formData: GuestFormInput) => Promise<Guest>;
 }
 
 const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<GuestFormData>({
-    name: '',
-    category: '' as GuestCategory,
-    companionCount: 0,
-    companions: [],
-    allergies: '',
-    ageGroup: undefined
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
   const { toast } = useToast();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    reset,
+    control,
+  } = useForm<GuestFormInput>({
+    resolver: zodResolver(guestFormSchema),
+    defaultValues: {
+      name: "",
+      category: "family-his",
+      companionCount: 0,
+      companions: [],
+      allergies: "",
+      ageGroup: "Adulto",
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "companions",
+  });
+
+  const companionCount = watch("companionCount");
+  const category = watch("category");
+  const ageGroup = watch("ageGroup");
   const totalSteps = 5;
 
   const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {};
+    const currentData = watch();
 
     switch (step) {
       case 1:
-        if (!formData.name.trim()) {
-          newErrors.name = 'Il nome è obbligatorio';
-        } else if (formData.name.trim().length < 2) {
-          newErrors.name = 'Il nome deve contenere almeno 2 caratteri';
-        } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(formData.name.trim())) {
-          newErrors.name = 'Il nome può contenere solo lettere, spazi, apostrofi e trattini';
-        }
-        if (!formData.ageGroup) {
-          newErrors.ageGroup = 'Seleziona la fascia d\'età';
+        if (!currentData.name?.trim() || !currentData.ageGroup) {
+          return false;
         }
         break;
-      
       case 2:
-        if (!formData.category) {
-          newErrors.category = 'Seleziona una categoria';
+        if (!currentData.category) {
+          return false;
         }
         break;
-      
       case 3:
-        if (formData.companionCount > 0) {
-          formData.companions.forEach((companion, index) => {
-            if (!companion.name.trim()) {
-              newErrors[`companion-${index}`] = 'Il nome dell\'accompagnatore è obbligatorio';
-            } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(companion.name.trim())) {
-              newErrors[`companion-${index}`] = 'Nome non valido';
-            }
-            if (!companion.ageGroup) {
-              newErrors[`companion-age-${index}`] = 'Seleziona la fascia d\'età';
-            }
-          });
+        if (companionCount > 0 && fields.length !== companionCount) {
+          return false;
         }
         break;
     }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
   const nextStep = () => {
@@ -93,53 +93,42 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   };
 
   const updateCompanions = (count: number) => {
-    const companions = Array.from({ length: count }, (_, index) => 
-      formData.companions[index] || { name: '', allergies: '', ageGroup: undefined }
-    );
-    setFormData(prev => ({ ...prev, companionCount: count, companions }));
-  };
-
-  const updateCompanion = (index: number, field: 'name' | 'allergies' | 'ageGroup', value: string | AgeGroup) => {
-    setFormData(prev => ({
-      ...prev,
-      companions: prev.companions.map((comp, i) => 
-        i === index ? { ...comp, [field]: value } : comp
-      )
-    }));
+    const currentCompanions = fields;
+    
+    if (count > currentCompanions.length) {
+      for (let i = currentCompanions.length; i < count; i++) {
+        append({ name: "", allergies: "", ageGroup: "Adulto" });
+      }
+    } else if (count < currentCompanions.length) {
+      for (let i = currentCompanions.length - 1; i >= count; i--) {
+        remove(i);
+      }
+    }
+    setValue("companionCount", count);
   };
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      category: '' as GuestCategory,
-      companionCount: 0,
-      companions: [],
-      allergies: '',
-      ageGroup: undefined
-    });
+    reset();
     setCurrentStep(1);
-    setErrors({});
     setIsOpen(false);
   };
 
-  const handleSubmit = async () => {
-    if (validateStep(4)) {
-      try {
-        await addGuest(formData);
-        toast({
-          title: "Invitato aggiunto!",
-          description: `${formData.name} è stato aggiunto alla lista degli invitati.`,
-        });
-        resetForm();
-      } catch (error) {
-        toast({
-          title: "Errore",
-          description: "Si è verificato un errore durante l'aggiunta dell'invitato.",
-          variant: "destructive",
-        });
-      }
+  const onSubmit = handleSubmit(async (data: GuestFormInput) => {
+    try {
+      await addGuest(data);
+      toast({
+        title: "Invitato aggiunto!",
+        description: `${data.name} è stato aggiunto alla lista degli invitati.`,
+      });
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'aggiunta dell'invitato.",
+        variant: "destructive",
+      });
     }
-  };
+  });
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -156,13 +145,12 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <Label htmlFor="name">Nome completo *</Label>
               <Input
                 id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                {...register("name")}
                 placeholder="Es: Mario Rossi"
                 className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && (
-                <p className="text-destructive text-sm mt-1">{errors.name}</p>
+                <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
               )}
             </div>
             
@@ -170,8 +158,8 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <Label htmlFor="ageGroup">Fascia d'età *</Label>
               <select
                 id="ageGroup"
-                value={formData.ageGroup || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value as AgeGroup }))}
+                value={ageGroup}
+                onChange={(e) => setValue("ageGroup", e.target.value as any)}
                 className={`w-full px-3 py-2 border rounded-md bg-background ${errors.ageGroup ? 'border-destructive' : 'border-border'}`}
               >
                 <option value="">Seleziona fascia d'età</option>
@@ -180,7 +168,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 ))}
               </select>
               {errors.ageGroup && (
-                <p className="text-destructive text-sm mt-1">{errors.ageGroup}</p>
+                <p className="text-destructive text-sm mt-1">{errors.ageGroup.message}</p>
               )}
             </div>
           </div>
@@ -200,9 +188,9 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, category: key as GuestCategory }))}
+                  onClick={() => setValue("category", key as any)}
                   className={`p-4 rounded-lg border-2 text-left transition-romantic ${
-                    formData.category === key
+                    category === key
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -211,7 +199,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 </button>
               ))}
               {errors.category && (
-                <p className="text-destructive text-sm">{errors.category}</p>
+                <p className="text-destructive text-sm">{errors.category.message}</p>
               )}
             </div>
           </div>
@@ -223,14 +211,14 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
             <div className="text-center mb-6">
               <Users className="w-12 h-12 text-primary mx-auto mb-3" />
               <h3 className="text-xl font-semibold">Accompagnatori</h3>
-              <p className="text-muted-foreground">Quante persone accompagneranno {formData.name}?</p>
+              <p className="text-muted-foreground">Quante persone accompagneranno {watch("name")}?</p>
             </div>
             
             <div>
               <Label htmlFor="companionCount">Numero di accompagnatori</Label>
               <select
                 id="companionCount"
-                value={formData.companionCount}
+                value={companionCount}
                 onChange={(e) => updateCompanions(parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-border rounded-md bg-background"
               >
@@ -238,42 +226,47 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                   <option key={i} value={i}>{i}</option>
                 ))}
               </select>
+              {errors.companionCount && (
+                <p className="text-destructive text-sm mt-1">{errors.companionCount.message}</p>
+              )}
             </div>
 
-            {formData.companionCount > 0 && (
+            {companionCount > 0 && (
               <div className="space-y-3">
                 <h4 className="font-medium">Nome e fascia d'età accompagnatori:</h4>
-                {formData.companions.map((companion, index) => (
-                  <div key={index} className="space-y-3 p-3 border rounded-lg">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="space-y-3 p-3 border rounded-lg">
                     <Label className="text-sm font-medium">Accompagnatore {index + 1}</Label>
                     <div>
                       <Label htmlFor={`companion-name-${index}`}>Nome completo *</Label>
                       <Input
                         id={`companion-name-${index}`}
-                        value={companion.name}
-                        onChange={(e) => updateCompanion(index, 'name', e.target.value)}
+                        {...register(`companions.${index}.name`)}
                         placeholder="Nome completo"
-                        className={errors[`companion-${index}`] ? 'border-destructive' : ''}
+                        className={errors.companions?.[index]?.name ? 'border-destructive' : ''}
                       />
-                      {errors[`companion-${index}`] && (
-                        <p className="text-destructive text-sm mt-1">{errors[`companion-${index}`]}</p>
+                      {errors.companions?.[index]?.name && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.companions[index]?.name?.message}
+                        </p>
                       )}
                     </div>
                     <div>
                       <Label htmlFor={`companion-age-${index}`}>Fascia d'età *</Label>
                       <select
                         id={`companion-age-${index}`}
-                        value={companion.ageGroup || ''}
-                        onChange={(e) => updateCompanion(index, 'ageGroup', e.target.value as AgeGroup)}
-                        className={`w-full px-3 py-2 border rounded-md bg-background ${errors[`companion-age-${index}`] ? 'border-destructive' : 'border-border'}`}
+                        {...register(`companions.${index}.ageGroup`)}
+                        className={`w-full px-3 py-2 border rounded-md bg-background ${errors.companions?.[index]?.ageGroup ? 'border-destructive' : 'border-border'}`}
                       >
                         <option value="">Seleziona fascia d'età</option>
                         {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
                           <option key={key} value={key}>{label}</option>
                         ))}
                       </select>
-                      {errors[`companion-age-${index}`] && (
-                        <p className="text-destructive text-sm mt-1">{errors[`companion-age-${index}`]}</p>
+                      {errors.companions?.[index]?.ageGroup && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.companions[index]?.ageGroup?.message}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -293,36 +286,43 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
             </div>
             
             <div>
-              <Label htmlFor="allergies">Allergeni/intolleranze di {formData.name}</Label>
+              <Label htmlFor="allergies">Allergeni/intolleranze di {watch("name")}</Label>
               <Textarea
                 id="allergies"
-                value={formData.allergies}
-                onChange={(e) => setFormData(prev => ({ ...prev, allergies: e.target.value }))}
+                {...register("allergies")}
                 placeholder="Es: glutine, lattosio, frutta secca, crostacei..."
                 maxLength={200}
                 className="min-h-[100px]"
               />
+              {errors.allergies && (
+                <p className="text-destructive text-sm mt-1">{errors.allergies.message}</p>
+              )}
               <p className="text-xs text-muted-foreground mt-1">
-                Caratteri rimasti: {200 - formData.allergies.length}
+                Caratteri rimasti: {200 - (watch("allergies")?.length || 0)}
               </p>
             </div>
 
-            {formData.companions.map((companion, index) => (
-              <div key={index}>
-                <Label>Allergeni/intolleranze di {companion.name}</Label>
+            {fields.map((field, index) => (
+              <div key={field.id}>
+                <Label>Allergeni/intolleranze di {field.name}</Label>
                 <Textarea
-                  value={companion.allergies || ''}
-                  onChange={(e) => updateCompanion(index, 'allergies', e.target.value)}
+                  {...register(`companions.${index}.allergies`)}
                   placeholder="Es: glutine, lattosio, frutta secca, crostacei..."
                   maxLength={200}
                   className="min-h-[80px]"
                 />
+                {errors.companions?.[index]?.allergies && (
+                  <p className="text-destructive text-sm mt-1">
+                    {errors.companions[index]?.allergies?.message}
+                  </p>
+                )}
               </div>
             ))}
           </div>
         );
 
       case 5:
+        const formValues = watch();
         return (
           <div className="space-y-4">
             <div className="text-center mb-6">
@@ -334,38 +334,38 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
             <Card className="p-4 bg-muted/30 border-primary/20">
               <div className="space-y-3">
                 <div>
-                  <strong>Nome:</strong> {formData.name}
+                  <strong>Nome:</strong> {formValues.name}
                 </div>
                 <div>
-                  <strong>Fascia d'età:</strong> {formData.ageGroup ? AGE_GROUP_LABELS[formData.ageGroup] : 'Non specificata'}
+                  <strong>Fascia d'età:</strong> {formValues.ageGroup ? AGE_GROUP_LABELS[formValues.ageGroup] : 'Non specificata'}
                 </div>
                 <div>
-                  <strong>Categoria:</strong> {CATEGORY_LABELS[formData.category]}
+                  <strong>Categoria:</strong> {CATEGORY_LABELS[formValues.category]}
                 </div>
                 <div>
-                  <strong>Accompagnatori:</strong> {formData.companionCount}
-                  {formData.companions.length > 0 && (
+                  <strong>Accompagnatori:</strong> {formValues.companionCount}
+                  {fields.length > 0 && (
                     <div className="ml-4 text-sm text-muted-foreground space-y-1">
-                      {formData.companions.map((comp, idx) => (
-                        <div key={idx}>
-                          {comp.name} ({comp.ageGroup ? AGE_GROUP_LABELS[comp.ageGroup] : 'Fascia d\'età non specificata'})
+                      {fields.map((field, idx) => (
+                        <div key={field.id}>
+                          {field.name} ({field.ageGroup ? AGE_GROUP_LABELS[field.ageGroup] : 'Fascia d\'età non specificata'})
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-                {formData.allergies && (
+                {formValues.allergies && (
                   <div>
-                    <strong>Allergeni {formData.name}:</strong> {formData.allergies}
+                    <strong>Allergeni {formValues.name}:</strong> {formValues.allergies}
                   </div>
                 )}
-                {formData.companions.some(comp => comp.allergies) && (
+                {fields.some(field => field.allergies) && (
                   <div>
                     <strong>Allergeni accompagnatori:</strong>
                     <div className="ml-4 text-sm">
-                      {formData.companions
-                        .filter(comp => comp.allergies)
-                        .map(comp => `${comp.name}: ${comp.allergies}`)
+                      {fields
+                        .filter(field => field.allergies)
+                        .map(field => `${field.name}: ${field.allergies}`)
                         .join(', ')
                       }
                     </div>
@@ -435,7 +435,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
             <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} className="bg-success hover:bg-success/90 text-white">
+          <Button onClick={onSubmit} className="bg-success hover:bg-success/90 text-white">
             <Check className="w-4 h-4 mr-1" />
             Salva invitato
           </Button>

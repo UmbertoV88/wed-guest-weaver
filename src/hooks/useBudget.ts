@@ -61,7 +61,7 @@ export const useBudget = () => {
       }
 
     } catch (err) {
-      console.error('Error loading budget data:', err);
+      console.error('Error loading budget data');
       setError('Errore nel caricamento dei dati budget');
       toast({
         title: 'Errore',
@@ -94,7 +94,7 @@ export const useBudget = () => {
       }
       return false;
     } catch (err) {
-      console.error('Error updating total budget:', err);
+      console.error('Error updating total budget');
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare il budget totale',
@@ -145,7 +145,7 @@ export const useBudget = () => {
       }
       return null;
     } catch (err) {
-      console.error('Error activating category:', err);
+      console.error('Error activating category');
       toast({
         title: 'Errore',
         description: 'Impossibile attivare la categoria',
@@ -182,7 +182,7 @@ export const useBudget = () => {
       }
       return null;
     } catch (err) {
-      console.error('Error updating category:', err);
+      console.error('Error updating category');
       const originalCategory = categories.find(cat => cat.id === id);
       if (originalCategory) {
         setCategories((prev: any) => 
@@ -240,7 +240,7 @@ export const useBudget = () => {
         await loadData();
       }
     } catch (err) {
-      console.error('Error deleting category:', err);
+      console.error('Error deleting category');
       
       // 4. REVERT IF FAILED
       const categoryToRestore = categories.find(cat => cat.id === id);
@@ -323,7 +323,7 @@ export const useBudget = () => {
       }
       return null;
     } catch (err) {
-      console.error('Error adding item:', err);
+      console.error('Error adding item');
       // ✅ ORA tempItem è accessibile nel catch!
       setItems((prev: any) => prev.filter((item: any) => item.id !== tempItem.id));
       setCategories((prev: any) => 
@@ -354,7 +354,7 @@ export const useBudget = () => {
       }
       return null;
     } catch (err) {
-      console.error('Error toggling item paid status:', err);
+      console.error('Error toggling item paid status');
       toast({
         title: 'Errore',
         description: 'Impossibile aggiornare lo stato del pagamento',
@@ -434,7 +434,7 @@ export const useBudget = () => {
     }
       return null;
     } catch (err) {
-      console.error('Error adding vendor:', err);
+      console.error('Error adding vendor');
       toast({
         title: 'Errore',
         description: 'Impossibile aggiungere il fornitore',
@@ -472,7 +472,7 @@ export const useBudget = () => {
       }
       return null;
     } catch (err) {
-      console.error('Error updating vendor:', err);
+      console.error('Error updating vendor');
       if (previousVendor) {
         setVendors(prev => 
           prev.map(vendor => vendor.id === id ? previousVendor : vendor)
@@ -524,7 +524,7 @@ export const useBudget = () => {
 
       // Delete in background
       for (const item of vendorItems) {
-        budgetItemsApi.delete(item.id).catch(console.error);
+        budgetItemsApi.delete(item.id).catch(() => {});
       }
 
       const success = await budgetVendorsApi.delete(id);
@@ -548,7 +548,7 @@ export const useBudget = () => {
         return false;
       }
     } catch (err) {
-      console.error('Error deleting vendor:', err);
+      console.error('Error deleting vendor');
       // ✅ ROLLBACK su errore
       setVendors(prev => [...prev, vendor]);
       setItems(prev => [...prev, ...vendorItems]);
@@ -585,7 +585,7 @@ export const useBudget = () => {
       }
       return null;
     } catch (err) {
-      console.error('Error adding vendor payment:', err);
+      console.error('Error adding vendor payment');
       toast({
         title: 'Errore',
         description: 'Impossibile registrare il pagamento',
@@ -608,7 +608,7 @@ export const useBudget = () => {
         setCategories(Array.isArray(categoriesData) ? categoriesData as any : []);
       }
     } catch (err) {
-      console.error('Error initializing defaults:', err);
+      console.error('Error initializing defaults');
     }
   };
 
