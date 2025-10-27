@@ -332,12 +332,19 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
         /*defaultValue={categories[0]?.id}*/
         className="space-y-2"
       >
-        {categories.map((category) => {
-          const IconComponent = ICON_OPTIONS[category.icon as keyof typeof ICON_OPTIONS] || Package;
-          const isEditing = editingCategory === category.id;
-          const isDeleting = deletingCategory === category.id;
-          const progressPercentage = category.budgeted > 0 ? (category.spent / category.budgeted) * 100 : 0;
-          const categoryPercentage = totalBudget > 0 ? ((category.budgeted / totalBudget) * 100).toFixed(1) : 0;
+          {categories.map((category) => {
+            const IconComponent = ICON_OPTIONS[category.icon as keyof typeof ICON_OPTIONS] || Package;
+            const isEditing = editingCategory === category.id;
+            const isDeleting = deletingCategory === category.id;
+            
+            // Calculate actual spent from vendors' total costs
+            const categoryVendors = getVendorsByCategory(category.id);
+            const actualSpent = categoryVendors.reduce((sum, vendor) => {
+              return sum + (vendor.default_cost || 0);
+            }, 0);
+            
+            const progressPercentage = category.budgeted > 0 ? (actualSpent / category.budgeted) * 100 : 0;
+            const categoryPercentage = totalBudget > 0 ? ((category.budgeted / totalBudget) * 100).toFixed(1) : 0;
 
           return (
             <AccordionItem
@@ -421,21 +428,21 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                     </div>
                   ) : (
                     <>
-                      {/* Budget Progress */}
+                       {/* Budget Progress */}
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Progresso spesa</span>
                           <span className="font-medium">
-                            {formatCurrency(category.spent)} / {formatCurrency(category.budgeted)}
+                            {formatCurrency(actualSpent)} / {formatCurrency(category.budgeted)}
                           </span>
                         </div>
                         <Progress value={Math.min(progressPercentage, 100)} className="h-3" />
                         <div className="flex justify-between text-xs text-gray-500">
                           <span>{Math.round(progressPercentage)}% utilizzato</span>
                           <span>
-                            {category.spent < category.budgeted
-                              ? `Rimanente: ${formatCurrency(category.budgeted - category.spent)}`
-                              : `Superato: ${formatCurrency(category.spent - category.budgeted)}`}
+                            {actualSpent < category.budgeted
+                              ? `Rimanente: ${formatCurrency(category.budgeted - actualSpent)}`
+                              : `Superato: ${formatCurrency(actualSpent - category.budgeted)}`}
                           </span>
                         </div>
                       </div>
