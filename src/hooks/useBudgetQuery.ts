@@ -752,11 +752,10 @@ export const useBudgetQuery = () => {
     },
 
     onSuccess: async (result, { amount, vendorId }) => {
-      // ✅ Invalida vendors per ricaricare dati reali dal DB
+      // ✅ Invalida tutte le query per ricaricare dati reali dal DB
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.vendors() });
-
-      // Mantieni l'aggiornamento esistente per items
-      queryClient.setQueryData(budgetQueryKeys.items(), (old: any) => (old ? [...old, result] : [result]));
+      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
+      await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
 
       toast({
         title: "Pagamento registrato",
