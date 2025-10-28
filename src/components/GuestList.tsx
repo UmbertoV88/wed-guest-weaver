@@ -67,10 +67,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   const handleConfirmMainOnly = async (guestId: string, guestName: string) => {
     try {
       await confirmGuestOnly(guestId);
-      toast({
-        title: "Invitato confermato!",
-        description: `${guestName} è stato confermato (solo l'invitato principale).`,
-      });
     } catch (error) {
       toast({
         title: "Errore",
@@ -83,10 +79,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   const handleRestore = async (guestId: string, guestName: string) => {
     try {
       await restoreGuest(guestId);
-      toast({
-        title: "Invitato ripristinato!",
-        description: `${guestName} è stato ripristinato nell'elenco.`,
-      });
     } catch (error) {
       toast({
         title: "Errore",
@@ -99,11 +91,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   const handleDelete = async (guestId: string, guestName: string) => {
     try {
       await deleteGuest(guestId);
-      toast({
-        title: "Invitato eliminato",
-        description: `${guestName} è stato spostato nel cestino.`,
-        variant: "destructive",
-      });
     } catch (error) {
       toast({
         title: "Errore",
@@ -121,11 +108,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
       onConfirm: async () => {
         try {
           await permanentlyDeleteGuest(guestId);
-          toast({
-            title: "Invitato eliminato definitivamente",
-            description: `${guestName} è stato rimosso permanentemente.`,
-            variant: "destructive",
-          });
         } catch (error) {
           toast({
             title: "Errore",
@@ -140,10 +122,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   const handleRevertMainOnly = async (guestId: string, guestName: string) => {
     try {
       await revertGuestOnly(guestId);
-      toast({
-        title: "Invitato riportato a da confermare!",
-        description: `${guestName} è stato riportato nello stato da confermare (solo l'invitato principale).`,
-      });
     } catch (error) {
       toast({
         title: "Errore",
@@ -156,10 +134,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   const handleConfirmAll = async (guestId: string, guestName: string) => {
     try {
       await confirmGuestAndAllCompanions(guestId);
-      toast({
-        title: "Gruppo confermato!",
-        description: `${guestName} e tutti gli accompagnatori sono stati confermati.`,
-      });
     } catch (error) {
       toast({
         title: "Errore",
@@ -169,13 +143,9 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     }
   };
 
-  const handleConfirmedToending = async (guestId: string, guestName: string) => {
+  const handleConfirmedToPending = async (guestId: string, guestName: string) => {
     try {
       await updateGuestStatus(guestId, 'pending');
-      toast({
-        title: "Invitato riportato a da confermare!",
-        description: `${guestName} è stato riportato nello stato da confermare.`,
-      });
     } catch (error) {
       toast({
         title: "Errore",
@@ -522,7 +492,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                       
                       {type === "confirmed" && (
                         <Button
-                          onClick={() => handleConfirmedToending(guest.id, guest.name)}
+                          onClick={() => handleConfirmedToPending(guest.id, guest.name)}
                           size="sm"
                           variant="outline"
                         >
