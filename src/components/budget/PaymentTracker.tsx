@@ -132,10 +132,6 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
     const remainingAmount = totalCost - alreadyPaid;
 
     if (remainingAmount <= 0) {
-      toast({
-        title: "Già Pagato",
-        description: "Questo pagamento è già stato completato",
-      });
       return;
     }
 
@@ -143,10 +139,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
   };
 
   const handleSetReminder = (payment: any) => {
-    toast({
-      title: "Promemoria impostato",
-      description: `Ti ricorderemo 3 giorni prima della scadenza per ${payment.vendor}`,
-    });
+    // Reminder logic removed - silent success
   };
 
   // Calcoli basati sui fornitori reali

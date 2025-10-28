@@ -756,12 +756,6 @@ export const useBudgetQuery = () => {
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.vendors() });
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
-
-      toast({
-        title: "Pagamento registrato",
-        description: `Pagamento di €${amount.toLocaleString()} registrato`,
-        duration: 3000,
-      });
     },
 
     onError: (err, variables, context) => {

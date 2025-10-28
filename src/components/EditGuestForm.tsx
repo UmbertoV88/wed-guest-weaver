@@ -135,10 +135,6 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
   const onSubmit = handleSubmit(async (data: GuestFormInput) => {
     try {
       await updateGuest(guest.id, data);
-      toast({
-        title: "Invitato modificato!",
-        description: `${data.name} è stato aggiornato con successo.`,
-      });
       resetForm();
     } catch (error) {
       toast({

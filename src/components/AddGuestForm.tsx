@@ -116,10 +116,6 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   const onSubmit = handleSubmit(async (data: GuestFormInput) => {
     try {
       await addGuest(data);
-      toast({
-        title: "Invitato aggiunto!",
-        description: `${data.name} è stato aggiunto alla lista degli invitati.`,
-      });
       resetForm();
     } catch (error) {
       toast({

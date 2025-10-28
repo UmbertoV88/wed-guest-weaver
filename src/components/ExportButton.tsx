@@ -16,11 +16,6 @@ const ExportButton = ({ getAllGuests, getGuestsByStatus }: ExportButtonProps) =>
     try {
       const allGuests = getAllGuests();
       await exportGuestsToExcel(allGuests, "lista_invitati_completa");
-      
-      toast({
-        title: "Export completato!",
-        description: `Esportati ${allGuests.length} invitati in formato Excel`,
-      });
     } catch (error) {
       toast({
         title: "Errore durante l'export",

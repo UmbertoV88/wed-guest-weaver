@@ -390,11 +390,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
     const remaining = (selectedVendor.default_cost || 0) - (selectedVendor.amount_paid || 0);
     if (amount > remaining) {
-      toast({
-        title: 'Attenzione',
-        description: `L'importo supera il rimanente da pagare (${formatCurrency(remaining)})`,
-        variant: 'destructive'
-      });
       return;
     }
 
