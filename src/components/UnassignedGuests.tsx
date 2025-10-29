@@ -96,13 +96,17 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             {guestList.map((guest) => (
               <div
                 key={guest.id}
-                className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors w-full ${
-                  guest.gruppo === 'family-his'
-                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
-                    : guest.gruppo === 'family-hers'
-                    ? 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800'
-                    : 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
-                }`}
+              className={`flex items-center space-x-3 p-2 rounded-lg border transition-colors w-full ${
+                guest.gruppo === 'family-his'
+                  ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
+                  : guest.gruppo === 'family-hers'
+                  ? 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800'
+                  : guest.gruppo === 'friends'
+                  ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+                  : guest.gruppo === 'colleagues'
+                  ? 'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700'
+                  : 'bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:border-gray-800'
+              }`}
               >
                 <Checkbox
                   checked={selectedGuests.includes(guest.id)}
@@ -173,6 +177,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
               <SelectItem value="family-his">Famiglia di lui</SelectItem>
               <SelectItem value="family-hers">Famiglia di lei</SelectItem>
               <SelectItem value="friends">Amici</SelectItem>
+              <SelectItem value="colleagues">Colleghi</SelectItem>
             </SelectContent>
           </Select>
         </div>

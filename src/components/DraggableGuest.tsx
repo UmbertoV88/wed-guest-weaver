@@ -45,11 +45,15 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
         className={`
           cursor-move transition-all duration-200 hover:shadow-md
           ${isDragging ? 'opacity-50 transform rotate-2' : ''}
-          ${guest.gruppo === 'family-his' ? 
-            'ring-1 ring-blue-500/30 bg-blue-50 dark:bg-blue-950/20' : 
-            guest.gruppo === 'family-hers' ? 
-            'ring-1 ring-purple-500/30 bg-purple-50 dark:bg-purple-950/20' :
-            'ring-1 ring-green-500/30 bg-green-50 dark:bg-green-950/20'}
+        ${guest.gruppo === 'family-his' ? 
+          'ring-1 ring-blue-500/30 bg-blue-50 dark:bg-blue-950/20' : 
+          guest.gruppo === 'family-hers' ? 
+          'ring-1 ring-purple-500/30 bg-purple-50 dark:bg-purple-950/20' :
+          guest.gruppo === 'friends' ?
+          'ring-1 ring-green-500/30 bg-green-50 dark:bg-green-950/20' :
+          guest.gruppo === 'colleagues' ?
+          'ring-1 ring-emerald-600/40 bg-emerald-100 dark:bg-emerald-900/30' :
+          'ring-1 ring-gray-500/30 bg-gray-50 dark:bg-gray-950/20'}
         `}
       >
 
