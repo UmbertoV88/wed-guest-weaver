@@ -59,6 +59,31 @@ export interface BudgetVendor {
   updated_at: string;
 }
 
+export interface PaymentReminder {
+  id: string;
+  user_id: string;
+  vendor_id: string;
+  reminder_type: 'auto_7_days' | 'auto_due_date' | 'custom';
+  scheduled_date: string;
+  status: 'pending' | 'sent' | 'failed' | 'cancelled';
+  notify_email: boolean;
+  notify_in_app: boolean;
+  sent_at?: string;
+  read_at?: string;
+  error_message?: string;
+  custom_message?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateReminderData {
+  vendor_id: string;
+  scheduled_date: string;
+  custom_message?: string;
+  notify_email?: boolean;
+  notify_in_app?: boolean;
+}
+
 // =====================================================
 // COMPUTED TYPES (per il frontend)
 // =====================================================

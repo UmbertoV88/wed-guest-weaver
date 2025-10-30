@@ -15,6 +15,7 @@ import BudgetOverview from '@/components/budget/BudgetOverview';
 import CategoryManager from '@/components/budget/CategoryManager';
 import VendorManager from '@/components/budget/VendorManager';
 import PaymentTracker from '@/components/budget/PaymentTracker';
+import { ReminderNotifications } from '@/components/budget/ReminderNotifications';
 const FinanceLayout = () => {
   const {
     user,
@@ -276,6 +277,7 @@ const FinanceLayout = () => {
   };
   return <div className="flex min-h-screen w-full">
       <DashboardSidebar user={user} profile={profile} isWeddingOrganizer={true} onSignOut={signOut} signingOut={authLoading} />
+      <ReminderNotifications />
       
       <SidebarInset className="flex-1 flex flex-col">
         <CommonHeader showSidebarTrigger={true} />

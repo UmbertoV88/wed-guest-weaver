@@ -254,6 +254,65 @@ export type Database = {
           },
         ]
       }
+      payment_reminders: {
+        Row: {
+          created_at: string | null
+          custom_message: string | null
+          error_message: string | null
+          id: string
+          notify_email: boolean | null
+          notify_in_app: boolean | null
+          read_at: string | null
+          reminder_type: string
+          scheduled_date: string
+          sent_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_message?: string | null
+          error_message?: string | null
+          id?: string
+          notify_email?: boolean | null
+          notify_in_app?: boolean | null
+          read_at?: string | null
+          reminder_type: string
+          scheduled_date: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_message?: string | null
+          error_message?: string | null
+          id?: string
+          notify_email?: boolean | null
+          notify_in_app?: boolean | null
+          read_at?: string | null
+          reminder_type?: string
+          scheduled_date?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "budget_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       piani_salvati: {
         Row: {
           created_at: string | null

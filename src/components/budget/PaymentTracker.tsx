@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar, Euro, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ReminderDialog } from "./ReminderDialog";
 
 // Mock payments data dal Budget-calculator
 const mockUpcomingPayments = [
@@ -40,6 +41,8 @@ interface PaymentTrackerProps {
 
 const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsPaid }) => {
   const [paymentFilter, setPaymentFilter] = useState<"tutti" | "pagati" | "da_pagare" | "scaduti" | "urgenti">("tutti");
+  const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
+  const [selectedVendorForReminder, setSelectedVendorForReminder] = useState<any>(null);
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
@@ -139,7 +142,11 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
   };
 
   const handleSetReminder = (payment: any) => {
-    // Reminder logic removed - silent success
+    const vendor = vendors.find((v) => v.id === payment.id);
+    if (vendor) {
+      setSelectedVendorForReminder(vendor);
+      setReminderDialogOpen(true);
+    }
   };
 
   // Calcoli basati sui fornitori reali
@@ -225,6 +232,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
   });
 
   return (
+    <>
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Pagamenti in Scadenza</h2>
@@ -430,6 +438,19 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
         </CardContent>
       </Card>
     </div>
+
+    <ReminderDialog
+      open={reminderDialogOpen}
+      onOpenChange={setReminderDialogOpen}
+      vendor={selectedVendorForReminder}
+      onReminderCreated={() => {
+        toast({
+          title: "✅ Promemoria Impostato",
+          description: "Riceverai una notifica alla data selezionata"
+        });
+      }}
+    />
+    </>
   );
 };
 
