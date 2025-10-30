@@ -127,7 +127,7 @@ serve(async (req: Request): Promise<Response> => {
           `;
 
           // IMPORTANTE: Sostituisci con la tua email verificata in MailerSend
-          const sentFrom = new Sender("your-verified-email@your-domain.com", "Wedding Planner");
+          const sentFrom = new Sender("test-3m5jgro107xgdpyo.mlsender.net", "Wedding Planner");
           const recipients = [new Recipient(userEmail, userName)];
 
           const emailParams = new EmailParams()
