@@ -277,7 +277,6 @@ const FinanceLayout = () => {
   };
   return <div className="flex min-h-screen w-full">
       <DashboardSidebar user={user} profile={profile} isWeddingOrganizer={true} onSignOut={signOut} signingOut={authLoading} />
-      <ReminderNotifications />
       
       <SidebarInset className="flex-1 flex flex-col">
         <CommonHeader showSidebarTrigger={true} />
@@ -285,6 +284,8 @@ const FinanceLayout = () => {
         <main className="flex-1 overflow-auto">
           <BudgetCalculator />
         </main>
+        
+        <ReminderNotifications />
       </SidebarInset>
     </div>;
 };
