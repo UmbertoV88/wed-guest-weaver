@@ -43,6 +43,9 @@ export const reminderApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
+      // Cancella promemoria custom precedenti per questo vendor
+      await this.cancelPreviousCustomReminders(data.vendor_id);
+
       const { data: result, error } = await supabase
         .from('payment_reminders')
         .insert({
@@ -111,6 +114,24 @@ export const reminderApi = {
       return true;
     } catch (error) {
       console.error('Error cancelling auto reminders:', error);
+      return false;
+    }
+  },
+
+  // Cancella tutti i promemoria custom precedenti per un vendor
+  async cancelPreviousCustomReminders(vendorId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('payment_reminders')
+        .update({ status: 'cancelled' })
+        .eq('vendor_id', vendorId)
+        .eq('reminder_type', 'custom')
+        .in('status', ['pending', 'sent']);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error cancelling previous custom reminders:', error);
       return false;
     }
   }
