@@ -123,7 +123,7 @@ export const reminderApi = {
     try {
       const { error } = await supabase
         .from('payment_reminders')
-        .update({ status: 'cancelled' })
+        .delete()
         .eq('vendor_id', vendorId)
         .eq('reminder_type', 'custom')
         .in('status', ['pending', 'sent']);
@@ -131,7 +131,7 @@ export const reminderApi = {
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error('Error cancelling previous custom reminders:', error);
+      console.error('Error deleting previous custom reminders:', error);
       return false;
     }
   }
