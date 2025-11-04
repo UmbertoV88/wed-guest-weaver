@@ -126,9 +126,19 @@ serve(async (req: Request): Promise<Response> => {
             </div>
           `;
 
-          // IMPORTANTE: Sostituisci con la tua email verificata in MailerSend
-          const sentFrom = new Sender("test-3m5jgro107xgdpyo.mlsender.net", "Wedding Planner");
-          const recipients = [new Recipient(userEmail, userName)];
+          // Usa l'email configurata come mittente
+          const fromEmail = Deno.env.get("MAILERSEND_FROM_EMAIL") || "noreply@weddingplanner.app";
+          const sentFrom = new Sender(fromEmail, "Wedding Planner");
+
+          // Per il trial, invia solo all'email admin se configurata (per test)
+          const testMode = Deno.env.get("MAILERSEND_ADMIN_EMAIL");
+          const finalEmail = testMode || userEmail;
+          const recipients = [new Recipient(finalEmail, userName)];
+
+          // Log per debug
+          console.log(`[REMINDER ${reminder.id}] Email configuration:`);
+          console.log(`  - From: ${fromEmail}`);
+          console.log(`  - To: ${finalEmail} (original: ${userEmail}, test mode: ${!!testMode})`);
 
           const emailParams = new EmailParams()
             .setFrom(sentFrom)
