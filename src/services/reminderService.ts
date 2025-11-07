@@ -54,8 +54,8 @@ export const reminderApi = {
           reminder_type: 'custom',
           scheduled_date: data.scheduled_date,
           custom_message: data.custom_message,
-          notify_email: data.notify_email ?? true,
-          notify_in_app: data.notify_in_app ?? true,
+          notify_email: false,  // Email disabilitate
+          notify_in_app: true,  // Solo notifiche in-app
         })
         .select()
         .single();
