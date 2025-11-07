@@ -28,8 +28,6 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
   const { toast } = useToast();
   const [date, setDate] = useState<Date>();
   const [customMessage, setCustomMessage] = useState("");
-  const [notifyEmail, setNotifyEmail] = useState(true);
-  const [notifyInApp, setNotifyInApp] = useState(true);
   const [cancelAutoReminders, setCancelAutoReminders] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -51,13 +49,13 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
         await reminderApi.cancelAutoReminders(vendor.id);
       }
 
-      // Crea il promemoria personalizzato
+      // Crea il promemoria personalizzato (solo in-app)
       const result = await reminderApi.create({
         vendor_id: vendor.id,
         scheduled_date: format(date, 'yyyy-MM-dd'),
         custom_message: customMessage,
-        notify_email: notifyEmail,
-        notify_in_app: notifyInApp
+        notify_email: false,
+        notify_in_app: true
       });
 
       if (result) {
@@ -71,8 +69,6 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
         // Reset form
         setDate(undefined);
         setCustomMessage("");
-        setNotifyEmail(true);
-        setNotifyInApp(true);
         setCancelAutoReminders(false);
       } else {
         throw new Error('Errore nella creazione del promemoria');
@@ -125,26 +121,6 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
               onChange={(e) => setCustomMessage(e.target.value)}
               rows={3}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Metodo di Notifica</Label>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="email"
-                checked={notifyEmail}
-                onCheckedChange={(checked) => setNotifyEmail(checked as boolean)}
-              />
-              <label htmlFor="email" className="text-sm">Invia Email</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="inapp"
-                checked={notifyInApp}
-                onCheckedChange={(checked) => setNotifyInApp(checked as boolean)}
-              />
-              <label htmlFor="inapp" className="text-sm">Notifica In-App</label>
-            </div>
           </div>
 
           {vendor?.payment_due_date && (
