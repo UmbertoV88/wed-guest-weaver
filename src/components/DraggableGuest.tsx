@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Crown, Users, UserPlus, AlertTriangle } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
-import { CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
+import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface DraggableGuestProps {
@@ -79,13 +79,13 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                   <>
                     <Users className="h-3 w-3 text-muted-foreground" />
                     <Badge variant="outline" className="text-xs">
-                      {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
+                      {CATEGORY_ICONS[guest.gruppo as keyof typeof CATEGORY_ICONS] || guest.gruppo}
                     </Badge>
                   </>
                 )}
                 {guest.fascia_eta && (
                   <Badge variant="secondary" className="text-xs">
-                    {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
+                    {AGE_GROUP_ICONS[guest.fascia_eta as keyof typeof AGE_GROUP_ICONS] || guest.fascia_eta}
                   </Badge>
                 )}
               </div>

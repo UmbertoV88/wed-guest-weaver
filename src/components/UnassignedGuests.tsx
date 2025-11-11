@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, AlertCircle, UserPlus, AlertTriangle, Crown } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
-import { CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
+import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 
 interface Table {
   id: number;
@@ -127,12 +127,12 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                   <div className="flex flex-wrap items-center gap-1 mt-1">
                     {guest.gruppo && (
                       <Badge variant="outline" className="text-xs">
-                        {CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo}
+                        {CATEGORY_ICONS[guest.gruppo as keyof typeof CATEGORY_ICONS] || guest.gruppo}
                       </Badge>
                     )}
                     {guest.fascia_eta && (
                       <Badge variant="secondary" className="text-xs">
-                        {AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta}
+                        {AGE_GROUP_ICONS[guest.fascia_eta as keyof typeof AGE_GROUP_ICONS] || guest.fascia_eta}
                       </Badge>
                     )}
                   </div>

@@ -75,3 +75,17 @@ export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
   "Ragazzo": "Ragazzo",
   "Bambino": "Bambino"
 };
+
+// Emoji per badge compatti nelle card ospiti (solo sezione Tavoli e Non Assegnati)
+export const CATEGORY_ICONS: Record<GuestCategory, string> = {
+  "family-his": "🤵🏻",
+  "family-hers": "👰🏻‍♀️",
+  "friends": "🤝🏻",
+  "colleagues": "💼"
+};
+
+export const AGE_GROUP_ICONS: Record<AgeGroup, string> = {
+  "Adulto": "👨🏻‍🦳",
+  "Ragazzo": "👦🏻",
+  "Bambino": "🍼"
+};
