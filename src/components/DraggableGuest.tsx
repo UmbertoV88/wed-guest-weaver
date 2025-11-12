@@ -161,6 +161,11 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
             }
           })()}
         </CardContent>
+        console.log('gruppo:', guest.gruppo);
+        console.log('CATEGORY_LABELS:', CATEGORY_LABELS[guest.gruppo]);
+        console.log('age group:', guest.fascia_eta);
+        console.log('AGE_GROUP_LABELS:', AGE_GROUP_LABELS[guest.fascia_eta]);
+
       </Card>
       
       <ConfirmDialog
