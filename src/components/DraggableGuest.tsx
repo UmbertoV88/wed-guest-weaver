@@ -87,6 +87,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
+                        {console.log("guest:", guest)}
                         <p>{CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo || 'N/A'}</p>
                       </TooltipContent>
                     </Tooltip>
