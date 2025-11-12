@@ -87,9 +87,8 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
-  <p>Famiglia di lui</p>  {/* ← Label fissa */}
-</TooltipContent>
-
+                        <p>{CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo || 'N/A'}</p>
+                      </TooltipContent>
                     </Tooltip>
                   </>
                 )}
@@ -101,9 +100,8 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>
-  <p>Famiglia di lei</p>  {/* ← Label fissa */}
-</TooltipContent>
-
+                      <p>{AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta || 'N/A'}</p>
+                    </TooltipContent>
                   </Tooltip>
                 )}
               </div>
