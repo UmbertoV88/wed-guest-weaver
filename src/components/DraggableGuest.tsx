@@ -90,7 +90,7 @@ console.log('gruppo:', guest.gruppo);
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo || 'N/A'}</p>
+                        <p>Testo fisso tooltip</p>
                       </TooltipContent>
                     </Tooltip>
                   </>
