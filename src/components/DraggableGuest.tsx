@@ -38,10 +38,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
   const handleConfirmRemove = () => {
     onMoveGuest(guest.id);
   };
-console.log('gruppo:', guest.gruppo);
-        console.log('CATEGORY_LABELS:', CATEGORY_LABELS[guest.gruppo]);
-        console.log('age group:', guest.fascia_eta);
-        console.log('AGE_GROUP_LABELS:', AGE_GROUP_LABELS[guest.fascia_eta]);
+
   return (
     <TooltipProvider>
       <>
@@ -90,7 +87,7 @@ console.log('gruppo:', guest.gruppo);
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Testo fisso tooltip</p>
+                        <p>{CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo || 'N/A'}</p>
                       </TooltipContent>
                     </Tooltip>
                   </>
