@@ -9,6 +9,17 @@ import { SeatingGuest } from "@/hooks/useSeating";
 import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+// Helper functions per tooltip labels
+const getCategoryLabel = (gruppo: string | null): string => {
+  if (!gruppo) return 'N/A';
+  return CATEGORY_LABELS[gruppo as keyof typeof CATEGORY_LABELS] || gruppo || 'Categoria sconosciuta';
+};
+
+const getAgeGroupLabel = (fasciaEta: string | null): string => {
+  if (!fasciaEta) return 'N/A';
+  return AGE_GROUP_LABELS[fasciaEta as keyof typeof AGE_GROUP_LABELS] || fasciaEta || 'Età sconosciuta';
+};
+
 interface Table {
   id: number;
   nome_tavolo: string;
@@ -134,7 +145,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                           </Badge>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{CATEGORY_LABELS[guest.gruppo as keyof typeof CATEGORY_LABELS] || guest.gruppo || 'N/A'}</p>
+                          {getCategoryLabel(guest.gruppo)}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -146,7 +157,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                           </Badge>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{AGE_GROUP_LABELS[guest.fascia_eta as keyof typeof AGE_GROUP_LABELS] || guest.fascia_eta || 'N/A'}</p>
+                          {getAgeGroupLabel(guest.fascia_eta)}
                         </TooltipContent>
                       </Tooltip>
                     )}
