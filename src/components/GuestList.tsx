@@ -13,7 +13,7 @@ import {
   Filter
 } from "lucide-react";
 import EditGuestForm from "@/components/EditGuestForm";
-import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS, AgeGroup } from "@/types/guest";
+import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS, AgeGroup, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -308,12 +308,12 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                     
                     {/* Seconda riga: Badges */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {CATEGORY_LABELS[guest.category]}
+                      <Badge variant="outline" className="text-xs">
+                        {CATEGORY_ICONS[guest.category as keyof typeof CATEGORY_ICONS] || guest.category}
                       </Badge>
                       {guest.ageGroup && (
-                        <Badge variant="outline" className="text-xs">
-                          {AGE_GROUP_LABELS[guest.ageGroup]}
+                        <Badge variant="secondary" className="text-xs">
+                          {AGE_GROUP_ICONS[guest.ageGroup as keyof typeof AGE_GROUP_ICONS] || guest.ageGroup}
                         </Badge>
                       )}
                     </div>
@@ -333,8 +333,8 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 <span className="text-sm font-medium break-words">{companion.name}</span>
                                 <div className="flex flex-wrap items-center gap-2">
                                   {companion.ageGroup && (
-                                    <Badge variant="outline" className="text-xs">
-                                      {AGE_GROUP_LABELS[companion.ageGroup]}
+                                    <Badge variant="secondary" className="text-xs">
+                                      {AGE_GROUP_ICONS[companion.ageGroup as keyof typeof AGE_GROUP_ICONS] || companion.ageGroup}
                                     </Badge>
                                   )}
                                   <Badge 
