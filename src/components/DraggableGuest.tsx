@@ -7,18 +7,6 @@ import { X, Crown, Users, UserPlus, AlertTriangle } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
 import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-// Helper functions per tooltip labels
-const getCategoryLabel = (gruppo: string | null): string => {
-  if (!gruppo) return 'N/A';
-  return CATEGORY_LABELS[gruppo as keyof typeof CATEGORY_LABELS] || gruppo || 'Categoria sconosciuta';
-};
-
-const getAgeGroupLabel = (fasciaEta: string | null): string => {
-  if (!fasciaEta) return 'N/A';
-  return AGE_GROUP_LABELS[fasciaEta as keyof typeof AGE_GROUP_LABELS] || fasciaEta || 'Età sconosciuta';
-};
 
 interface DraggableGuestProps {
   guest: SeatingGuest;
@@ -51,9 +39,8 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
   };
 
   return (
-    <TooltipProvider>
-      <>
-        <Card
+    <>
+      <Card
         ref={drag}
         className={`
           cursor-move transition-all duration-200 hover:shadow-md
@@ -91,29 +78,15 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                 {guest.gruppo && (
                   <>
                     <Users className="h-3 w-3 text-muted-foreground" />
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge variant="outline" className="text-xs cursor-help">
-                          {CATEGORY_ICONS[guest.gruppo as keyof typeof CATEGORY_ICONS] || guest.gruppo}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {getCategoryLabel(guest.gruppo)}
-                      </TooltipContent>
-                    </Tooltip>
+                    <Badge variant="outline" className="text-xs">
+                      {CATEGORY_ICONS[guest.gruppo as keyof typeof CATEGORY_ICONS] || guest.gruppo}
+                    </Badge>
                   </>
                 )}
                 {guest.fascia_eta && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant="secondary" className="text-xs cursor-help">
-                        {AGE_GROUP_ICONS[guest.fascia_eta as keyof typeof AGE_GROUP_ICONS] || guest.fascia_eta}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {getAgeGroupLabel(guest.fascia_eta)}
-                    </TooltipContent>
-                  </Tooltip>
+                  <Badge variant="secondary" className="text-xs">
+                    {AGE_GROUP_ICONS[guest.fascia_eta as keyof typeof AGE_GROUP_ICONS] || guest.fascia_eta}
+                  </Badge>
                 )}
               </div>
               
@@ -184,8 +157,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
         onConfirm={handleConfirmRemove}
         variant="destructive"
       />
-      </>
-    </TooltipProvider>
+    </>
   );
 };
 

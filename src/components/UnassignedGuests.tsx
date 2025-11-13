@@ -7,18 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, AlertCircle, UserPlus, AlertTriangle, Crown } from "lucide-react";
 import { SeatingGuest } from "@/hooks/useSeating";
 import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-// Helper functions per tooltip labels
-const getCategoryLabel = (gruppo: string | null): string => {
-  if (!gruppo) return 'N/A';
-  return CATEGORY_LABELS[gruppo as keyof typeof CATEGORY_LABELS] || gruppo || 'Categoria sconosciuta';
-};
-
-const getAgeGroupLabel = (fasciaEta: string | null): string => {
-  if (!fasciaEta) return 'N/A';
-  return AGE_GROUP_LABELS[fasciaEta as keyof typeof AGE_GROUP_LABELS] || fasciaEta || 'Età sconosciuta';
-};
 
 interface Table {
   id: number;
@@ -138,28 +126,14 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                   </div>
                   <div className="flex flex-wrap items-center gap-1 mt-1">
                     {guest.gruppo && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="outline" className="text-xs cursor-help">
-                            {CATEGORY_ICONS[guest.gruppo as keyof typeof CATEGORY_ICONS] || guest.gruppo}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {getCategoryLabel(guest.gruppo)}
-                        </TooltipContent>
-                      </Tooltip>
+                      <Badge variant="outline" className="text-xs">
+                        {CATEGORY_ICONS[guest.gruppo as keyof typeof CATEGORY_ICONS] || guest.gruppo}
+                      </Badge>
                     )}
                     {guest.fascia_eta && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="secondary" className="text-xs cursor-help">
-                            {AGE_GROUP_ICONS[guest.fascia_eta as keyof typeof AGE_GROUP_ICONS] || guest.fascia_eta}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {getAgeGroupLabel(guest.fascia_eta)}
-                        </TooltipContent>
-                      </Tooltip>
+                      <Badge variant="secondary" className="text-xs">
+                        {AGE_GROUP_ICONS[guest.fascia_eta as keyof typeof AGE_GROUP_ICONS] || guest.fascia_eta}
+                      </Badge>
                     )}
                   </div>
                   {guest.allergies && (
@@ -178,8 +152,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
   };
 
   return (
-    <TooltipProvider>
-      <Card className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-orange-200 dark:border-orange-800">
+    <Card className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-orange-200 dark:border-orange-800">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -281,7 +254,6 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
         )}
       </CardContent>
     </Card>
-    </TooltipProvider>
   );
 };
 
