@@ -38,6 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 //import { useBudget } from '@/hooks/useBudget';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
+import { bombonieraApi } from '@/services/budgetService';
 
 interface VendorManagerProps {
   categories: any[];
@@ -85,6 +86,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     payment_due_date: undefined as Date | undefined
   });
   const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
+  const [bombonieraCount, setBombonieraCount] = useState(0);
 
   const { toast } = useToast();
 
@@ -109,6 +111,24 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       }, 100);
     }
   }, [editingVendor]);
+
+  // Effect per caricare il conteggio bomboniere
+  useEffect(() => {
+    const loadBombonieraCount = async () => {
+      try {
+        const count = await bombonieraApi.getAssignedCount();
+        setBombonieraCount(count);
+      } catch (error) {
+        console.error('Errore caricamento bomboniere:', error);
+      }
+    };
+    
+    loadBombonieraCount();
+    
+    // Aggiorna ogni 10 secondi
+    const interval = setInterval(loadBombonieraCount, 10000);
+    return () => clearInterval(interval);
+  }, [vendors]);
 
   // Normalizza URL aggiungendo https:// se manca il protocollo
   const normalizeUrl = (url: string): string => {
@@ -946,6 +966,45 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                         <p className="text-xs text-muted-foreground text-right">
                           {payments.percentage.toFixed(0)}% completato
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Widget Bomboniere - SOLO per fornitori categoria Bomboniere */}
+                  {vendor.category_id === bombonieraCategory?.id && 
+                   vendor.default_cost && 
+                   bombonieraCount > 0 && (
+                    <div className="mt-3 p-3 bg-pink-50 rounded-lg border border-pink-200 space-y-2">
+                      {/* Numero bomboniere */}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-gray-700">🎁 Bomboniere:</span>
+                        <span className="font-bold text-gray-900">{bombonieraCount}</span>
+                      </div>
+                      
+                      {/* Costo unitario */}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Costo unitario:</span>
+                        <span className="font-medium text-gray-900">
+                          {formatCurrency(vendor.default_cost)}
+                        </span>
+                      </div>
+                      
+                      {/* Divisore */}
+                      <div className="h-px bg-pink-300" />
+                      
+                      {/* Totale calcolato */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-gray-700">
+                          Totale calcolato:
+                        </span>
+                        <span className="text-lg font-bold text-pink-600">
+                          {formatCurrency(Number(vendor.default_cost) * bombonieraCount)}
+                        </span>
+                      </div>
+                      
+                      {/* Formula */}
+                      <div className="text-xs text-gray-500 text-center">
+                        {bombonieraCount} × {formatCurrency(vendor.default_cost)}
                       </div>
                     </div>
                   )}

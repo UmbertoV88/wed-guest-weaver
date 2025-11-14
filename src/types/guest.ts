@@ -13,6 +13,7 @@ export interface Guest {
   unitId?: string; // Reference to original invitation unit
   containsPrimary?: boolean; // True if this card contains the main guest
   ageGroup?: AgeGroup;
+  bombonieraAssegnata?: boolean;
 }
 
 export interface Companion {
@@ -21,6 +22,7 @@ export interface Companion {
   allergies?: string;
   status: GuestStatus;
   ageGroup?: AgeGroup;
+  bombonieraAssegnata?: boolean;
 }
 
 export type GuestCategory = 

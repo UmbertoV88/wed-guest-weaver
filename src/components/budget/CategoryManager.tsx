@@ -31,7 +31,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import AddVendorDialog from "./AddVendorDialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { budgetCategoriesApi } from "@/services/budgetService";
+import { budgetCategoriesApi, bombonieraApi } from "@/services/budgetService";
 
 // Icon mapping
 const ICON_OPTIONS = {
@@ -123,6 +123,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     color: "#E91E63",
     icon: "Package",
   });
+  const [bombonieraCount, setBombonieraCount] = useState(0);
 
   const { toast } = useToast();
 
@@ -136,6 +137,25 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       }, 100);
     }
   }, [showAddForm]);
+
+  // Effect per caricare il conteggio bomboniere
+  useEffect(() => {
+    const loadBombonieraCount = async () => {
+      try {
+        const count = await bombonieraApi.getAssignedCount();
+        setBombonieraCount(count);
+      } catch (error) {
+        console.error('Errore caricamento conteggio bomboniere:', error);
+      }
+    };
+    
+    // Carica subito
+    loadBombonieraCount();
+    
+    // Aggiorna ogni 10 secondi
+    const interval = setInterval(loadBombonieraCount, 10000);
+    return () => clearInterval(interval);
+  }, [categories]);
 
   const handleAddExpenseClick = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
@@ -359,7 +379,16 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                       <IconComponent className="w-5 h-5" style={{ color: category.color }} />
                     </div>
                     <div className="text-left">
-                      <h3 className="font-semibold text-base">{category.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-base">{category.name}</h3>
+                        
+                        {/* Badge Bomboniere - SOLO se categoria è "Bomboniere" */}
+                        {category.name.toLowerCase().includes('bomboniere') && bombonieraCount > 0 && (
+                          <Badge variant="secondary" className="bg-pink-100 text-pink-700 border-pink-300">
+                            🎁 {bombonieraCount} Bomboniere
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">{categoryPercentage}% del budget</p>
                     </div>
                   </div>

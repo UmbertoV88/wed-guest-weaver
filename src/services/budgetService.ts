@@ -600,3 +600,33 @@ export const budgetUtils = {
     return colors[Math.floor(Math.random() * colors.length)];
   }
 };
+
+// ==========================================
+// BOMBONIERE API
+// ==========================================
+
+export const bombonieraApi = {
+  /**
+   * Conta il numero di bomboniere assegnate (checkbox selezionate)
+   * @returns Numero di ospiti confermati con bomboniera_assegnata = true
+   */
+  async getAssignedCount(): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from('invitati')
+        .select('*', { count: 'exact', head: true })
+        .eq('bomboniera_assegnata', true)
+        .eq('confermato', true);
+
+      if (error) {
+        console.error('Errore conteggio bomboniere:', error);
+        throw error;
+      }
+      
+      return count || 0;
+    } catch (error) {
+      console.error('Errore bombonieraApi.getAssignedCount:', error);
+      return 0;
+    }
+  }
+};
