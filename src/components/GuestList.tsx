@@ -16,6 +16,8 @@ import EditGuestForm from "@/components/EditGuestForm";
 import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS, AgeGroup, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface GuestListProps {
   guests: Guest[];
@@ -36,9 +38,10 @@ interface GuestListProps {
   deleteCompanion: (guestId: string, companionId: string) => Promise<any>;
   restoreCompanion: (guestId: string, companionId: string) => Promise<any>;
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
+  toggleBomboniera?: (invitatiId: string, checked: boolean) => Promise<any>;
 }
 
-const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestListProps) => {
+const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion, toggleBomboniera }: GuestListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -317,6 +320,25 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                         </Badge>
                       )}
                     </div>
+                    
+                    {/* Checkbox Bomboniera - SOLO per ospiti confermati */}
+                    {guest.status === 'confirmed' && toggleBomboniera && (
+                      <div className="flex items-center gap-2 mt-2 p-2 bg-pink-50 rounded-md border border-pink-200">
+                        <Checkbox
+                          id={`bomboniera-${guest.id}`}
+                          checked={guest.bombonieraAssegnata || false}
+                          onCheckedChange={(checked) => {
+                            toggleBomboniera(guest.id, checked as boolean);
+                          }}
+                        />
+                        <Label 
+                          htmlFor={`bomboniera-${guest.id}`}
+                          className="text-sm font-medium cursor-pointer flex items-center gap-1"
+                        >
+                          🎁 Bomboniera
+                        </Label>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-2 text-sm">
@@ -328,116 +350,53 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                         </div>
                         <div className="pl-3 sm:pl-5 space-y-3">
                           {guest.companions.map(companion => (
-                            <div key={companion.id} className="flex items-start justify-between gap-2">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0 flex-1">
-                                <span className="text-sm font-medium break-words">{companion.name}</span>
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {companion.ageGroup && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {AGE_GROUP_ICONS[companion.ageGroup as keyof typeof AGE_GROUP_ICONS] || companion.ageGroup}
+                            <div key={companion.id} className="space-y-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0 flex-1">
+                                  <span className="text-sm font-medium break-words">{companion.name}</span>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    {companion.ageGroup && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {AGE_GROUP_ICONS[companion.ageGroup as keyof typeof AGE_GROUP_ICONS] || companion.ageGroup}
+                                      </Badge>
+                                    )}
+                                    <Badge 
+                                      variant={
+                                        companion.status === 'confirmed' ? 'default' : 
+                                        companion.status === 'pending' ? 'secondary' : 
+                                        'destructive'
+                                      }
+                                      className="text-xs"
+                                    >
+                                      {companion.status === 'confirmed' ? 'Confermato' : 
+                                       companion.status === 'pending' ? 'Da confermare' : 
+                                       'Eliminato'}
                                     </Badge>
-                                  )}
-                                  <Badge 
-                                    variant={
-                                      companion.status === 'confirmed' ? 'default' : 
-                                      companion.status === 'pending' ? 'secondary' : 
-                                      'destructive'
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {companion.status === 'confirmed' ? 'Confermato' : 
-                                     companion.status === 'pending' ? 'Da confermare' : 
-                                     'Eliminato'}
-                                  </Badge>
+                                  </div>
                                 </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+...
+                                 </div>
                               </div>
-                              <div className="flex items-center gap-1 flex-shrink-0">
-                                  {/* Show companion actions regardless of main guest status if companion is pending */}
-                                  {companion.status === 'pending' && (
-                                    <>
-                                      <Button
-                                        onClick={() => confirmCompanion(guest.id, companion.id)}
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs bg-success/10 hover:bg-success/20 text-success"
-                                        disabled={companionLoading === companion.id}
-                                      >
-                                        <UserCheck className="w-4 h-4" />
-                                        <span className="hidden sm:inline sm:ml-1">Conferma</span>
-                                      </Button>
-                                      <Button
-                                        onClick={() => deleteCompanion(guest.id, companion.id)}
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
-                                        disabled={companionLoading === companion.id}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
-                                      </Button>
-                                    </>
-                                  )}
-                                  {/* Show delete for confirmed companions */}
-                                  {companion.status === 'confirmed' && (
-                                    <>
-                                      <Button
-                                        onClick={() => {
-                                          // Change companion status to pending
-                                          updateCompanionStatus(guest.id, companion.id, 'pending');
-                                        }}
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
-                                        disabled={companionLoading === companion.id}
-                                      >
-                                        <RotateCcw className="w-4 h-4" />
-                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
-                                      </Button>
-                                      <Button
-                                        onClick={() => deleteCompanion(guest.id, companion.id)}
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
-                                        disabled={companionLoading === companion.id}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
-                                      </Button>
-                                    </>
-                                  )}
-                                  {/* Show restore for deleted companions */}
-                                  {type === "deleted" && companion.status === 'deleted' && (
-                                    <>
-                                      <Button
-                                        onClick={() => restoreCompanion(guest.id, companion.id)}
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-primary hover:bg-primary/10"
-                                        disabled={companionLoading === companion.id}
-                                      >
-                                        <RotateCcw className="w-4 h-4" />
-                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
-                                      </Button>
-                                       <Button
-                                         onClick={() => {
-                                           setDeleteDialog({
-                                             open: true,
-                                             title: "Elimina definitivamente accompagnatore",
-                                             description: `Eliminare definitivamente ${companion.name}?`,
-                                             onConfirm: () => permanentlyDeleteCompanion(guest.id, companion.id)
-                                           });
-                                         }}
-                                         size="sm"
-                                         variant="ghost"
-                                         className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2 text-xs text-destructive hover:bg-destructive/10"
-                                         disabled={companionLoading === companion.id}
-                                       >
-                                         <Trash2 className="w-4 h-4" />
-                                         <span className="hidden sm:inline sm:ml-1">Elimina</span>
-                                       </Button>
-                                    </>
-                                  )}
-                               </div>
+                              
+                              {/* Checkbox bomboniera per accompagnatore confermato */}
+                              {companion.status === 'confirmed' && toggleBomboniera && (
+                                <div className="flex items-center gap-2 p-2 bg-pink-50 rounded-md border border-pink-200">
+                                  <Checkbox
+                                    id={`bomboniera-comp-${companion.id}`}
+                                    checked={companion.bombonieraAssegnata || false}
+                                    onCheckedChange={(checked) => {
+                                      toggleBomboniera(companion.id, checked as boolean);
+                                    }}
+                                  />
+                                  <Label 
+                                    htmlFor={`bomboniera-comp-${companion.id}`}
+                                    className="text-sm cursor-pointer"
+                                  >
+                                    🎁 Bomboniera
+                                  </Label>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>

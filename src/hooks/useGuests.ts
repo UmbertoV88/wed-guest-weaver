@@ -88,6 +88,7 @@ export const useGuests = () => {
               allergies: n.allergies || undefined,
               status: companionStatus,
               ageGroup: mapDbAgeGroupToAgeGroup(r.fascia_eta),
+              bombonieraAssegnata: r.bomboniera_assegnata || false,
               dbRow: r, // Keep reference to original data
             };
           });
@@ -128,12 +129,14 @@ export const useGuests = () => {
               allergies: primaryNote.allergies || undefined,
               containsPrimary: true,
               ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta),
+              bombonieraAssegnata: primary?.bomboniera_assegnata || false,
               companions: companionsWithSameStatus.map(comp => ({
                 id: comp.id,
                 name: comp.name,
                 allergies: comp.allergies,
                 status: comp.status,
                 ageGroup: comp.ageGroup,
+                bombonieraAssegnata: comp.bombonieraAssegnata,
               })),
             } as Guest);
           } else if (isForPrimary && companionsWithSameStatus.length === 0) {
@@ -144,6 +147,7 @@ export const useGuests = () => {
               allergies: primaryNote.allergies || undefined,
               containsPrimary: true,
               ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta),
+              bombonieraAssegnata: primary?.bomboniera_assegnata || false,
               companions: [],
             } as Guest);
           } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
@@ -159,6 +163,7 @@ export const useGuests = () => {
                 allergies: comp.allergies,
                 status: comp.status,
                 ageGroup: comp.ageGroup,
+                bombonieraAssegnata: comp.bombonieraAssegnata,
               })),
             } as Guest);
           }
@@ -721,6 +726,22 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
     };
   };
 
+  const toggleBomboniera = useCallback(async (invitatiId: string, checked: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('invitati')
+        .update({ bomboniera_assegnata: checked })
+        .eq('id', parseInt(invitatiId, 10));
+
+      if (error) throw error;
+
+      await loadGuests();
+    } catch (error) {
+      console.error('Errore toggle bomboniera:', error);
+      throw error;
+    }
+  }, [loadGuests]);
+
   return {
     guests,
     loading,
@@ -742,5 +763,6 @@ const addGuest = async (formData: GuestFormData): Promise<Guest> => {
     getGuestsByStatus,
     getStats,
     updateGuest,
+    toggleBomboniera,
   };
 };
