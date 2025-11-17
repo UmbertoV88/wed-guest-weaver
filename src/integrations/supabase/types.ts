@@ -203,6 +203,7 @@ export type Database = {
       }
       invitati: {
         Row: {
+          bomboniera_assegnata: boolean
           cognome: string | null
           confermato: boolean | null
           created_at: string | null
@@ -217,6 +218,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bomboniera_assegnata?: boolean
           cognome?: string | null
           confermato?: boolean | null
           created_at?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bomboniera_assegnata?: boolean
           cognome?: string | null
           confermato?: boolean | null
           created_at?: string | null

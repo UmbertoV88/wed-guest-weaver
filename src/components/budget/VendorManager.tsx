@@ -130,6 +130,11 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     return () => clearInterval(interval);
   }, [vendors]);
 
+  // Trova la categoria Bomboniere
+  const bombonieraCategory = categories.find(c => 
+    c.name.toLowerCase().includes('bomboniere')
+  );
+
   // Normalizza URL aggiungendo https:// se manca il protocollo
   const normalizeUrl = (url: string): string => {
     if (!url.trim()) return '';
