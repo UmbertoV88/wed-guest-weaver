@@ -322,13 +322,13 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                     </div>
                     
                     {/* Checkbox Bomboniera - SOLO per ospiti confermati */}
-                    {guest.status === 'confirmed' && toggleBomboniera && (
+                    {guest.status === 'confirmed' && toggleBomboniera && guest.containsPrimary && (
                       <div className="flex items-center gap-2 mt-2 p-2 bg-pink-50 rounded-md border border-pink-200">
                         <Checkbox
                           id={`bomboniera-${guest.id}`}
                           checked={guest.bombonieraAssegnata || false}
                           onCheckedChange={(checked) => {
-                            toggleBomboniera(guest.id, checked as boolean);
+                            toggleBomboniera(guest.primaryDbId || guest.id, checked as boolean);
                           }}
                         />
                         <Label 
@@ -375,8 +375,100 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 flex-shrink-0">
-...
-                                 </div>
+                                  {/* Bottoni azioni accompagnatore */}
+                                  {companion.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        onClick={() => {
+                                          confirmCompanion(guest.id, companion.id);
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-primary hover:bg-primary/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <UserCheck className="w-3 h-3" />
+                                        <span className="hidden sm:inline sm:ml-1">Conferma</span>
+                                      </Button>
+                                      <Button
+                                        onClick={() => {
+                                          deleteCompanion(guest.id, companion.id);
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-destructive hover:bg-destructive/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                                      </Button>
+                                    </>
+                                  )}
+                                  {companion.status === 'confirmed' && (
+                                    <>
+                                      <Button
+                                        onClick={() => {
+                                          updateCompanionStatus(guest.id, companion.id, 'pending');
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-primary hover:bg-primary/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <RotateCcw className="w-3 h-3" />
+                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
+                                      </Button>
+                                      <Button
+                                        onClick={() => {
+                                          deleteCompanion(guest.id, companion.id);
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-destructive hover:bg-destructive/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                                      </Button>
+                                    </>
+                                  )}
+                                  {companion.status === 'deleted' && type === 'deleted' && (
+                                    <>
+                                      <Button
+                                        onClick={() => {
+                                          restoreCompanion(guest.id, companion.id);
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-primary hover:bg-primary/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <RotateCcw className="w-3 h-3" />
+                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
+                                      </Button>
+                                      <Button
+                                        onClick={() => {
+                                          setDeleteDialog({
+                                            open: true,
+                                            title: "Eliminare definitivamente?",
+                                            description: `Sei sicuro di voler eliminare definitivamente ${companion.name}? Questa azione non può essere annullata.`,
+                                            onConfirm: () => {
+                                              permanentlyDeleteCompanion(guest.id, companion.id);
+                                              setDeleteDialog({ ...deleteDialog, open: false });
+                                            }
+                                          });
+                                        }}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-destructive hover:bg-destructive/10"
+                                        disabled={companionLoading === companion.id}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
                               </div>
                               
                               {/* Checkbox bomboniera per accompagnatore confermato */}

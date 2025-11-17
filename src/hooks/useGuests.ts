@@ -130,6 +130,7 @@ export const useGuests = () => {
               containsPrimary: true,
               ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta),
               bombonieraAssegnata: primary?.bomboniera_assegnata || false,
+              primaryDbId: String(primary.id),
               companions: companionsWithSameStatus.map(comp => ({
                 id: comp.id,
                 name: comp.name,
@@ -148,6 +149,7 @@ export const useGuests = () => {
               containsPrimary: true,
               ageGroup: mapDbAgeGroupToAgeGroup(primary?.fascia_eta),
               bombonieraAssegnata: primary?.bomboniera_assegnata || false,
+              primaryDbId: String(primary.id),
               companions: [],
             } as Guest);
           } else if (!isForPrimary && companionsWithSameStatus.length > 0) {
