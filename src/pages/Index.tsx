@@ -35,7 +35,8 @@ const DashboardLayout = () => {
     confirmCompanion, 
     deleteCompanion, 
     restoreCompanion, 
-    permanentlyDeleteCompanion 
+    permanentlyDeleteCompanion,
+    toggleBomboniera
   } = useGuests();
 
   const handleSignOut = async () => {
@@ -97,6 +98,7 @@ const DashboardLayout = () => {
                 deleteCompanion={deleteCompanion}
                 restoreCompanion={restoreCompanion}
                 permanentlyDeleteCompanion={permanentlyDeleteCompanion}
+                toggleBomboniera={toggleBomboniera}
               />
           </section>
 

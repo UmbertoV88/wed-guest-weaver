@@ -30,9 +30,10 @@ interface GuestTabsProps {
   deleteCompanion: (guestId: string, companionId: string) => Promise<void>;
   restoreCompanion: (guestId: string, companionId: string) => Promise<void>;
   permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<void>;
+  toggleBomboniera: (invitatiId: string, checked: boolean) => Promise<void>;
 }
 
-const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion }: GuestTabsProps) => {
+const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion, toggleBomboniera }: GuestTabsProps) => {
   
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
@@ -105,6 +106,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             deleteCompanion={deleteCompanion}
             restoreCompanion={restoreCompanion}
             permanentlyDeleteCompanion={permanentlyDeleteCompanion}
+            toggleBomboniera={toggleBomboniera}
           />
         </TabsContent>
 
@@ -128,6 +130,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             deleteCompanion={deleteCompanion}
             restoreCompanion={restoreCompanion}
             permanentlyDeleteCompanion={permanentlyDeleteCompanion}
+            toggleBomboniera={toggleBomboniera}
           />
         </TabsContent>
 
@@ -151,6 +154,7 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
             deleteCompanion={deleteCompanion}
             restoreCompanion={restoreCompanion}
             permanentlyDeleteCompanion={permanentlyDeleteCompanion}
+            toggleBomboniera={toggleBomboniera}
           />
         </TabsContent>
       </Tabs>
