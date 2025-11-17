@@ -14,6 +14,7 @@ export interface Guest {
   containsPrimary?: boolean; // True if this card contains the main guest
   ageGroup?: AgeGroup;
   bombonieraAssegnata?: boolean;
+  primaryDbId?: string; // Real database ID for main guest (only when containsPrimary is true)
 }
 
 export interface Companion {
