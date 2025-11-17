@@ -147,7 +147,16 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
   // Calcola i pagamenti per un fornitore
   const getVendorPayments = (vendor: any) => {
-    const totalCost = vendor.default_cost || 0;
+    // Per categoria Bomboniere, calcola costo totale dinamicamente
+    const isBomboniera = bombonieraCategory?.id === vendor.category_id;
+    const unitCost = vendor.default_cost || 0;
+    
+    // Costo totale = (numero bomboniere × costo unitario) per categoria Bomboniere
+    // altrimenti usa default_cost normale
+    const totalCost = isBomboniera && bombonieraCount > 0 
+      ? unitCost * bombonieraCount 
+      : unitCost;
+    
     const paid = vendor.amount_paid || 0;
     const remaining = totalCost - paid;
     const percentage = totalCost > 0 ? (paid / totalCost) * 100 : 0;
@@ -156,7 +165,13 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     if (percentage >= 100) status = 'paid';
     else if (percentage > 0) status = 'partial';
     
-    return { paid, remaining, percentage, status };
+    return { 
+      paid, 
+      remaining, 
+      percentage, 
+      status,
+      totalCost // Aggiungi per usarlo nel rendering
+    };
   };
 
   const getStatusIcon = (status: string) => {
@@ -524,7 +539,11 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
               {/* Costo */}
               <div>
-                <Label htmlFor="vendor-cost">Costo *</Label>
+                <Label htmlFor="vendor-cost">
+                  {categories.find(c => c.id === newVendor.category_id)?.name.toLowerCase().includes('bomboniere') 
+                    ? 'Costo unitario *' 
+                    : 'Costo *'}
+                </Label>
                 <Input
                   id="vendor-cost"
                   type="number"
@@ -724,7 +743,11 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       
               {/* Costo */}
               <div>
-                <Label htmlFor="edit-vendor-cost">Costo *</Label>
+                <Label htmlFor="edit-vendor-cost">
+                  {categories.find(c => c.id === editForm.category_id)?.name.toLowerCase().includes('bomboniere') 
+                    ? 'Costo unitario *' 
+                    : 'Costo *'}
+                </Label>
                 <Input
                   id="edit-vendor-cost"
                   type="number"
@@ -943,10 +966,19 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                       {/* Labels con valori */}
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         <div className="text-left">
-                          <p className="text-muted-foreground">Costo Totale</p>
-                          <p className="font-semibold text-foreground">
-                            {formatCurrency(vendor.default_cost)}
+                          <p className="text-muted-foreground">
+                            {vendor.category_id === bombonieraCategory?.id && bombonieraCount > 0
+                              ? 'Costo Totale (calcolato)'
+                              : 'Costo Totale'}
                           </p>
+                          <p className="font-semibold text-foreground">
+                            {formatCurrency(payments.totalCost)}
+                          </p>
+                          {vendor.category_id === bombonieraCategory?.id && bombonieraCount > 0 && (
+                            <p className="text-xs text-pink-600 mt-1">
+                              {bombonieraCount} × {formatCurrency(vendor.default_cost)}
+                            </p>
+                          )}
                         </div>
                         <div className="text-center">
                           <p className="text-muted-foreground">Pagato</p>

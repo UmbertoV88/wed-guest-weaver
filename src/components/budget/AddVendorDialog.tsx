@@ -243,7 +243,11 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
             {/* Costo */}
             <div>
-              <Label htmlFor="vendor-cost">Costo *</Label>
+              <Label htmlFor="vendor-cost">
+                {categories.find(c => c.id === formData.category_id)?.name.toLowerCase().includes('bomboniere') 
+                  ? 'Costo unitario *' 
+                  : 'Costo *'}
+              </Label>
               <Input
                 id="vendor-cost"
                 type="number"
