@@ -383,24 +383,24 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                           confirmCompanion(guest.id, companion.id);
                                         }}
                                         size="sm"
-                                        variant="ghost"
-                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-primary hover:bg-primary/10"
+                                        variant="outline"
+                                        className="h-8 px-3 text-xs font-medium text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <UserCheck className="w-3 h-3" />
-                                        <span className="hidden sm:inline sm:ml-1">Conferma</span>
+                                        <UserCheck className="w-4 h-4 mr-1" />
+                                        Conferma
                                       </Button>
                                       <Button
                                         onClick={() => {
                                           deleteCompanion(guest.id, companion.id);
                                         }}
                                         size="sm"
-                                        variant="ghost"
-                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-destructive hover:bg-destructive/10"
+                                        variant="outline"
+                                        className="h-8 px-3 text-xs font-medium text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <Trash2 className="w-3 h-3" />
-                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                                        <Trash2 className="w-4 h-4 mr-1" />
+                                        Elimina
                                       </Button>
                                     </>
                                   )}
@@ -411,24 +411,24 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                           updateCompanionStatus(guest.id, companion.id, 'pending');
                                         }}
                                         size="sm"
-                                        variant="ghost"
-                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-primary hover:bg-primary/10"
+                                        variant="outline"
+                                        className="h-8 px-3 text-xs font-medium text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <RotateCcw className="w-3 h-3" />
-                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
+                                        <RotateCcw className="w-4 h-4 mr-1" />
+                                        Ripristina
                                       </Button>
                                       <Button
                                         onClick={() => {
                                           deleteCompanion(guest.id, companion.id);
                                         }}
                                         size="sm"
-                                        variant="ghost"
-                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-destructive hover:bg-destructive/10"
+                                        variant="outline"
+                                        className="h-8 px-3 text-xs font-medium text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <Trash2 className="w-3 h-3" />
-                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                                        <Trash2 className="w-4 h-4 mr-1" />
+                                        Elimina
                                       </Button>
                                     </>
                                   )}
@@ -439,12 +439,12 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                           restoreCompanion(guest.id, companion.id);
                                         }}
                                         size="sm"
-                                        variant="ghost"
-                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-primary hover:bg-primary/10"
+                                        variant="outline"
+                                        className="h-8 px-3 text-xs font-medium text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <RotateCcw className="w-3 h-3" />
-                                        <span className="hidden sm:inline sm:ml-1">Ripristina</span>
+                                        <RotateCcw className="w-4 h-4 mr-1" />
+                                        Ripristina
                                       </Button>
                                       <Button
                                         onClick={() => {
@@ -459,12 +459,12 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                           });
                                         }}
                                         size="sm"
-                                        variant="ghost"
-                                        className="h-7 w-7 sm:w-auto sm:px-2 p-0 sm:p-1 text-xs text-destructive hover:bg-destructive/10"
+                                        variant="outline"
+                                        className="h-8 px-3 text-xs font-medium text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700"
                                         disabled={companionLoading === companion.id}
                                       >
-                                        <Trash2 className="w-3 h-3" />
-                                        <span className="hidden sm:inline sm:ml-1">Elimina</span>
+                                        <Trash2 className="w-4 h-4 mr-1" />
+                                        Elimina
                                       </Button>
                                     </>
                                   )}
