@@ -360,18 +360,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         {AGE_GROUP_ICONS[companion.ageGroup as keyof typeof AGE_GROUP_ICONS] || companion.ageGroup}
                                       </Badge>
                                     )}
-                                    <Badge 
-                                      variant={
-                                        companion.status === 'confirmed' ? 'default' : 
-                                        companion.status === 'pending' ? 'secondary' : 
-                                        'destructive'
-                                      }
-                                      className="text-xs"
-                                    >
-                                      {companion.status === 'confirmed' ? 'Confermato' : 
-                                       companion.status === 'pending' ? 'Da confermare' : 
-                                       'Eliminato'}
-                                    </Badge>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 flex-shrink-0">
