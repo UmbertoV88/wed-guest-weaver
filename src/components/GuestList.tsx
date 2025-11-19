@@ -319,26 +319,28 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           {AGE_GROUP_ICONS[guest.ageGroup as keyof typeof AGE_GROUP_ICONS] || guest.ageGroup}
                         </Badge>
                       )}
+                      
+                      {/* Div rosa compatto con checkbox + emoji */}
+                      {guest.status === 'confirmed' && toggleBomboniera && guest.containsPrimary && (
+                        <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-pink-50 rounded-md border border-pink-200">
+                          <Checkbox
+                            id={`bomboniera-${guest.id}`}
+                            checked={guest.bombonieraAssegnata || false}
+                            onCheckedChange={(checked) => {
+                              toggleBomboniera(guest.primaryDbId || guest.id, checked as boolean);
+                            }}
+                            className="h-4 w-4"
+                          />
+                          <label 
+                            htmlFor={`bomboniera-${guest.id}`}
+                            className="cursor-pointer text-base leading-none"
+                          >
+                            🎁
+                          </label>
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Checkbox Bomboniera - SOLO per ospiti confermati */}
-                    {guest.status === 'confirmed' && toggleBomboniera && guest.containsPrimary && (
-                      <div className="flex items-center gap-2 mt-2 p-2 bg-pink-50 rounded-md border border-pink-200">
-                        <Checkbox
-                          id={`bomboniera-${guest.id}`}
-                          checked={guest.bombonieraAssegnata || false}
-                          onCheckedChange={(checked) => {
-                            toggleBomboniera(guest.primaryDbId || guest.id, checked as boolean);
-                          }}
-                        />
-                        <Label 
-                          htmlFor={`bomboniera-${guest.id}`}
-                          className="text-sm font-medium cursor-pointer flex items-center gap-1"
-                        >
-                          🎁 Bomboniera
-                        </Label>
-                      </div>
-                    )}
                   </div>
                   
                   <div className="space-y-2 text-sm">
@@ -359,6 +361,26 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                       <Badge variant="secondary" className="text-xs">
                                         {AGE_GROUP_ICONS[companion.ageGroup as keyof typeof AGE_GROUP_ICONS] || companion.ageGroup}
                                       </Badge>
+                                    )}
+                                    
+                                    {/* Div rosa compatto con checkbox + emoji */}
+                                    {companion.status === 'confirmed' && toggleBomboniera && (
+                                      <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-pink-50 rounded-md border border-pink-200">
+                                        <Checkbox
+                                          id={`bomboniera-comp-${companion.id}`}
+                                          checked={companion.bombonieraAssegnata || false}
+                                          onCheckedChange={(checked) => {
+                                            toggleBomboniera(companion.id, checked as boolean);
+                                          }}
+                                          className="h-4 w-4"
+                                        />
+                                        <label 
+                                          htmlFor={`bomboniera-comp-${companion.id}`}
+                                          className="cursor-pointer text-base leading-none"
+                                        >
+                                          🎁
+                                        </label>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -459,24 +481,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 </div>
                               </div>
                               
-                              {/* Checkbox bomboniera per accompagnatore confermato */}
-                              {companion.status === 'confirmed' && toggleBomboniera && (
-                                <div className="flex items-center gap-2 p-2 bg-pink-50 rounded-md border border-pink-200">
-                                  <Checkbox
-                                    id={`bomboniera-comp-${companion.id}`}
-                                    checked={companion.bombonieraAssegnata || false}
-                                    onCheckedChange={(checked) => {
-                                      toggleBomboniera(companion.id, checked as boolean);
-                                    }}
-                                  />
-                                  <Label 
-                                    htmlFor={`bomboniera-comp-${companion.id}`}
-                                    className="text-sm cursor-pointer"
-                                  >
-                                    🎁 Bomboniera
-                                  </Label>
-                                </div>
-                              )}
                             </div>
                           ))}
                         </div>
