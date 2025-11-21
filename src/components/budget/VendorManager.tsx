@@ -1,0 +1,1394 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import {
+  Plus,
+  Phone,
+  Mail,
+  Calendar as CalendarIcon,
+  Euro,
+  Edit3,
+  Trash2,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Search,
+  Users
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+//import { useBudget } from '@/hooks/useBudget';
+import { useBudgetQuery } from '@/hooks/useBudgetQuery';
+import { bombonieraApi, guestsApi } from '@/services/budgetService';
+import { supabase } from '@/integrations/supabase/client';
+
+interface VendorManagerProps {
+  categories: any[];
+}
+
+const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
+  const { vendors, addVendor, updateVendor, deleteVendor, addVendorPayment, loading } = useBudgetQuery();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingVendor, setEditingVendor] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const formRef = useRef<HTMLDivElement>(null);
+  const editFormRef = useRef<HTMLDivElement>(null);
+
+  // Payment dialog state
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentNotes, setPaymentNotes] = useState('');
+
+  // Delete dialog state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [newVendor, setNewVendor] = useState({
+    name: '',
+    category_id: '',
+    contact_email: '',
+    contact_phone: '',
+    address: '',
+    website: '',
+    notes: '',
+    default_cost: '',
+    payment_due_date: undefined as Date | undefined
+  });
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [editForm, setEditForm] = useState({
+    name: '',
+    category_id: '',
+    contact_email: '',
+    contact_phone: '',
+    address: '',
+    website: '',
+    notes: '',
+    default_cost: '',
+    payment_due_date: undefined as Date | undefined
+  });
+  const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
+  const [bombonieraCount, setBombonieraCount] = useState(0);
+  const [bombonieraByCategory, setBombonieraByCategory] = useState({
+    familyHis: 0,
+    familyHers: 0,
+    friends: 0,
+    colleagues: 0,
+    total: 0
+  });
+  const [confirmedGuestsCount, setConfirmedGuestsCount] = useState(0);
+  const [guestsByCategory, setGuestsByCategory] = useState({
+    familyHis: 0,
+    familyHers: 0,
+    friends: 0,
+    colleagues: 0,
+    total: 0
+  });
+  const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<any>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (showAddForm && formRef.current) {
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    }
+  }, [showAddForm]);
+
+  useEffect(() => {
+    if (editingVendor && editFormRef.current) {
+      setTimeout(() => {
+        editFormRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    }
+  }, [editingVendor]);
+
+  // Effect per caricare il conteggio bomboniere con Realtime
+  useEffect(() => {
+    const loadBombonieraCount = async () => {
+      try {
+        const count = await bombonieraApi.getAssignedCount();
+        setBombonieraCount(count);
+
+        // Carica anche i conteggi per categoria (solo bomboniere assegnate)
+        const countsByCategory = await bombonieraApi.getAssignedCountByCategory();
+        setBombonieraByCategory(countsByCategory);
+      } catch (error) {
+        console.error('Errore caricamento bomboniere:', error);
+      }
+    };
+
+    // Carica subito
+    loadBombonieraCount();
+
+    // Sottoscrizione Realtime per aggiornamenti istantanei
+    const channel = supabase
+      .channel('bomboniere_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'invitati' },
+        () => {
+          loadBombonieraCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [vendors]);
+
+  // Effect per caricare il conteggio ospiti confermati con Realtime
+  useEffect(() => {
+    const loadConfirmedGuestsCount = async () => {
+      try {
+        const count = await guestsApi.getConfirmedCount();
+        setConfirmedGuestsCount(count);
+
+        // Carica anche i conteggi per categoria
+        const countsByCategory = await guestsApi.getConfirmedCountByCategory();
+        setGuestsByCategory(countsByCategory);
+      } catch (error) {
+        console.error('Errore caricamento ospiti confermati:', error);
+      }
+    };
+
+    // Carica subito
+    loadConfirmedGuestsCount();
+
+    // Sottoscrizione Realtime per aggiornamenti istantanei
+    const channel = supabase
+      .channel('guests_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'invitati' },
+        () => {
+          loadConfirmedGuestsCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [vendors]);
+
+  // Trova la categoria Bomboniere
+  const bombonieraCategory = categories.find(c =>
+    c.name.toLowerCase().includes('bomboniere')
+  );
+
+  // Trova la categoria Sala Ricevimento
+  const salaRicevimentoCategory = categories.find(c =>
+    c.name.toLowerCase().includes('sala') && c.name.toLowerCase().includes('ricevimento')
+  );
+
+  // Normalizza URL aggiungendo https:// se manca il protocollo
+  const normalizeUrl = (url: string): string => {
+    if (!url.trim()) return '';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
+  // Calcola i pagamenti per un fornitore
+  const getVendorPayments = (vendor: any) => {
+    // Per categoria Bomboniere, calcola costo totale dinamicamente
+    const isBomboniera = bombonieraCategory?.id === vendor.category_id;
+    const isSalaRicevimento = salaRicevimentoCategory?.id === vendor.category_id;
+    const unitCost = vendor.default_cost || 0;
+
+    // Costo totale = (numero bomboniere × costo unitario) per categoria Bomboniere
+    // o (numero ospiti × costo unitario) per categoria Sala Ricevimento
+    // altrimenti usa default_cost normale
+    let totalCost = unitCost;
+    if (isBomboniera && bombonieraCount > 0) {
+      totalCost = unitCost * bombonieraCount;
+    } else if (isSalaRicevimento && confirmedGuestsCount > 0) {
+      totalCost = unitCost * confirmedGuestsCount;
+    }
+
+    const paid = vendor.amount_paid || 0;
+    const remaining = totalCost - paid;
+    const percentage = totalCost > 0 ? (paid / totalCost) * 100 : 0;
+
+    let status: 'paid' | 'partial' | 'pending' = 'pending';
+    if (percentage >= 100) status = 'paid';
+    else if (percentage > 0) status = 'partial';
+
+    return {
+      paid,
+      remaining,
+      percentage,
+      status,
+      totalCost // Aggiungi per usarlo nel rendering
+    };
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'partial':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'pending':
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Pagato</Badge>;
+      case 'partial':
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Parziale</Badge>;
+      case 'pending':
+        return <Badge variant="destructive">In sospeso</Badge>;
+      default:
+        return <Badge variant="secondary">Sconosciuto</Badge>;
+    }
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.name : 'Sconosciuta';
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const handleAddVendor = async () => {
+    // ✅ RESET ERRORI PRECEDENTI
+    setFormErrors({});
+
+    // ✅ VALIDAZIONE CAMPO PER CAMPO
+    const errors: Record<string, string> = {};
+
+    if (!newVendor.name.trim()) {
+      errors.name = "Nome fornitore è obbligatorio";
+    } else if (newVendor.name.trim().length < 2) {
+      errors.name = "Il nome deve avere almeno 2 caratteri";
+    }
+
+    if (!newVendor.category_id) {
+      errors.category_id = "Seleziona una categoria";
+    }
+
+    if (!newVendor.default_cost.trim()) {
+      errors.default_cost = "Costo è obbligatorio";
+    } else {
+      const cost = parseFloat(newVendor.default_cost);
+      if (isNaN(cost) || cost <= 0) {
+        errors.default_cost = "Inserisci un costo valido maggiore di 0";
+      } else if (cost > 100000) {
+        errors.default_cost = "Il costo sembra eccessivo (max €100.000)";
+      }
+    }
+
+    // Validazione email opzionale
+    if (newVendor.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newVendor.contact_email)) {
+      errors.contact_email = "Formato email non valido";
+    }
+
+    // ✅ SE CI SONO ERRORI, MOSTRALI SUI CAMPI (NON CHIUDERE LA FINESTRA)
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return; // ESCE SENZA CHIUDERE IL FORM
+    }
+
+    // ✅ SE TUTTO OK, PROCEDI CON IL SALVATAGGIO
+    const cost = parseFloat(newVendor.default_cost);
+    const vendorData = {
+      name: newVendor.name.trim(),
+      category_id: newVendor.category_id,
+      contact_email: newVendor.contact_email.trim() || undefined,
+      contact_phone: newVendor.contact_phone.trim() || undefined,
+      address: newVendor.address.trim() || undefined,
+      website: normalizeUrl(newVendor.website) || undefined,
+      notes: newVendor.notes.trim() || undefined,
+      default_cost: cost,
+      payment_due_date: newVendor.payment_due_date ? format(newVendor.payment_due_date, 'yyyy-MM-dd') : undefined
+    };
+
+    await addVendor(vendorData);
+
+    // Reset form dopo l'aggiunta (gli errori sono gestiti dal toast nella mutation)
+    setNewVendor({
+      name: '',
+      category_id: '',
+      contact_email: '',
+      contact_phone: '',
+      address: '',
+      website: '',
+      notes: '',
+      default_cost: '',
+      payment_due_date: undefined
+    });
+    setFormErrors({});
+    setShowAddForm(false);
+  };
+
+
+
+  const handleDeleteVendor = (vendor: { id: string; name: string }) => {
+    setVendorToDelete(vendor);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDeleteVendor = async () => {
+    if (vendorToDelete) {
+      await deleteVendor(vendorToDelete.id);
+      setVendorToDelete(null);
+    }
+  };
+
+  const handleEditVendor = (vendor: any) => {
+    setEditingVendor(vendor);
+    setEditForm({
+      name: vendor.name || '',
+      category_id: vendor.category_id || '',
+      contact_email: vendor.contact_email || '',
+      contact_phone: vendor.contact_phone || '',
+      address: vendor.address || '',
+      website: vendor.website?.replace('https://', '') || '',
+      notes: vendor.notes || '',
+      default_cost: vendor.default_cost?.toString() || '',
+      payment_due_date: vendor.payment_due_date ? new Date(vendor.payment_due_date) : undefined
+    });
+    setEditFormErrors({});
+  };
+
+  const handleUpdateVendor = async () => {
+    // Reset errori precedenti
+    setEditFormErrors({});
+
+    // Validazione campo per campo
+    const errors: Record<string, string> = {};
+
+    if (!editForm.name.trim()) {
+      errors.name = "Nome fornitore è obbligatorio";
+    } else if (editForm.name.trim().length < 2) {
+      errors.name = "Il nome deve avere almeno 2 caratteri";
+    }
+
+    if (!editForm.category_id) {
+      errors.category_id = "Seleziona una categoria";
+    }
+
+    if (!editForm.default_cost.trim()) {
+      errors.default_cost = "Costo è obbligatorio";
+    } else {
+      const cost = parseFloat(editForm.default_cost);
+      if (isNaN(cost) || cost <= 0) {
+        errors.default_cost = "Inserisci un costo valido maggiore di 0";
+      } else if (cost > 100000) {
+        errors.default_cost = "Il costo sembra eccessivo (max €100.000)";
+      }
+    }
+
+    // Validazione email opzionale
+    if (editForm.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.contact_email)) {
+      errors.contact_email = "Formato email non valido";
+    }
+
+    // Se ci sono errori, mostrali sui campi
+    if (Object.keys(errors).length > 0) {
+      setEditFormErrors(errors);
+      return;
+    }
+
+    // Se tutto OK, procedi con l'aggiornamento
+    const cost = parseFloat(editForm.default_cost);
+    const vendorData = {
+      name: editForm.name.trim(),
+      category_id: editForm.category_id,
+      contact_email: editForm.contact_email.trim() || undefined,
+      contact_phone: editForm.contact_phone.trim() || undefined,
+      address: editForm.address.trim() || undefined,
+      website: normalizeUrl(editForm.website) || undefined,
+      notes: editForm.notes.trim() || undefined,
+      default_cost: cost,
+      payment_due_date: editForm.payment_due_date ? format(editForm.payment_due_date, 'yyyy-MM-dd') : undefined
+    };
+
+    await updateVendor(editingVendor.id, vendorData);
+
+    // Reset dopo l'aggiornamento
+    setEditingVendor(null);
+    setEditForm({
+      name: '',
+      category_id: '',
+      contact_email: '',
+      contact_phone: '',
+      address: '',
+      website: '',
+      notes: '',
+      default_cost: '',
+      payment_due_date: undefined
+    });
+    setEditFormErrors({});
+  };
+
+  const handleCancelEdit = () => {
+    setEditingVendor(null);
+    setEditForm({
+      name: '',
+      category_id: '',
+      contact_email: '',
+      contact_phone: '',
+      address: '',
+      website: '',
+      notes: '',
+      default_cost: '',
+      payment_due_date: undefined
+    });
+    setEditFormErrors({});
+  };
+
+  const handleAddPayment = (vendor: any) => {
+    setSelectedVendor(vendor);
+    setPaymentAmount('');
+    setPaymentNotes('');
+    setShowPaymentDialog(true);
+  };
+
+  const handleSubmitPayment = async () => {
+    if (!selectedVendor || !paymentAmount) return;
+
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: 'Errore',
+        description: 'Inserisci un importo valido',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const remaining = (selectedVendor.default_cost || 0) - (selectedVendor.amount_paid || 0);
+    if (amount > remaining) {
+      return;
+    }
+
+    await addVendorPayment(
+      selectedVendor.id,
+      amount,
+      selectedVendor.category_id,
+      paymentNotes || `Pagamento per ${selectedVendor.name}`
+    );
+
+    setShowPaymentDialog(false);
+    setSelectedVendor(null);
+    setPaymentAmount('');
+    setPaymentNotes('');
+  };
+
+
+  const filteredVendors = vendors.filter(vendor =>
+    vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    getCategoryName(vendor.category_id).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Gestione Fornitori</h2>
+          <p className="text-gray-600">Gestisci i tuoi fornitori e traccia i pagamenti</p>
+        </div>
+        <Button
+          onClick={() => setShowAddForm(true)}
+          className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Aggiungi Fornitore
+        </Button>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <Input
+          placeholder="Cerca fornitori..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+
+
+      {/* Add Vendor Form */}
+      {showAddForm && (
+        <Card ref={formRef} className="border-2 border-pink-200">
+          <CardHeader>
+            <CardTitle className="text-pink-700">Aggiungi Nuovo Fornitore</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome Fornitore */}
+              <div>
+                <Label htmlFor="vendor-name">Nome Fornitore *</Label>
+                <Input
+                  id="vendor-name"
+                  value={newVendor.name}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, name: e.target.value }));
+                    // Pulisci errore quando l'utente inizia a digitare
+                    if (formErrors.name) {
+                      setFormErrors(prev => ({ ...prev, name: '' }));
+                    }
+                  }}
+                  placeholder="es. Studio Fotografico Luce"
+                  className={formErrors.name ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {formErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.name}</p>
+                )}
+              </div>
+
+              {/* Categoria */}
+              <div>
+                <Label>Categoria *</Label>
+                <Select
+                  value={newVendor.category_id}
+                  onValueChange={(value) => {
+                    setNewVendor(prev => ({ ...prev, category_id: value }));
+                    // Pulisci errore quando l'utente seleziona
+                    if (formErrors.category_id) {
+                      setFormErrors(prev => ({ ...prev, category_id: '' }));
+                    }
+                  }}
+                >
+                  <SelectTrigger className={formErrors.category_id ? 'border-red-500 focus:border-red-500' : ''}>
+                    <SelectValue placeholder="Seleziona categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.category_id && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.category_id}</p>
+                )}
+              </div>
+
+              {/* Costo */}
+              <div>
+                <Label htmlFor="vendor-cost">
+                  {(() => {
+                    const categoryName = categories.find(c => c.id === newVendor.category_id)?.name.toLowerCase() || '';
+                    return (categoryName.includes('bomboniere') || (categoryName.includes('sala') && categoryName.includes('ricevimento')))
+                      ? 'Costo unitario *'
+                      : 'Costo *';
+                  })()}
+                </Label>
+                <Input
+                  id="vendor-cost"
+                  type="number"
+                  value={newVendor.default_cost}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, default_cost: e.target.value }));
+                    // Pulisci errore quando l'utente inizia a digitare
+                    if (formErrors.default_cost) {
+                      setFormErrors(prev => ({ ...prev, default_cost: '' }));
+                    }
+                  }}
+                  placeholder="1000.00"
+                  step="0.01"
+                  min="0.01"
+                  className={formErrors.default_cost ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {formErrors.default_cost && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.default_cost}</p>
+                )}
+              </div>
+
+              {/* Data Scadenza */}
+              <div>
+                <Label htmlFor="vendor-due-date">Data Scadenza</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="vendor-due-date"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newVendor.payment_due_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newVendor.payment_due_date ? (
+                        format(newVendor.payment_due_date, "PPP", { locale: it })
+                      ) : (
+                        <span>Seleziona data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={newVendor.payment_due_date}
+                      onSelect={(date) => setNewVendor(prev => ({ ...prev, payment_due_date: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Email */}
+              <div>
+                <Label htmlFor="vendor-email">Email</Label>
+                <Input
+                  id="vendor-email"
+                  type="email"
+                  value={newVendor.contact_email}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, contact_email: e.target.value }));
+                    if (formErrors.contact_email) {
+                      setFormErrors(prev => ({ ...prev, contact_email: '' }));
+                    }
+                  }}
+                  placeholder="email@example.com"
+                  className={formErrors.contact_email ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {formErrors.contact_email && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.contact_email}</p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="vendor-phone">Telefono</Label>
+                <Input
+                  id="vendor-phone"
+                  value={newVendor.contact_phone}
+                  onChange={(e) => setNewVendor(prev => ({ ...prev, contact_phone: e.target.value }))}
+                  placeholder="+39 333 123 4567"
+                />
+              </div>
+              <div>
+                <Label htmlFor="vendor-website">Sito Web</Label>
+                <Input
+                  id="vendor-website"
+                  value={newVendor.website}
+                  onChange={(e) => {
+                    setNewVendor(prev => ({ ...prev, website: e.target.value }));
+                    if (formErrors.website) {
+                      setFormErrors(prev => ({ ...prev, website: '' }));
+                    }
+                  }}
+                  placeholder="example.com"
+                  className={formErrors.website ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {formErrors.website && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.website}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="vendor-address">Indirizzo</Label>
+              <Input
+                id="vendor-address"
+                value={newVendor.address}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Via Roma 123, Milano"
+              />
+            </div>
+            <div>
+              <Label htmlFor="vendor-notes">Note</Label>
+              <Textarea
+                id="vendor-notes"
+                value={newVendor.notes}
+                onChange={(e) => setNewVendor(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Note aggiuntive..."
+                rows={2}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleAddVendor} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Aggiungi Fornitore
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowAddForm(false)}
+                className="flex-1"
+              >
+                Annulla
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Edit Vendor Form */}
+      {editingVendor && (
+        <Card ref={editFormRef} className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-blue-800">
+              Modifica Fornitore: {editingVendor.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome Fornitore */}
+              <div>
+                <Label htmlFor="edit-vendor-name">Nome Fornitore *</Label>
+                <Input
+                  id="edit-vendor-name"
+                  value={editForm.name}
+                  onChange={(e) => {
+                    setEditForm(prev => ({ ...prev, name: e.target.value }));
+                    if (editFormErrors.name) {
+                      setEditFormErrors(prev => ({ ...prev, name: '' }));
+                    }
+                  }}
+                  placeholder="es. Studio Fotografico Luce"
+                  className={editFormErrors.name ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {editFormErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.name}</p>
+                )}
+              </div>
+
+              {/* Categoria */}
+              <div>
+                <Label>Categoria *</Label>
+                <Select
+                  value={editForm.category_id}
+                  onValueChange={(value) => {
+                    setEditForm(prev => ({ ...prev, category_id: value }));
+                    if (editFormErrors.category_id) {
+                      setEditFormErrors(prev => ({ ...prev, category_id: '' }));
+                    }
+                  }}
+                >
+                  <SelectTrigger className={editFormErrors.category_id ? 'border-red-500 focus:border-red-500' : ''}>
+                    <SelectValue placeholder="Seleziona categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {editFormErrors.category_id && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.category_id}</p>
+                )}
+              </div>
+
+              {/* Costo */}
+              <div>
+                <Label htmlFor="edit-vendor-cost">
+                  {(() => {
+                    const categoryName = categories.find(c => c.id === editForm.category_id)?.name.toLowerCase() || '';
+                    return (categoryName.includes('bomboniere') || (categoryName.includes('sala') && categoryName.includes('ricevimento')))
+                      ? 'Costo unitario *'
+                      : 'Costo *';
+                  })()}
+                </Label>
+                <Input
+                  id="edit-vendor-cost"
+                  type="number"
+                  value={editForm.default_cost}
+                  onChange={(e) => {
+                    setEditForm(prev => ({ ...prev, default_cost: e.target.value }));
+                    if (editFormErrors.default_cost) {
+                      setEditFormErrors(prev => ({ ...prev, default_cost: '' }));
+                    }
+                  }}
+                  placeholder="1000.00"
+                  step="0.01"
+                  min="0.01"
+                  className={editFormErrors.default_cost ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {editFormErrors.default_cost && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.default_cost}</p>
+                )}
+              </div>
+
+              {/* Data Scadenza */}
+              <div>
+                <Label>Data Scadenza</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editForm.payment_due_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {editForm.payment_due_date ? (
+                        format(editForm.payment_due_date, "PPP", { locale: it })
+                      ) : (
+                        <span>Seleziona data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={editForm.payment_due_date}
+                      onSelect={(date) => setEditForm(prev => ({ ...prev, payment_due_date: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Email */}
+              <div>
+                <Label htmlFor="edit-vendor-email">Email</Label>
+                <Input
+                  id="edit-vendor-email"
+                  type="email"
+                  value={editForm.contact_email}
+                  onChange={(e) => {
+                    setEditForm(prev => ({ ...prev, contact_email: e.target.value }));
+                    if (editFormErrors.contact_email) {
+                      setEditFormErrors(prev => ({ ...prev, contact_email: '' }));
+                    }
+                  }}
+                  placeholder="email@example.com"
+                  className={editFormErrors.contact_email ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {editFormErrors.contact_email && (
+                  <p className="text-sm text-red-500 mt-1">{editFormErrors.contact_email}</p>
+                )}
+              </div>
+
+              {/* Telefono */}
+              <div>
+                <Label htmlFor="edit-vendor-phone">Telefono</Label>
+                <Input
+                  id="edit-vendor-phone"
+                  value={editForm.contact_phone}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, contact_phone: e.target.value }))}
+                  placeholder="+39 333 123 4567"
+                />
+              </div>
+
+              {/* Sito Web */}
+              <div>
+                <Label htmlFor="edit-vendor-website">Sito Web</Label>
+                <Input
+                  id="edit-vendor-website"
+                  value={editForm.website}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="example.com"
+                />
+                <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
+              </div>
+            </div>
+
+            {/* Indirizzo */}
+            <div className="mt-4">
+              <Label htmlFor="edit-vendor-address">Indirizzo</Label>
+              <Input
+                id="edit-vendor-address"
+                value={editForm.address}
+                onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Via Roma 123, Milano"
+              />
+            </div>
+
+            {/* Note */}
+            <div className="mt-4">
+              <Label htmlFor="edit-vendor-notes">Note</Label>
+              <Textarea
+                id="edit-vendor-notes"
+                value={editForm.notes}
+                onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Note aggiuntive..."
+                rows={2}
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2 mt-6">
+              <Button
+                onClick={handleUpdateVendor}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                <Edit3 className="w-4 h-4 mr-2" />
+                Salva Modifiche
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelEdit}
+                className="flex-1"
+              >
+                Annulla
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Vendors List */}
+      {loading ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <p className="text-muted-foreground">Caricamento fornitori...</p>
+          </CardContent>
+        </Card>
+      ) : (
+        /* COMPACT LIST VIEW */
+        <div className="space-y-2">
+          {filteredVendors.map((vendor) => {
+            const payments = getVendorPayments(vendor);
+            return (
+              <Card
+                key={vendor.id}
+                className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => {
+                  setSelectedVendorForDetails(vendor);
+                  setShowDetailsDialog(true);
+                }}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  {/* Nome e Categoria */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(payments.status)}
+                      <h3 className="font-semibold text-gray-900 truncate">{vendor.name}</h3>
+                    </div>
+                    <p className="text-sm text-gray-600">{getCategoryName(vendor.category_id)}</p>
+                  </div>
+
+                  {/* Badge Stato */}
+                  <div className="flex-shrink-0">
+                    {payments.status === 'paid' && (
+                      <Badge className="bg-green-100 text-green-800">Pagato</Badge>
+                    )}
+                    {payments.status === 'partial' && (
+                      <Badge className="bg-yellow-100 text-yellow-800">Parziale</Badge>
+                    )}
+                    {payments.status === 'pending' && (
+                      <Badge className="bg-red-100 text-red-800">In sospeso</Badge>
+                    )}
+                  </div>
+
+                  {/* Importi e Progress */}
+                  <div className="flex-shrink-0 w-64 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        {formatCurrency(payments.paid)} / {formatCurrency(payments.totalCost)}
+                      </span>
+                      <span className="font-medium">{Math.round(payments.percentage)}%</span>
+                    </div>
+                    <Progress value={payments.percentage} className="h-2" />
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )
+      }
+
+      {
+        filteredVendors.length === 0 && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">Nessun fornitore trovato</p>
+              <p className="text-gray-400">Aggiungi il tuo primo fornitore per iniziare</p>
+            </CardContent>
+          </Card>
+        )
+      }
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Registra Pagamento</DialogTitle>
+            <DialogDescription>
+              Fornitore: {selectedVendor?.name}
+              {selectedVendor && (
+                <div className="mt-2 space-y-1 text-sm">
+                  <p>Costo totale: <strong>{formatCurrency(selectedVendor.default_cost || 0)}</strong></p>
+                  <p>Già pagato: <strong className="text-green-600">{formatCurrency(selectedVendor.amount_paid || 0)}</strong></p>
+                  <p>Rimanente: <strong className="text-red-600">{formatCurrency((selectedVendor.default_cost || 0) - (selectedVendor.amount_paid || 0))}</strong></p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="payment-amount">Importo Pagamento *</Label>
+              <Input
+                id="payment-amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="payment-notes">Note (opzionale)</Label>
+              <Textarea
+                id="payment-notes"
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+                placeholder="Es: Acconto del 30%, Saldo finale, ecc."
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPaymentDialog(false)}
+            >
+              Annulla
+            </Button>
+            <Button
+              onClick={handleSubmitPayment}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Euro className="w-4 h-4 mr-2" />
+              Registra
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Elimina Fornitore"
+        description={
+          <>
+            <p>Sei sicuro di voler eliminare questo fornitore?</p>
+            <p className="mt-2 font-semibold text-destructive">
+              Questa azione non può essere annullata.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tutti i dati associati (pagamenti, note, ecc.) saranno eliminati definitivamente.
+            </p>
+          </>
+        }
+        confirmText="Elimina"
+        cancelText="Annulla"
+        onConfirm={handleConfirmDeleteVendor}
+        variant="destructive"
+      />
+
+      {/* Vendor Details Sheet */}
+      <Sheet open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          {selectedVendorForDetails && (() => {
+            const vendor = selectedVendorForDetails;
+            const payments = getVendorPayments(vendor);
+
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    {getStatusIcon(payments.status)}
+                    {vendor.name}
+                  </SheetTitle>
+                  <p className="text-sm text-gray-600">{getCategoryName(vendor.category_id)}</p>
+                </SheetHeader>
+
+                <div className="mt-6 space-y-6">
+                  {/* Contact Information */}
+                  <div className="space-y-2">
+                    {vendor.contact_email && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Mail className="w-4 h-4" />
+                        <span>{vendor.contact_email}</span>
+                      </div>
+                    )}
+                    {vendor.contact_phone && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <span>{vendor.contact_phone}</span>
+                      </div>
+                    )}
+                    {vendor.website && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 truncate">
+                        <span>🌐</span>
+                        <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
+                          {vendor.website}
+                        </a>
+                      </div>
+                    )}
+                    {vendor.address && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span>📍</span>
+                        <span>{vendor.address}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Payment Progress */}
+                  {vendor.default_cost && vendor.default_cost > 0 && (
+                    <div className="space-y-3 pt-4 border-t">
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="text-left">
+                          <p className="text-muted-foreground">Costo Totale</p>
+                          <p className="font-semibold text-foreground">{formatCurrency(payments.totalCost)}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-muted-foreground">Pagato</p>
+                          <p className="font-semibold text-green-600">{formatCurrency(payments.paid)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-muted-foreground">Rimanente</p>
+                          <p className="font-semibold text-red-600">{formatCurrency(payments.remaining)}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Progress value={payments.percentage} className="h-2" />
+                        <p className="text-xs text-muted-foreground text-right">{payments.percentage.toFixed(0)}% completato</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Widget Bomboniere */}
+                  {vendor.category_id === bombonieraCategory?.id && vendor.default_cost && bombonieraCount > 0 && (() => {
+                    const unitCost = vendor.default_cost;
+                    const groomGuests = bombonieraByCategory.familyHis;
+                    const brideGuests = bombonieraByCategory.familyHers;
+                    const sharedGuests = bombonieraByCategory.friends + bombonieraByCategory.colleagues;
+                    const groomCost = groomGuests * unitCost;
+                    const brideCost = brideGuests * unitCost;
+                    const sharedCost = sharedGuests * unitCost;
+                    const totalCost = groomCost + brideCost + sharedCost;
+
+                    return (
+                      <div className="mt-3 p-3 bg-pink-50 rounded-lg border border-pink-200 space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-700">🎁 Bomboniere totali:</span>
+                          <span className="font-bold text-gray-900">{bombonieraCount}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Costo unitario:</span>
+                          <span className="font-medium text-gray-900">{formatCurrency(unitCost)}</span>
+                        </div>
+                        <div className="h-px bg-pink-300" />
+                        <div className="space-y-1.5 text-sm">
+                          {groomGuests > 0 && (
+                            <div className="flex items-center justify-between pl-2">
+                              <span className="text-gray-600">├─ Sposo: {groomGuests} ospiti</span>
+                              <span className="font-medium text-gray-900">{formatCurrency(groomCost)}</span>
+                            </div>
+                          )}
+                          {brideGuests > 0 && (
+                            <div className="flex items-center justify-between pl-2">
+                              <span className="text-gray-600">├─ Sposa: {brideGuests} ospiti</span>
+                              <span className="font-medium text-gray-900">{formatCurrency(brideCost)}</span>
+                            </div>
+                          )}
+                          {sharedGuests > 0 && (
+                            <div className="flex items-center justify-between pl-2">
+                              <span className="text-gray-600">└─ Condivisi: {sharedGuests} ospiti</span>
+                              <span className="font-medium text-gray-900">{formatCurrency(sharedCost)}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="h-px bg-pink-300" />
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-700">Totale calcolato:</span>
+                          <span className="text-lg font-bold text-pink-600">{formatCurrency(totalCost)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Widget Sala Ricevimento */}
+                  {vendor.category_id === salaRicevimentoCategory?.id && vendor.default_cost && confirmedGuestsCount > 0 && (() => {
+                    const unitCost = vendor.default_cost;
+                    const groomGuests = guestsByCategory.familyHis;
+                    const brideGuests = guestsByCategory.familyHers;
+                    const sharedGuests = guestsByCategory.friends + guestsByCategory.colleagues;
+                    const groomCost = groomGuests * unitCost;
+                    const brideCost = brideGuests * unitCost;
+                    const sharedCost = sharedGuests * unitCost;
+                    const totalCost = groomCost + brideCost + sharedCost;
+
+                    return (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-700">👥 Ospiti confermati:</span>
+                          <span className="font-bold text-gray-900">{confirmedGuestsCount}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Costo unitario:</span>
+                          <span className="font-medium text-gray-900">{formatCurrency(unitCost)}</span>
+                        </div>
+                        <div className="h-px bg-blue-300" />
+                        <div className="space-y-1.5 text-sm">
+                          {groomGuests > 0 && (
+                            <div className="flex items-center justify-between pl-2">
+                              <span className="text-gray-600">├─ Sposo: {groomGuests} ospiti</span>
+                              <span className="font-medium text-gray-900">{formatCurrency(groomCost)}</span>
+                            </div>
+                          )}
+                          {brideGuests > 0 && (
+                            <div className="flex items-center justify-between pl-2">
+                              <span className="text-gray-600">├─ Sposa: {brideGuests} ospiti</span>
+                              <span className="font-medium text-gray-900">{formatCurrency(brideCost)}</span>
+                            </div>
+                          )}
+                          {sharedGuests > 0 && (
+                            <div className="flex items-center justify-between pl-2">
+                              <span className="text-gray-600">└─ Condivisi: {sharedGuests} ospiti</span>
+                              <span className="font-medium text-gray-900">{formatCurrency(sharedCost)}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="h-px bg-blue-300" />
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-700">Totale calcolato:</span>
+                          <span className="text-lg font-bold text-blue-600">{formatCurrency(totalCost)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Notes */}
+                  {vendor.notes && (
+                    <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                      {vendor.notes}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="pt-4 border-t">
+                    <div className="flex gap-2">
+                      {/* Registra Pagamento button - only if vendor has cost */}
+                      {vendor.default_cost && vendor.default_cost > 0 && (
+                        <Button
+                          onClick={() => {
+                            setShowDetailsDialog(false);
+                            setSelectedVendor(vendor);
+                            setPaymentAmount('');
+                            setPaymentNotes('');
+                            setShowPaymentDialog(true);
+                          }}
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                        >
+                          <Euro className="w-4 h-4 mr-2" />
+                          Registra Pagamento
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowDetailsDialog(false);
+                          setEditingVendor(vendor);
+                          setEditForm({
+                            name: vendor.name,
+                            category_id: vendor.category_id,
+                            contact_email: vendor.contact_email || '',
+                            contact_phone: vendor.contact_phone || '',
+                            address: vendor.address || '',
+                            website: vendor.website || '',
+                            notes: vendor.notes || '',
+                            default_cost: vendor.default_cost?.toString() || '',
+                            payment_due_date: vendor.payment_due_date ? new Date(vendor.payment_due_date) : undefined
+                          });
+                        }}
+                        className="flex-1"
+                      >
+                        <Edit3 className="w-4 h-4 mr-2" />
+                        Modifica
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setShowDetailsDialog(false);
+                          setVendorToDelete({
+                            id: vendor.id,
+                            name: vendor.name
+                          });
+                          setShowDeleteDialog(true);
+                        }}
+                        className="flex-1"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Elimina
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
+    </div >
+  );
+};
+
+export default VendorManager;
