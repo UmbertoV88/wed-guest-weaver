@@ -364,7 +364,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "family-hers":
                             return (
                               <SimpleTooltip
-                                content="Famiglia della Sposa :-P"
+                                content="Famiglia della Sposa"
                                 className="bg-white border-2 border-pink-300 shadow-lg text-pink-700 font-medium"
                               >
                                 <span className="inline-block">{badge}</span>
