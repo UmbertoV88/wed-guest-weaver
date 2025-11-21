@@ -30,11 +30,11 @@ interface WeddingHeaderProps {
   signingOut?: boolean;
 }
 
-const WeddingHeader = ({ 
-  className, 
-  user, 
-  profile, 
-  isWeddingOrganizer, 
+const WeddingHeader = ({
+  className,
+  user,
+  profile,
+  isWeddingOrganizer,
   onSignOut,
   signingOut = false
 }: WeddingHeaderProps) => {
@@ -84,17 +84,17 @@ const WeddingHeader = ({
   };
 
   const menuSections = [
-    { icon: Camera, label: "Fotografo", href: "/fotografo" },
+    // { icon: Camera, label: "Fotografo", href: "/fotografo" },
     { icon: DollarSign, label: "Finanza", href: "/finanza" },
     { icon: Users, label: "Invitati", href: "/" },
-    { icon: MapPin, label: "Location", href: "/location" },
+    // { icon: MapPin, label: "Location", href: "/location" },
   ];
 
   return (
     <header className={cn("bg-white/80 backdrop-blur-sm border-b border-rose-100 sticky top-0 z-10", className)}>
       <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto">
-          
+
           {/* Unified Header - Mobile and Desktop */}
           <div className="flex justify-between items-center">
             {/* Logo Section */}
@@ -124,12 +124,12 @@ const WeddingHeader = ({
                 <SheetHeader>
                   <SheetTitle className="text-left">Menu</SheetTitle>
                 </SheetHeader>
-                
+
                 <div className="mt-6 space-y-6">
                   {/* Calendar and Countdown Section */}
                   <div className="space-y-4">
                     <div className="text-sm font-semibold text-muted-foreground">Data Matrimonio</div>
-                    
+
                     {/* Wedding Date Picker */}
                     <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
@@ -138,7 +138,7 @@ const WeddingHeader = ({
                           className="w-full justify-start gap-2 text-left"
                         >
                           <Calendar className="w-4 h-4 text-primary" />
-                          {weddingDate 
+                          {weddingDate
                             ? format(weddingDate, "dd MMM yyyy", { locale: it })
                             : "Scegli data matrimonio"
                           }
@@ -208,7 +208,7 @@ const WeddingHeader = ({
                         Wedding Organizer
                       </Badge>
                     )}
-                    
+
                     {/* User Greeting */}
                     {(profile?.full_name || user?.email) && (
                       <div className="text-center text-sm text-muted-foreground">
