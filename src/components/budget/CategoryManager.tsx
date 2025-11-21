@@ -265,6 +265,56 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     }
   };
 
+  // Funzione helper per calcolare la spesa di una categoria
+  const calculateCategorySpent = (category: BudgetCategory) => {
+    const isBombonieraCategory = category.name.toLowerCase().includes('bomboniere');
+    const isSalaRicevimentoCategory = category.name.toLowerCase().includes('sala') &&
+      category.name.toLowerCase().includes('ricevimento');
+
+    const categoryVendors = getVendorsByCategory(category.id);
+    return categoryVendors.reduce((sum, vendor) => {
+      const unitCost = vendor.default_cost || 0;
+      let vendorTotalCost = unitCost;
+
+      if (isBombonieraCategory && bombonieraCount > 0) {
+        vendorTotalCost = unitCost * bombonieraCount;
+      } else if (isSalaRicevimentoCategory && confirmedGuestsCount > 0) {
+        vendorTotalCost = unitCost * confirmedGuestsCount;
+      }
+
+      return sum + vendorTotalCost;
+    }, 0);
+  };
+
+  // Ordina le categorie: Non iniziate -> In corso -> Completate -> Ordine alfabetico
+  const sortedCategories = React.useMemo(() => {
+    return [...categories].sort((a, b) => {
+      const spentA = calculateCategorySpent(a);
+      const spentB = calculateCategorySpent(b);
+
+      const percentA = a.budgeted > 0 ? (spentA / a.budgeted) * 100 : 0;
+      const percentB = b.budgeted > 0 ? (spentB / b.budgeted) * 100 : 0;
+
+      // Determina lo stato (0: Non iniziato, 1: In corso, 2: Completato/Superato)
+      const getStatusWeight = (percent: number) => {
+        if (percent === 0) return 0;
+        if (percent < 100) return 1;
+        return 2;
+      };
+
+      const statusA = getStatusWeight(percentA);
+      const statusB = getStatusWeight(percentB);
+
+      // Prima ordina per stato
+      if (statusA !== statusB) {
+        return statusA - statusB;
+      }
+
+      // Poi ordina alfabeticamente
+      return a.name.localeCompare(b.name);
+    });
+  }, [categories, getVendorsByCategory, bombonieraCount, confirmedGuestsCount]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -372,7 +422,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
         /*defaultValue={categories[0]?.id}*/
         className="space-y-2"
       >
-        {categories.map((category) => {
+        {sortedCategories.map((category) => {
           const IconComponent = ICON_OPTIONS[category.icon as keyof typeof ICON_OPTIONS] || Package;
           const isEditing = editingCategory === category.id;
           const isDeleting = deletingCategory === category.id;
