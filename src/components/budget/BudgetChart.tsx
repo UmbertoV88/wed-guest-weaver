@@ -42,7 +42,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
     const start = polarToCartesian(centerX, centerY, radius, endAngle);
     const end = polarToCartesian(centerX, centerY, radius, startAngle);
     const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-    
+
     return [
       "M", centerX, centerY,
       "L", start.x, start.y,
@@ -95,7 +95,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
                 <circle
                   cx="140"
                   cy="140"
-                  r="50"
+                  r="75"
                   fill="white"
                   stroke="#e5e7eb"
                   strokeWidth="2"
@@ -103,7 +103,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xl font-bold text-gray-900">
                     {formatCurrency(totalBudget)}
                   </div>
                   <div className="text-sm text-gray-600">Budget Totale</div>
@@ -111,7 +111,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
               </div>
             </div>
           </div>
-          
+
           {/* Legend */}
           <div className="grid grid-cols-2 gap-2 mt-6">
             {segments.map((segment) => (
@@ -152,7 +152,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
                     {/* Estimated budget bar */}
                     <div
                       className="h-3 rounded-full opacity-50"
-                      style={{ 
+                      style={{
                         backgroundColor: category.color,
                         width: '100%'
                       }}
@@ -160,7 +160,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
                     {/* Actual spent bar */}
                     <div
                       className="h-3 rounded-full absolute top-0 left-0"
-                      style={{ 
+                      style={{
                         backgroundColor: category.color,
                         width: `${Math.min((category.spent / category.budgeted) * 100, 100)}%`
                       }}

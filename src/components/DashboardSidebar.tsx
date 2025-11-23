@@ -48,7 +48,7 @@ const DashboardSidebar = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const { profile: userProfile, updateWeddingDate } = useProfile();
   const weddingDate = userProfile?.wedding_date ? new Date(userProfile.wedding_date) : undefined;
-  
+
   useEffect(() => {
     if (!weddingDate) return;
 
@@ -56,10 +56,10 @@ const DashboardSidebar = ({
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const wedding = new Date(weddingDate.getFullYear(), weddingDate.getMonth(), weddingDate.getDate());
-      
+
       const diffTime = wedding.getTime() - today.getTime();
       const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
+
       if (days < 0) {
         setCountdown("Matrimonio celebrato! 💕");
       } else if (days === 0) {
@@ -78,7 +78,7 @@ const DashboardSidebar = ({
 
   const handleDateSelect = async (date: Date | undefined) => {
     if (!date) return;
-    
+
     try {
       await updateWeddingDate(date);
       setIsCalendarOpen(false);
@@ -86,11 +86,11 @@ const DashboardSidebar = ({
       console.error('Errore salvando la data:', error);
     }
   };
-  
+
   const menuItems = [
     { icon: Users, label: "Invitati", href: "/dashboard", isActive: window.location.pathname === "/dashboard" },
     { icon: Utensils, label: "Tavoli", href: "/dashboard/seating", isActive: window.location.pathname === "/dashboard/seating" },
-    { icon: DollarSign, label: "Finanza", href: "/finanza", isActive: false },
+    { icon: DollarSign, label: "Budget", href: "/finanza", isActive: false },
     // { icon: Camera, label: "Fotografo", href: "/fotografo", isActive: false },
     // { icon: MapPin, label: "Location", href: "/location", isActive: false },
   ];
@@ -106,7 +106,7 @@ const DashboardSidebar = ({
                 <Heart className="w-4 h-4 text-primary" />
                 {!collapsed && "Data Matrimonio"}
               </div>
-              
+
               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -115,7 +115,7 @@ const DashboardSidebar = ({
                     className="w-full justify-start gap-2 text-left"
                   >
                     <Calendar className="w-4 h-4 text-primary" />
-                    {weddingDate 
+                    {weddingDate
                       ? format(weddingDate, "dd MMM yyyy", { locale: it })
                       : "Scegli data"
                     }
@@ -164,7 +164,7 @@ const DashboardSidebar = ({
           <SidebarMenu>
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton 
+                <SidebarMenuButton
                   asChild
                   isActive={item.isActive}
                   className="w-full"
@@ -188,13 +188,8 @@ const DashboardSidebar = ({
         {/* User Info */}
         {!collapsed && (
           <>
-            {isWeddingOrganizer && (
-              <Badge variant="secondary" className="w-full justify-center py-2 bg-gradient-to-r from-gold/20 to-primary/20 text-primary-deep border-primary/30">
-                <Crown className="w-4 h-4 mr-2" />
-                Wedding Organizer
-              </Badge>
-            )}
-            
+            {/* Wedding Organizer badge hidden as per user request */}
+
             {(profile?.full_name || user?.email) && (
               <div className="text-center text-xs text-muted-foreground">
                 Ciao, {profile?.full_name || user?.email}

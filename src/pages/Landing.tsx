@@ -86,13 +86,13 @@ const Landing = () => {
                 className="bg-gold hover:bg-gold/90 text-primary-deep text-xl px-12 py-7 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
               >
                 <span className="flex items-center gap-3">
-                  INIZIA SUBITO - Solo €97
+                  PROVA GRATIS 48 ORE
                   <Sparkles className="w-5 h-5" />
                 </span>
               </Button>
             </Link>
 
-            <p className="mt-6 text-white/70 text-sm">🔥 OFFERTA LIMITATA - Prezzo normale €297</p>
+            <p className="mt-6 text-white/70 text-sm">✨ Poi solo €19.90/mese · Nessuna carta richiesta per il trial</p>
           </div>
         </div>
 
@@ -358,22 +358,34 @@ const Landing = () => {
           </h2>
 
           <p className="text-xl mb-12 text-white/90">
-            Unisciti a centinaia di coppie che hanno trasformato lo stress in serenità
+            Inizia con 48 ore di prova gratuita. Poi scegli il piano più adatto a te.
           </p>
 
           <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl mb-8">
-            <div className="text-3xl font-bold mb-2">
-              <span className="line-through text-white/60">€297</span>
+            <div className="text-2xl font-bold mb-4 text-gold">
+              ✨ PROVA GRATUITA 48 ORE
             </div>
-            <div className="text-6xl font-bold text-gold mb-6">€97</div>
-            <div className="text-white/80 mb-8">🔥 Offerta limitata - Solo per le prime 100 coppie</div>
+            <div className="text-white/80 mb-8">Nessuna carta di credito richiesta per iniziare</div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-white/5 p-6 rounded-xl">
+                <div className="text-sm text-white/60 mb-2">Piano Mensile</div>
+                <div className="text-4xl font-bold text-gold mb-2">€19.90</div>
+                <div className="text-white/70 text-sm">al mese</div>
+              </div>
+              <div className="bg-white/5 p-6 rounded-xl border-2 border-gold/30">
+                <div className="text-sm text-gold mb-2">🔥 Più Popolare</div>
+                <div className="text-4xl font-bold text-gold mb-2">€179.90</div>
+                <div className="text-white/70 text-sm">all'anno · Risparmi €58.90</div>
+              </div>
+            </div>
 
             <Link to="/auth">
               <Button
                 size="lg"
                 className="bg-gold hover:bg-gold/90 text-primary-deep text-2xl px-16 py-8 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full md:w-auto"
               >
-                INIZIA ORA
+                INIZIA PROVA GRATUITA
               </Button>
             </Link>
           </div>
@@ -385,29 +397,12 @@ const Landing = () => {
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              Accesso Immediato
+              48 Ore Gratis
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5" />
-              Garanzia 30 Giorni
+              Cancella Quando Vuoi
             </div>
-          </div>
-
-          {/* Email capture form */}
-          <div className="max-w-md mx-auto">
-            <p className="text-white/80 mb-4">Oppure ricevi più informazioni via email:</p>
-            <form onSubmit={handleEmailSubmit} className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="La tua email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
-              />
-              <Button type="submit" variant="secondary" className="bg-gold hover:bg-gold/90 text-primary-deep">
-                Invia
-              </Button>
-            </form>
           </div>
         </div>
       </section>
@@ -416,17 +411,7 @@ const Landing = () => {
       <footer className="py-8 bg-primary-deep text-white/60 text-center text-sm">
         <div className="container mx-auto px-4">
           <p className="mb-4">© 2024 Sistema Matrimonio Perfetto. Tutti i diritti riservati.</p>
-          <div className="flex justify-center gap-6">
-            <a href="#" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Termini di Servizio
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Contatti
-            </a>
-          </div>
+          {/* Footer links hidden as per user request */}
           <p className="mt-4 text-xs">
             I risultati possono variare. Il sistema è uno strumento di supporto all'organizzazione del matrimonio.
           </p>

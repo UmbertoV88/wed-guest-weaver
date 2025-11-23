@@ -66,8 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -77,54 +77,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     });
+
+    // Initialize trial period for new user
+    if (!error && data.user) {
+      try {
+        const { stripeService } = await import('@/services/stripeService');
+        await stripeService.initializeTrialPeriod(data.user.id);
+      } catch (trialError) {
+        console.error('Error initializing trial:', trialError);
+        // Don't fail signup if trial initialization fails
+      }
+    }
+
     return { error };
   };
 
   const signOut = async (showConfirmation: boolean = false) => {
     if (signingOut) return; // Prevent multiple logout attempts
-    
+
     setSigningOut(true);
-    
+
     try {
       // Clear local session first for immediate UI feedback
       await supabase.auth.signOut({ scope: 'local' });
-      
+
       // Clear all cached queries
       queryClient.clear();
-      
+
       // Clear any sensitive data from localStorage
       localStorage.removeItem('supabase.auth.token');
-      
+
       // Attempt global sign-out (token revocation)
       await supabase.auth.signOut({ scope: 'global' });
-      
+
       // Clear state
       setSession(null);
       setUser(null);
-      
+
       // Show success message
       toast({
         title: "Logout effettuato",
         description: "Sei stato disconnesso con successo.",
       });
-      
+
       // Use window.location instead of navigate to avoid router context issues
       window.location.href = '/';
-      
+
     } catch (error) {
       console.error('Logout error');
-      
+
       // Even if logout fails, clear local state and redirect
       setSession(null);
       setUser(null);
       queryClient.clear();
-      
+
       toast({
         title: "Logout completato",
         description: "Disconnessione effettuata (con alcuni problemi di rete).",
         variant: "default"
       });
-      
+
       // Use window.location instead of navigate to avoid router context issues
       window.location.href = '/';
     } finally {
