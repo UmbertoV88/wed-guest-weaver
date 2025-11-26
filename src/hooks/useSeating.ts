@@ -88,7 +88,7 @@ export const useSeating = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, toast]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchData();
@@ -164,7 +164,7 @@ export const useSeating = () => {
         variant: "destructive",
       });
     }
-  }, [user?.id, toast]);
+  }, [user?.id]);
 
   // Delete table
   const deleteTable = useCallback(async (tableId: number) => {
@@ -201,7 +201,7 @@ export const useSeating = () => {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, []);
 
   // Move guest to table
   const moveGuest = useCallback(async (guestId: number, tableId?: number) => {
@@ -253,7 +253,7 @@ export const useSeating = () => {
       });
       fetchData();
     }
-  }, [user?.id, toast, fetchData]);
+  }, [user?.id, fetchData]);
   
   // Function to assign multiple guests to a table - VERSIONE CORRETTA
   const assignMultipleGuests = useCallback(async (guestIds: number[], tableId: number): Promise<void> => {
@@ -308,7 +308,7 @@ export const useSeating = () => {
         variant: "destructive",
       });
     }
-  }, [user?.id, tables, assignments, toast]);
+  }, [user?.id, tables, assignments]);
 
   // Update global capacity
   const updateGlobalCapacity = useCallback(async (newCapacity: number) => {
@@ -347,7 +347,7 @@ export const useSeating = () => {
         variant: "destructive",
       });
     }
-  }, [user?.id, toast]);
+  }, [user?.id]);
 
   // Export Excel
   const exportExcel = useCallback(async () => {
@@ -443,7 +443,7 @@ export const useSeating = () => {
         variant: "destructive",
       });
     }
-  }, [tables, guests, toast]);
+  }, [tables, guests]);
 
   return {
     tables,
