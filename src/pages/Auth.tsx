@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+
 import CommonHeader from '@/components/CommonHeader';
 import { signInSchema, signUpSchema, SignInInput, SignUpInput } from '@/schemas/authSchema';
 import { Eye, EyeOff } from 'lucide-react';
@@ -18,7 +18,6 @@ const Auth = () => {
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const { user, signIn, signUp } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'signup' ? 'signup' : 'signin';
@@ -52,18 +51,7 @@ const Auth = () => {
     const { error } = await signIn(data.email, data.password);
 
     if (error) {
-      toast({
-        title: "Errore di accesso",
-        description: error.message === 'Invalid login credentials'
-          ? "Email o password non corretti"
-          : error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Accesso effettuato!",
-        description: "Benvenuto nella gestione del tuo matrimonio.",
-      });
+      console.error('Sign in error:', error.message);
     }
 
     setLoading(false);
@@ -75,18 +63,8 @@ const Auth = () => {
     const { error } = await signUp(data.email, data.password, data.fullName);
 
     if (error) {
-      toast({
-        title: "Errore di registrazione",
-        description: error.message === 'User already registered'
-          ? "Utente già registrato con questa email"
-          : error.message,
-        variant: "destructive",
-      });
+      console.error('Sign up error:', error.message);
     } else {
-      toast({
-        title: "Registrazione completata!",
-        description: "Controlla la tua email per confermare l'account.",
-      });
       resetSignUp();
     }
 

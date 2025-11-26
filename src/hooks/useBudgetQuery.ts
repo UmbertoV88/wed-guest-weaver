@@ -6,7 +6,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import { budgetSettingsApi, budgetCategoriesApi, budgetItemsApi, budgetVendorsApi } from "@/services/budgetService";
 import type { BudgetCategory, BudgetItem, BudgetSettings } from "@/types/budget";
 
@@ -28,7 +27,6 @@ export const budgetQueryKeys = {
 
 export const useBudgetQuery = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // =====================================================
@@ -87,14 +85,14 @@ export const useBudgetQuery = () => {
     mutationFn: (totalBudget: number) => budgetSettingsApi.upsert({ total_budget: totalBudget }),
     onSuccess: (result, totalBudget) => {
       queryClient.setQueryData(budgetQueryKeys.settings(), result);
-      toast({
+      console.error("Toast removed:", {
         title: "Budget aggiornato",
         description: `Budget totale impostato a €${totalBudget.toLocaleString()}`,
         duration: 3000,
       });
     },
     onError: () => {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiornare il budget totale",
         variant: "destructive",
@@ -139,7 +137,7 @@ export const useBudgetQuery = () => {
       queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
       queryClient.invalidateQueries({ queryKey: [...budgetQueryKeys.categories(), 'available'] });
       
-      toast({
+      console.error("Toast removed:", {
         title: "Categoria attivata",
         description: "Categoria aggiunta al tuo budget",
         duration: 3000,
@@ -148,7 +146,7 @@ export const useBudgetQuery = () => {
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
       queryClient.setQueryData([...budgetQueryKeys.categories(), 'available'], context?.previousAvailable);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile attivare la categoria",
         variant: "destructive",
@@ -176,7 +174,7 @@ export const useBudgetQuery = () => {
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiornare la categoria",
         variant: "destructive",
@@ -236,7 +234,7 @@ export const useBudgetQuery = () => {
         description = `Categoria disattivata. Eliminati: ${parts.join(' e ')}`;
       }
 
-      toast({
+      console.error("Toast removed:", {
         title: "✅ Categoria eliminata",
         description,
         duration: 4000,
@@ -263,7 +261,7 @@ export const useBudgetQuery = () => {
         queryClient.setQueryData([...budgetQueryKeys.categories(), 'available'], context.previousAvailableCategories);
       }
       
-      toast({
+      console.error("Toast removed:", {
         title: "❌ Errore",
         description: "Impossibile eliminare la categoria. Riprova.",
         variant: "destructive",
@@ -322,7 +320,7 @@ export const useBudgetQuery = () => {
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiungere la spesa",
         variant: "destructive",
@@ -350,7 +348,7 @@ export const useBudgetQuery = () => {
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiornare lo stato del pagamento",
         variant: "destructive",
@@ -450,7 +448,7 @@ export const useBudgetQuery = () => {
           });
       }
 
-      toast({
+      console.error("Toast removed:", {
         title: "Fornitore aggiunto",
         description: `${variables.name} aggiunto con successo${variables.default_cost ? ` (costo: €${variables.default_cost.toLocaleString()})` : ""}`,
         duration: 3000,
@@ -458,7 +456,7 @@ export const useBudgetQuery = () => {
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), context?.previousVendors);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiungere il fornitore",
         variant: "destructive",
@@ -624,7 +622,7 @@ export const useBudgetQuery = () => {
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.categories() });
       await queryClient.invalidateQueries({ queryKey: budgetQueryKeys.items() });
 
-      toast({
+      console.error("Toast removed:", {
         title: "Fornitore aggiornato",
         description: "Fornitore e spese associate aggiornate con successo",
         duration: 3000,
@@ -634,7 +632,7 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), context?.previousVendors);
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiornare il fornitore",
         variant: "destructive",
@@ -691,7 +689,7 @@ export const useBudgetQuery = () => {
         budgetItemsApi.delete(item.id).catch(() => {});
       });
 
-      toast({
+      console.error("Toast removed:", {
         title: "Fornitore eliminato",
         description: `${context?.vendor.name} e le spese associate sono state rimosse`,
         duration: 3000,
@@ -701,7 +699,7 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.vendors(), context?.previousVendors);
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile eliminare il fornitore",
         variant: "destructive",
@@ -764,7 +762,7 @@ export const useBudgetQuery = () => {
       queryClient.setQueryData(budgetQueryKeys.items(), context?.previousItems);
       queryClient.setQueryData(budgetQueryKeys.categories(), context?.previousCategories);
 
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile registrare il pagamento",
         variant: "destructive",

@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar, Euro, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { ReminderDialog } from "./ReminderDialog";
 
 // Mock payments data dal Budget-calculator
@@ -43,7 +42,6 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
   const [paymentFilter, setPaymentFilter] = useState<"tutti" | "pagati" | "da_pagare" | "scaduti" | "urgenti">("tutti");
   const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
   const [selectedVendorForReminder, setSelectedVendorForReminder] = useState<any>(null);
-  const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("it-IT", {
@@ -112,7 +110,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
 
   const handleMarkAsPaid = (payment: any) => {
     if (!onMarkAsPaid) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Funzione di pagamento non disponibile",
         variant: "destructive",
@@ -122,7 +120,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
 
     const vendor = vendors.find((v) => v.id === payment.id);
     if (!vendor) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Fornitore non trovato",
         variant: "destructive",
@@ -444,7 +442,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
       onOpenChange={setReminderDialogOpen}
       vendor={selectedVendorForReminder}
       onReminderCreated={() => {
-        toast({
+        console.error("Toast removed:", {
           title: "✅ Promemoria Impostato",
           description: "Riceverai una notifica alla data selezionata"
         });

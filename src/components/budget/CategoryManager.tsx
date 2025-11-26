@@ -28,7 +28,6 @@ import {
   Euro,
   Loader2,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import AddVendorDialog from "./AddVendorDialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { budgetCategoriesApi, bombonieraApi, guestsApi } from "@/services/budgetService";
@@ -126,7 +125,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const [bombonieraCount, setBombonieraCount] = useState(0);
   const [confirmedGuestsCount, setConfirmedGuestsCount] = useState(0);
 
-  const { toast } = useToast();
 
   useEffect(() => {
     if (showAddForm && addFormRef.current) {
@@ -210,7 +208,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   const handleDeleteCategory = async (categoryId: string) => {
     const category = categories.find((cat) => cat.id === categoryId);
     if (!category) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Categoria non trovata",
         variant: "destructive",
@@ -233,7 +231,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       setDeleteDialogOpen(true);
     } catch (error) {
       console.error("Errore durante il recupero delle informazioni:", error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile recuperare le informazioni sulla categoria",
         variant: "destructive",
@@ -253,7 +251,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       // Toast viene gestito da useBudgetQuery.ts con i dettagli corretti
     } catch (error) {
       console.error("Errore durante l'eliminazione della categoria:", error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore durante l'eliminazione",
         description: "Si è verificato un errore. Riprova più tardi.",
         variant: "destructive",
@@ -376,7 +374,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
               <Button
                 onClick={async () => {
                   if (!newCategory.categoryId || !newCategory.estimatedCost) {
-                    toast({
+                    console.error("Toast removed:", {
                       title: "Errore",
                       description: "Compila tutti i campi obbligatori",
                       variant: "destructive",

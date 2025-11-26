@@ -10,7 +10,6 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { reminderApi } from "@/services/reminderService";
-import { useToast } from "@/hooks/use-toast";
 
 interface ReminderDialogProps {
   open: boolean;
@@ -25,7 +24,6 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
   vendor,
   onReminderCreated
 }) => {
-  const { toast } = useToast();
   const [date, setDate] = useState<Date>();
   const [customMessage, setCustomMessage] = useState("");
   const [cancelAutoReminders, setCancelAutoReminders] = useState(false);
@@ -33,7 +31,7 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
 
   const handleSubmit = async () => {
     if (!date) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Seleziona una data per il promemoria",
         variant: "destructive"
@@ -59,7 +57,7 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
       });
 
       if (result) {
-        toast({
+        console.error("Toast removed:", {
           title: "✅ Promemoria creato",
           description: `Ti ricorderemo il ${format(date, 'dd MMMM yyyy', { locale: it })}`
         });
@@ -75,7 +73,7 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
       }
     } catch (error) {
       console.error('Error creating reminder:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile creare il promemoria",
         variant: "destructive"

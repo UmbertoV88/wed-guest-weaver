@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useIdleTimer } from '@/hooks/useIdleTimer';
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
 
@@ -34,7 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [signingOut, setSigningOut] = useState(false);
   const [showSessionWarning, setShowSessionWarning] = useState(false);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -115,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
 
       // Show success message
-      toast({
+      console.error("Toast removed:", {
         title: "Logout effettuato",
         description: "Sei stato disconnesso con successo.",
       });
@@ -131,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       queryClient.clear();
 
-      toast({
+      console.error("Toast removed:", {
         title: "Logout completato",
         description: "Disconnessione effettuata (con alcuni problemi di rete).",
         variant: "default"
@@ -153,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleIdleLogout = async () => {
     if (user && !signingOut) {
       setShowSessionWarning(false);
-      toast({
+      console.error("Toast removed:", {
         title: "Sessione scaduta",
         description: "Sei stato disconnesso per inattività.",
         variant: "destructive"
@@ -166,7 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setShowSessionWarning(false);
     // Reset the idle timer by calling resetTimer from useIdleTimer
     idleTimer.resetTimer();
-    toast({
+    console.error("Toast removed:", {
       title: "Sessione estesa",
       description: "La tua sessione è stata estesa con successo.",
     });

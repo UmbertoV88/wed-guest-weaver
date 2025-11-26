@@ -18,7 +18,7 @@ import {
   Edit
 } from "lucide-react";
 import { Guest, CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
-import { useToast } from "@/hooks/use-toast";
+
 import { guestFormSchema, GuestFormInput } from "@/schemas/guestSchema";
 
 interface EditGuestFormProps {
@@ -29,7 +29,6 @@ interface EditGuestFormProps {
 const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const { toast } = useToast();
 
   const {
     register,
@@ -137,11 +136,7 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
       await updateGuest(guest.id, data);
       resetForm();
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante la modifica dell'invitato.",
-        variant: "destructive",
-      });
+      console.error('Update guest error:', error);
     }
   });
 

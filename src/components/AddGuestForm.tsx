@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Plus, 
-  User, 
-  Users, 
-  AlertTriangle, 
-  ArrowRight, 
+import {
+  Plus,
+  User,
+  Users,
+  AlertTriangle,
+  ArrowRight,
   ArrowLeft,
   Check,
   X
 } from "lucide-react";
 import { Guest, CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
-import { useToast } from "@/hooks/use-toast";
+
 import { guestFormSchema, GuestFormInput } from "@/schemas/guestSchema";
 
 interface AddGuestFormProps {
@@ -27,7 +27,6 @@ interface AddGuestFormProps {
 const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const { toast } = useToast();
 
   const {
     register,
@@ -94,7 +93,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
 
   const updateCompanions = (count: number) => {
     const currentCompanions = fields;
-    
+
     if (count > currentCompanions.length) {
       for (let i = currentCompanions.length; i < count; i++) {
         append({ name: "", allergies: "", ageGroup: "Adulto" });
@@ -118,11 +117,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
       await addGuest(data);
       resetForm();
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante l'aggiunta dell'invitato.",
-        variant: "destructive",
-      });
+      console.error('Add guest error:', error);
     }
   });
 
@@ -136,7 +131,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <h3 className="text-xl font-semibold">Nome dell'invitato</h3>
               <p className="text-muted-foreground">Chi vuoi invitare al matrimonio?</p>
             </div>
-            
+
             <div>
               <Label htmlFor="name">Nome completo *</Label>
               <Input
@@ -149,7 +144,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
               )}
             </div>
-            
+
             <div>
               <Label htmlFor="ageGroup">Fascia d'età *</Label>
               <select
@@ -178,18 +173,17 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <h3 className="text-xl font-semibold">Categoria invitato</h3>
               <p className="text-muted-foreground">Come classifichi questo invitato?</p>
             </div>
-            
+
             <div className="grid gap-3">
               {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setValue("category", key as any)}
-                  className={`p-4 rounded-lg border-2 text-left transition-romantic ${
-                    category === key
+                  className={`p-4 rounded-lg border-2 text-left transition-romantic ${category === key
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-border hover:border-primary/50'
-                  }`}
+                    }`}
                 >
                   <span className="font-medium">{label}</span>
                 </button>
@@ -209,7 +203,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <h3 className="text-xl font-semibold">Accompagnatori</h3>
               <p className="text-muted-foreground">Quante persone accompagneranno {watch("name")}?</p>
             </div>
-            
+
             <div>
               <Label htmlFor="companionCount">Numero di accompagnatori</Label>
               <select
@@ -280,7 +274,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <h3 className="text-xl font-semibold">Allergeni e intolleranze</h3>
               <p className="text-muted-foreground">Informazioni importanti per il catering</p>
             </div>
-            
+
             <div>
               <Label htmlFor="allergies">Allergeni/intolleranze di {watch("name")}</Label>
               <Textarea
@@ -326,7 +320,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
               <h3 className="text-xl font-semibold">Riepilogo invitato</h3>
               <p className="text-muted-foreground">Controlla i dati prima di salvare</p>
             </div>
-            
+
             <Card className="p-4 bg-muted/30 border-primary/20">
               <div className="space-y-3">
                 <div>
@@ -376,7 +370,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
 
   if (!isOpen) {
     return (
-      <Button 
+      <Button
         onClick={() => setIsOpen(true)}
         size="lg"
         className="bg-hero text-white shadow-elegant hover:shadow-floating transition-romantic"
@@ -393,16 +387,16 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium">Passo {currentStep} di {totalSteps}</span>
-          <Button 
+          <Button
             onClick={resetForm}
-            variant="ghost" 
+            variant="ghost"
             size="sm"
           >
             <X className="w-4 h-4" />
           </Button>
         </div>
         <div className="w-full bg-muted rounded-full h-2">
-          <div 
+          <div
             className="bg-romantic h-2 rounded-full transition-romantic"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />

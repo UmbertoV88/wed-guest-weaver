@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useGuests } from "@/hooks/useGuests";
-import { useToast } from "@/hooks/use-toast";
+
 import AddGuestForm from "@/components/AddGuestForm";
 import GuestTabs from "@/components/GuestTabs";
 import CommonHeader from "@/components/CommonHeader";
@@ -17,7 +17,6 @@ import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 const DashboardLayout = () => {
   const { user, signOut, signingOut } = useAuth();
   const { profile, isWeddingOrganizer } = useProfile();
-  const { toast } = useToast();
   const {
     addGuest,
     getGuestsByStatus,

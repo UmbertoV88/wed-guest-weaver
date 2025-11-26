@@ -5,7 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { 
   budgetSettingsApi, 
   budgetCategoriesApi, 
@@ -20,7 +19,6 @@ import type { BudgetCategory, BudgetItem, BudgetSettings } from '@/types/budget'
 
 export const useBudget = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
 
   // State with explicit types
   const [settings, setSettings] = useState<BudgetSettings | null>(null);
@@ -63,7 +61,7 @@ export const useBudget = () => {
     } catch (err) {
       console.error('Error loading budget data');
       setError('Errore nel caricamento dei dati budget');
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile caricare i dati del budget',
         variant: 'destructive',
@@ -86,7 +84,7 @@ export const useBudget = () => {
 
       if (result) {
         setSettings(result);
-        toast({
+        console.error("Toast removed:", {
           title: 'Budget aggiornato',
           description: `Budget totale impostato a €${totalBudget.toLocaleString()}`,
         });
@@ -95,7 +93,7 @@ export const useBudget = () => {
       return false;
     } catch (err) {
       console.error('Error updating total budget');
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile aggiornare il budget totale',
         variant: 'destructive',
@@ -136,7 +134,7 @@ export const useBudget = () => {
         setAvailableCategories(prev => prev.filter(cat => cat.id !== categoryId));
         setCategories(prev => [...prev, result as any]);
         
-        toast({
+        console.error("Toast removed:", {
           title: 'Categoria attivata',
           description: 'Categoria aggiunta al tuo budget',
         });
@@ -146,7 +144,7 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error activating category');
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile attivare la categoria',
         variant: 'destructive',
@@ -189,7 +187,7 @@ export const useBudget = () => {
           prev.map((cat: any) => cat.id === id ? originalCategory : cat)
         );
       }
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile aggiornare la categoria',
         variant: 'destructive',
@@ -230,7 +228,7 @@ export const useBudget = () => {
           description = `Categoria disattivata. Eliminati: ${parts.join(' e ')}`;
         }
 
-        toast({
+        console.error("Toast removed:", {
           title: '✅ Categoria eliminata',
           description,
           duration: 4000,
@@ -253,7 +251,7 @@ export const useBudget = () => {
       
       await loadData(); // Ricarica per sicurezza
       
-      toast({
+      console.error("Toast removed:", {
         title: '❌ Errore',
         description: 'Impossibile eliminare la categoria. Riprova.',
         variant: 'destructive',
@@ -333,7 +331,7 @@ export const useBudget = () => {
             : cat
         )
       );
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile aggiungere la spesa',
         variant: 'destructive',
@@ -355,7 +353,7 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error toggling item paid status');
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile aggiornare lo stato del pagamento',
         variant: 'destructive',
@@ -426,7 +424,7 @@ export const useBudget = () => {
         });
       }
       
-      toast({
+      console.error("Toast removed:", {
         title: 'Fornitore aggiunto',
         description: `${data.name} aggiunto con successo${data.default_cost ? ` (costo: €${data.default_cost.toLocaleString()})` : ''}`,
       });
@@ -435,7 +433,7 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error adding vendor');
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile aggiungere il fornitore',
         variant: 'destructive',
@@ -458,7 +456,7 @@ export const useBudget = () => {
         setVendors(prev => 
           prev.map(vendor => vendor.id === id ? result as any : vendor)
         );
-        toast({
+        console.error("Toast removed:", {
           title: 'Fornitore aggiornato',
           description: 'Informazioni aggiornate con successo',
         });
@@ -478,7 +476,7 @@ export const useBudget = () => {
           prev.map(vendor => vendor.id === id ? previousVendor : vendor)
         );
       }
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile aggiornare il fornitore',
         variant: 'destructive',
@@ -490,7 +488,7 @@ export const useBudget = () => {
   const deleteVendor = async (id: string) => {
     const vendor = vendors.find(v => v.id === id);
     if (!vendor) {
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Fornitore non trovato',
         variant: 'destructive',
@@ -530,7 +528,7 @@ export const useBudget = () => {
       const success = await budgetVendorsApi.delete(id);
 
       if (success) {
-        toast({
+        console.error("Toast removed:", {
           title: 'Fornitore eliminato',
           description: `${vendor.name} e le spese associate sono state rimosse`,
         });
@@ -552,7 +550,7 @@ export const useBudget = () => {
       // ✅ ROLLBACK su errore
       setVendors(prev => [...prev, vendor]);
       setItems(prev => [...prev, ...vendorItems]);
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile eliminare il fornitore',
         variant: 'destructive',
@@ -577,7 +575,7 @@ export const useBudget = () => {
           )
         );
         
-        toast({
+        console.error("Toast removed:", {
           title: 'Pagamento registrato',
           description: `Pagamento di €${amount.toLocaleString()} registrato`,
         });
@@ -586,7 +584,7 @@ export const useBudget = () => {
       return null;
     } catch (err) {
       console.error('Error adding vendor payment');
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Impossibile registrare il pagamento',
         variant: 'destructive',

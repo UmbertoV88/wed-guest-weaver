@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, AlertTriangle, Calendar, PieChart, Settings, Users, CreditCard } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import CommonHeader from "@/components/CommonHeader";
@@ -58,9 +58,6 @@ const FinanceLayout = () => {
     const [activeTab, setActiveTab] = useState(() => {
       return localStorage.getItem('finance-active-tab') || "overview";
     });
-    const {
-      toast
-    } = useToast();
     useEffect(() => {
       localStorage.setItem('finance-active-tab', activeTab);
     }, [activeTab]);

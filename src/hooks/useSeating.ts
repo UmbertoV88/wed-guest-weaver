@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 const supabaseClient: any = supabase;
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import ExcelJS from 'exceljs';
 
@@ -34,7 +33,6 @@ export interface SeatingGuest {
 
 export const useSeating = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [tables, setTables] = useState<Table[]>([]);
   const [assignments, setAssignments] = useState<TableAssignment[]>([]);
   const [rawGuests, setRawGuests] = useState<any[]>([]);
@@ -82,7 +80,7 @@ export const useSeating = () => {
       setRawGuests(guestsQuery.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile caricare i dati. Riprova.",
         variant: "destructive",
@@ -130,7 +128,7 @@ export const useSeating = () => {
   // Add table
   const addTable = useCallback(async (tableData: { nome_tavolo: string; capacita_max: number; lato?: string }) => {
     if (!user?.id) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Utente non autenticato.",
         variant: "destructive",
@@ -154,13 +152,13 @@ export const useSeating = () => {
       if (response.error) throw response.error;
 
       setTables((prev) => [...prev, response.data]);
-      toast({
+      console.error("Toast removed:", {
         title: "Tavolo creato",
         description: "Il nuovo tavolo è stato aggiunto con successo.",
       });
     } catch (error) {
       console.error('Error creating table:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile creare il tavolo. Riprova.",
         variant: "destructive",
@@ -191,13 +189,13 @@ export const useSeating = () => {
       setTables((prev) => prev.filter((table) => table.id !== tableId));
       setAssignments((prev) => prev.filter((assignment) => assignment.tavolo_id !== tableId));
       
-      toast({
+      console.error("Toast removed:", {
         title: "Tavolo eliminato",
         description: "Il tavolo è stato rimosso con successo.",
       });
     } catch (error) {
       console.error('Error deleting table:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile eliminare il tavolo. Riprova.",
         variant: "destructive",
@@ -208,7 +206,7 @@ export const useSeating = () => {
   // Move guest to table
   const moveGuest = useCallback(async (guestId: number, tableId?: number) => {
     if (!user?.id) {  // AGGIUNGI QUESTO CONTROLLO
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Utente non autenticato.",
         variant: "destructive",
@@ -248,7 +246,7 @@ export const useSeating = () => {
       }
     } catch (error) {
       console.error('Error moving guest:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile spostare l'ospite. Riprova.",
         variant: "destructive",
@@ -260,7 +258,7 @@ export const useSeating = () => {
   // Function to assign multiple guests to a table - VERSIONE CORRETTA
   const assignMultipleGuests = useCallback(async (guestIds: number[], tableId: number): Promise<void> => {
     if (!user?.id) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Utente non autenticato.",
         variant: "destructive",
@@ -298,13 +296,13 @@ export const useSeating = () => {
       // Update local state
       setAssignments((prev) => [...prev, ...(data || [])]);
       
-      toast({
+      console.error("Toast removed:", {
         title: "Successo",
         description: `${guestIds.length} ospiti assegnati al ${table.nome_tavolo}`,
       });
     } catch (error) {
       console.error('Error assigning multiple guests:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: error instanceof Error ? error.message : "Errore nell'assegnazione degli ospiti",
         variant: "destructive",
@@ -315,7 +313,7 @@ export const useSeating = () => {
   // Update global capacity
   const updateGlobalCapacity = useCallback(async (newCapacity: number) => {
     if (!user?.id) {
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Utente non autenticato.",
         variant: "destructive",
@@ -337,13 +335,13 @@ export const useSeating = () => {
       // Update local state
       setTables((prev) => prev.map((table) => ({ ...table, capacita_max: newCapacity })));
 
-      toast({
+      console.error("Toast removed:", {
         title: "Capienza aggiornata",
         description: "La capienza di tutti i tavoli è stata aggiornata.",
       });
     } catch (error) {
       console.error('Error updating capacity:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Impossibile aggiornare la capienza. Riprova.",
         variant: "destructive",
@@ -433,13 +431,13 @@ export const useSeating = () => {
         a.remove();
       }, 1000);
       
-      toast({
+      console.error("Toast removed:", {
         title: "Excel esportato",
         description: "Il file della disposizione tavoli è stato scaricato con formattazione.",
       });
     } catch (error) {
       console.error('Errore durante l\'esportazione:', error);
-      toast({
+      console.error("Toast removed:", {
         title: "Errore",
         description: "Si è verificato un errore durante l'esportazione del file.",
         variant: "destructive",

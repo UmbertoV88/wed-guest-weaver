@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import EditGuestForm from "@/components/EditGuestForm";
 import { Guest, CATEGORY_LABELS, GuestStatus, AGE_GROUP_LABELS, AgeGroup, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
-import { useToast } from "@/hooks/use-toast";
+
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -56,7 +56,6 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     description: "",
     onConfirm: () => { }
   });
-  const { toast } = useToast();
 
   // Filter guests based on search and category
   const filteredGuests = guests.filter(guest => {
@@ -72,11 +71,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     try {
       await confirmGuestOnly(guestId);
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante la conferma.",
-        variant: "destructive",
-      });
+      console.error('Confirm guest error:', error);
     }
   };
 
@@ -84,11 +79,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     try {
       await restoreGuest(guestId);
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante il ripristino.",
-        variant: "destructive",
-      });
+      console.error('Restore guest error:', error);
     }
   };
 
@@ -96,11 +87,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     try {
       await deleteGuest(guestId);
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante l'eliminazione.",
-        variant: "destructive",
-      });
+      console.error('Delete guest error:', error);
     }
   };
 
@@ -113,11 +100,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
         try {
           await permanentlyDeleteGuest(guestId);
         } catch (error) {
-          toast({
-            title: "Errore",
-            description: "Si è verificato un errore durante l'eliminazione permanente.",
-            variant: "destructive",
-          });
+          console.error('Permanent delete error:', error);
         }
       }
     });
@@ -127,11 +110,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     try {
       await revertGuestOnly(guestId);
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante l'operazione.",
-        variant: "destructive",
-      });
+      console.error('Revert guest error:', error);
     }
   };
 
@@ -139,11 +118,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     try {
       await confirmGuestAndAllCompanions(guestId);
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante la conferma del gruppo.",
-        variant: "destructive",
-      });
+      console.error('Confirm all error:', error);
     }
   };
 
@@ -151,11 +126,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
     try {
       await updateGuestStatus(guestId, 'pending');
     } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante l'operazione.",
-        variant: "destructive",
-      });
+      console.error('Update status error:', error);
     }
   };
 

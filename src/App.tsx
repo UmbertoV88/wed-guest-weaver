@@ -1,5 +1,5 @@
 import React from "react";
-import { Toaster } from "@/components/ui/toaster";
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,13 +16,20 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Non ricaricare quando torni sulla tab
+      refetchOnReconnect: false,   // Non ricaricare quando la connessione si ripristina
+      retry: 1,                     // Riprova solo 1 volta in caso di errore
+    },
+  },
+});
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
         <Sonner />
         <BrowserRouter>
           <AuthProvider>

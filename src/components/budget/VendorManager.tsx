@@ -40,7 +40,6 @@ import {
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 //import { useBudget } from '@/hooks/useBudget';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
@@ -112,7 +111,6 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<any>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
-  const { toast } = useToast();
 
   useEffect(() => {
     if (showAddForm && formRef.current) {
@@ -506,7 +504,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
-      toast({
+      console.error("Toast removed:", {
         title: 'Errore',
         description: 'Inserisci un importo valido',
         variant: 'destructive'

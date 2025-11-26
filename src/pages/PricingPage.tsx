@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+
 import { stripeService } from '@/services/stripeService';
 import { STRIPE_PRICES } from '@/types/subscription';
 import { Check, Sparkles, Crown } from 'lucide-react';
 
 const PricingPage: React.FC = () => {
     const navigate = useNavigate();
-    const { toast } = useToast();
     const [loadingPlan, setLoadingPlan] = useState<'monthly' | 'yearly' | null>(null);
 
     const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
@@ -33,11 +32,6 @@ const PricingPage: React.FC = () => {
             window.location.href = url;
         } catch (error) {
             console.error('Error creating checkout:', error);
-            toast({
-                title: 'Errore',
-                description: 'Impossibile avviare il pagamento. Riprova più tardi.',
-                variant: 'destructive'
-            });
             setLoadingPlan(null);
         }
     };

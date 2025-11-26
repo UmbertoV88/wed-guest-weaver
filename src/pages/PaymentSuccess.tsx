@@ -3,19 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+
 
 const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
-    const { toast } = useToast();
-
-    useEffect(() => {
-        // Show success toast
-        toast({
-            title: 'Pagamento completato! 🎉',
-            description: 'Il tuo abbonamento è stato attivato con successo.',
-        });
-    }, [toast]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
