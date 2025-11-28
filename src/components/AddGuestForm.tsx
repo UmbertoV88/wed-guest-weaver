@@ -27,6 +27,7 @@ interface AddGuestFormProps {
 const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [attemptedNext, setAttemptedNext] = useState(false);
 
   const {
     register,
@@ -82,8 +83,10 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   };
 
   const nextStep = () => {
+    setAttemptedNext(true);
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+      setAttemptedNext(false);
     }
   };
 
@@ -110,6 +113,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
     reset();
     setCurrentStep(1);
     setIsOpen(false);
+    setAttemptedNext(false);
   };
 
   const onSubmit = handleSubmit(async (data: GuestFormInput) => {
@@ -138,10 +142,12 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 id="name"
                 {...register("name")}
                 placeholder="Es: Mario Rossi"
-                className={errors.name ? 'border-destructive' : ''}
+                className={errors.name || (attemptedNext && !watch("name")?.trim()) ? 'border-destructive' : ''}
               />
-              {errors.name && (
-                <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
+              {(errors.name || (attemptedNext && !watch("name")?.trim())) && (
+                <p className="text-destructive text-sm mt-1">
+                  {errors.name?.message || "Il nome è obbligatorio"}
+                </p>
               )}
             </div>
 
@@ -181,8 +187,8 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                   type="button"
                   onClick={() => setValue("category", key as any)}
                   className={`p-4 rounded-lg border-2 text-left transition-romantic ${category === key
-                      ? 'border-primary bg-primary/5 text-primary'
-                      : 'border-border hover:border-primary/50'
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border hover:border-primary/50'
                     }`}
                 >
                   <span className="font-medium">{label}</span>
@@ -382,7 +388,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
   }
 
   return (
-    <Card className="p-6 shadow-elegant border-primary/20 animate-fade-in-up">
+    <Card className="p-6 shadow-elegant border-primary/20 animate-fade-in-up min-w-[460px] w-full max-w-[30rem] mx-auto">
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
@@ -404,7 +410,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
       </div>
 
       {/* Step content */}
-      <div className="mb-6">
+      <div className="mb-6 min-h-[280px]">
         {renderStepContent()}
       </div>
 
