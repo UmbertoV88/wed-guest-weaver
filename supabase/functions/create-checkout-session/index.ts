@@ -1,4 +1,6 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+// @deno-types="https://deno.land/x/deno@v1.37.0/cli/tsc/dts/lib.deno.d.ts"
+declare const Deno: any
+
 import Stripe from 'https://esm.sh/stripe@14.11.0?target=deno'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -11,14 +13,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { priceId, successUrl, cancelUrl } = await req.json()
+    const { priceId, successUrl, cancelUrl, skipTrial } = await req.json()
 
     // Get the user from the Authorization header
     const authHeader = req.headers.get('Authorization')
@@ -34,14 +36,15 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Get user from JWT
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    const { data: { user }, error: userError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
     
     if (userError || !user) {
       throw new Error('Invalid user token')
     }
 
-    // Check if user already has a Stripe customer ID
+    // Get or create Stripe customer ID
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id')
@@ -50,7 +53,7 @@ serve(async (req) => {
 
     let customerId = profile?.stripe_customer_id
 
-    // Create Stripe customer if doesn't exist
+    // If no customer exists, create one
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -58,19 +61,18 @@ serve(async (req) => {
           supabase_user_id: user.id,
         },
       })
+      
       customerId = customer.id
-
-      // Update profiles with customer ID
+      
+      // Save customer ID to profile
       await supabase
         .from('profiles')
-        .update({
-          stripe_customer_id: customerId
-        })
+        .update({ stripe_customer_id: customerId })
         .eq('user_id', user.id)
     }
 
     // Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: any = {
       customer: customerId,
       line_items: [
         {
@@ -89,7 +91,14 @@ serve(async (req) => {
           supabase_user_id: user.id,
         },
       },
-    })
+    }
+
+    // Only add trial period if skipTrial is false or undefined
+    if (!skipTrial) {
+      sessionConfig.subscription_data.trial_period_days = 2 // Start with 48 hours (2 days) free trial before charging
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig)
 
     return new Response(
       JSON.stringify({
@@ -104,7 +113,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error creating checkout session:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'An unknown error occurred' 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,

@@ -76,16 +76,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Initialize trial period for new user
-    if (!error && data.user) {
-      try {
-        const { stripeService } = await import('@/services/stripeService');
-        await stripeService.initializeTrialPeriod(data.user.id);
-      } catch (trialError) {
-        console.error('Error initializing trial:', trialError);
-        // Don't fail signup if trial initialization fails
-      }
-    }
+    // Trial initialization moved to PricingPage
+    // if (!error && data.user) { ... }
 
     return { error };
   };

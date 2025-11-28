@@ -198,6 +198,25 @@ const DashboardSidebar = ({
           </>
         )}
 
+        {/* Manage Subscription Button */}
+        {!collapsed && (
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-3"
+            onClick={async () => {
+              try {
+                const { url } = await import('@/services/stripeService').then(m => m.stripeService.createPortalSession(window.location.href));
+                window.location.href = url;
+              } catch (error) {
+                console.error('Error opening portal:', error);
+              }
+            }}
+          >
+            <DollarSign className="w-4 h-4" />
+            <span>Gestisci Abbonamento</span>
+          </Button>
+        )}
+
         {/* Logout Button */}
         {onSignOut && (
           <LogoutConfirmDialog

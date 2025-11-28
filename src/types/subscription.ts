@@ -54,14 +54,14 @@ export interface StripePriceConfig {
  */
 export const STRIPE_PRICES: Record<'monthly' | 'yearly', StripePriceConfig> = {
   monthly: {
-    priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY || 'price_1SVy95BEIoyzReo7H2GrsKlA',
+    priceId: import.meta.env.VITE_STRIPE_PRICE_MONTHLY || 'price_1SXj4CBEIoyzReo76fGqMtUC',
     amount: 19.90,
     currency: 'EUR',
     interval: 'month',
     displayName: 'Piano Mensile'
   },
   yearly: {
-    priceId: import.meta.env.VITE_STRIPE_PRICE_YEARLY || 'price_1SVy9UBEIoyzReo7fRxHFuJD',
+    priceId: import.meta.env.VITE_STRIPE_PRICE_YEARLY || 'price_1SXiuDBEIoyzReo7I7KzrqzM',
     amount: 179.90,
     currency: 'EUR',
     interval: 'year',
@@ -77,6 +77,7 @@ export interface CreateCheckoutSessionRequest {
   priceId: string;
   successUrl: string;
   cancelUrl: string;
+  skipTrial?: boolean;
 }
 
 export interface CreateCheckoutSessionResponse {
@@ -101,7 +102,17 @@ export interface CreatePortalSessionResponse {
  */
 export function hasActiveSubscription(subscription: UserSubscription | null): boolean {
   if (!subscription) return false;
-  return subscription.subscription_status === 'active' || subscription.subscription_status === 'trialing';
+  
+  if (subscription.subscription_status === 'active') return true;
+  
+  if (subscription.subscription_status === 'trialing') {
+    // Check if trial is still valid based on date
+    if (!subscription.trial_ends_at) return false;
+    const trialEnd = new Date(subscription.trial_ends_at);
+    return trialEnd > new Date();
+  }
+  
+  return false;
 }
 
 /**

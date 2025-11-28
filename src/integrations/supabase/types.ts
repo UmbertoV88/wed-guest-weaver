@@ -365,6 +365,17 @@ export type Database = {
           updated_at: string
           user_id: string
           wedding_date: string | null
+          // Subscription fields
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: 'active' | 'inactive' | 'trialing' | 'past_due' | 'canceled'
+          subscription_type: 'monthly' | 'yearly' | 'lifetime'
+          amount_paid: number | null
+          currency: string
+          trial_ends_at: string | null
+          current_period_start: string | null
+          current_period_end: string | null
+          canceled_at: string | null
         }
         Insert: {
           created_at?: string
@@ -375,6 +386,17 @@ export type Database = {
           updated_at?: string
           user_id: string
           wedding_date?: string | null
+          // Subscription fields
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: 'active' | 'inactive' | 'trialing' | 'past_due' | 'canceled'
+          subscription_type?: 'monthly' | 'yearly' | 'lifetime'
+          amount_paid?: number | null
+          currency?: string
+          trial_ends_at?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          canceled_at?: string | null
         }
         Update: {
           created_at?: string
@@ -385,6 +407,17 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wedding_date?: string | null
+          // Subscription fields
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: 'active' | 'inactive' | 'trialing' | 'past_due' | 'canceled'
+          subscription_type?: 'monthly' | 'yearly' | 'lifetime'
+          amount_paid?: number | null
+          currency?: string
+          trial_ends_at?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          canceled_at?: string | null
         }
         Relationships: []
       }

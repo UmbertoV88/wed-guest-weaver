@@ -15,6 +15,7 @@ import PricingPage from "./pages/PricingPage";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedPricingRoute from "./components/ProtectedPricingRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,7 +37,11 @@ function App() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/pricing" element={
+                <ProtectedPricingRoute>
+                  <PricingPage />
+                </ProtectedPricingRoute>
+              } />
               <Route path="/payment/success" element={<PaymentSuccess />} />
               <Route path="/payment/canceled" element={<PaymentCanceled />} />
               <Route path="/dashboard" element={

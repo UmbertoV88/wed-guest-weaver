@@ -1,12 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 
 const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { subscription, loading, refetch } = useSubscription();
+    const [checkingStatus, setCheckingStatus] = useState(true);
+    const [retryCount, setRetryCount] = useState(0);
+
+    // Check subscription status and retry if webhook hasn't updated yet
+    useEffect(() => {
+        if (!user || loading) return;
+
+        const checkSubscription = async () => {
+            // If subscription is active, we're good
+            if (subscription?.subscription_status === 'active' || subscription?.subscription_status === 'trialing') {
+                setCheckingStatus(false);
+                return;
+            }
+
+            // If we've tried less than 5 times, retry after a delay
+            if (retryCount < 5) {
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff, max 10s
+                console.log(`Subscription not active yet, retrying in ${delay}ms... (attempt ${retryCount + 1}/5)`);
+
+                setTimeout(() => {
+                    refetch?.();
+                    setRetryCount(prev => prev + 1);
+                }, delay);
+            } else {
+                // After 5 retries, stop checking
+                console.log('Webhook may be delayed. Subscription will update shortly.');
+                setCheckingStatus(false);
+            }
+        };
+
+        checkSubscription();
+    }, [user, loading, subscription, retryCount, refetch]);
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">

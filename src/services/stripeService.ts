@@ -18,8 +18,8 @@ class StripeService {
   async getSubscription(userId: string): Promise<UserSubscription | null> {
     try {
       const { data, error } = await supabase
-        .from('profiles' as any)
-        .select('*')
+        .from('profiles')
+        .select('id, user_id, stripe_customer_id, stripe_subscription_id, subscription_status, subscription_type, amount_paid, currency, trial_ends_at, current_period_start, current_period_end, canceled_at, created_at, updated_at')
         .eq('user_id', userId)
         .single();
 
@@ -29,6 +29,11 @@ class StripeService {
           return null;
         }
         throw error;
+      }
+
+      // Type guard: verify data has required properties
+      if (!data || typeof data !== 'object') {
+        return null;
       }
 
       return data as UserSubscription;
@@ -44,14 +49,16 @@ class StripeService {
   async createCheckoutSession(
     priceId: string,
     successUrl: string,
-    cancelUrl: string
+    cancelUrl: string,
+    skipTrial: boolean = false
   ): Promise<CreateCheckoutSessionResponse> {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           priceId,
           successUrl,
-          cancelUrl
+          cancelUrl,
+          skipTrial
         } as CreateCheckoutSessionRequest
       });
 
@@ -96,7 +103,7 @@ class StripeService {
       trialEndsAt.setHours(trialEndsAt.getHours() + 48);
 
       const { data, error} = await supabase
-        .from('profiles' as any)
+        .from('profiles')
         .update({
           subscription_status: 'trialing',
           subscription_type: 'monthly', // Default to monthly after trial
@@ -104,10 +111,15 @@ class StripeService {
           trial_ends_at: trialEndsAt.toISOString()
         })
         .eq('user_id', userId)
-        .select()
+        .select('id, user_id, stripe_customer_id, stripe_subscription_id, subscription_status, subscription_type, amount_paid, currency, trial_ends_at, current_period_start, current_period_end, canceled_at, created_at, updated_at')
         .single();
 
       if (error) throw error;
+
+      // Type guard: verify data has required properties
+      if (!data || typeof data !== 'object') {
+        return null;
+      }
 
       return data as UserSubscription;
     } catch (error) {
