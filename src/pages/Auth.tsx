@@ -103,6 +103,7 @@ const Auth = () => {
                         id="signin-email"
                         type="email"
                         placeholder="tua@email.com"
+                        className={signInErrors.email ? "border-destructive" : ""}
                       />
                       {signInErrors.email && (
                         <p className="text-destructive text-sm">{signInErrors.email.message}</p>
@@ -116,7 +117,7 @@ const Auth = () => {
                           id="signin-password"
                           type={showSignInPassword ? "text" : "password"}
                           placeholder="La tua password"
-                          className="pr-10"
+                          className={`pr-10 ${signInErrors.password ? "border-destructive" : ""}`}
                         />
                         <button
                           type="button"
@@ -149,6 +150,7 @@ const Auth = () => {
                         id="signup-name"
                         type="text"
                         placeholder="Il tuo nome completo"
+                        className={signUpErrors.fullName ? "border-destructive" : ""}
                       />
                       {signUpErrors.fullName && (
                         <p className="text-destructive text-sm">{signUpErrors.fullName.message}</p>
@@ -161,6 +163,7 @@ const Auth = () => {
                         id="signup-email"
                         type="email"
                         placeholder="tua@email.com"
+                        className={signUpErrors.email ? "border-destructive" : ""}
                       />
                       {signUpErrors.email && (
                         <p className="text-destructive text-sm">{signUpErrors.email.message}</p>
@@ -174,7 +177,7 @@ const Auth = () => {
                           id="signup-password"
                           type={showSignUpPassword ? "text" : "password"}
                           placeholder="Crea una password (min. 8 caratteri)"
-                          className="pr-10"
+                          className={`pr-10 ${signUpErrors.password ? "border-destructive" : ""}`}
                         />
                         <button
                           type="button"
