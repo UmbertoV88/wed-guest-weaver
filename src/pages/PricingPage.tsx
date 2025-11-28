@@ -110,7 +110,7 @@ const PricingPage: React.FC = () => {
                         <CardContent className="space-y-6 flex-1">
                             <div>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-4xl font-bold text-gray-900">€{monthlyPrice?.amount}</span>
+                                    <span className="text-4xl font-bold text-gray-900">€{monthlyPrice?.amount.toFixed(2)}</span>
                                     <span className="text-gray-500">/mese</span>
                                 </div>
                                 {!hasUsedTrial && (
@@ -154,7 +154,7 @@ const PricingPage: React.FC = () => {
                             </Button>
                             {!hasUsedTrial && (
                                 <p className="text-xs text-center text-muted-foreground w-full mt-2">
-                                    Poi €{monthlyPrice?.amount}/mese. Cancella quando vuoi.
+                                    Poi €{monthlyPrice?.amount.toFixed(2)}/mese. Cancella quando vuoi.
                                 </p>
                             )}
                         </CardFooter>
@@ -180,7 +180,7 @@ const PricingPage: React.FC = () => {
                                     <span className="text-gray-500">/mese</span>
                                 </div>
                                 <p className="text-sm text-gray-500 mt-1">
-                                    Fatturato annualmente (€{yearlyPrice?.amount}/anno)
+                                    Fatturato annualmente (€{yearlyPrice?.amount.toFixed(2)}/anno)
                                 </p>
                                 {!hasUsedTrial && (
                                     <p className="text-xs text-muted-foreground mt-1">
@@ -228,7 +228,7 @@ const PricingPage: React.FC = () => {
                             </Button>
                             {!hasUsedTrial && (
                                 <p className="text-xs text-center text-muted-foreground w-full mt-2">
-                                    Poi €{yearlyPrice?.amount}/anno. Cancella quando vuoi.
+                                    Poi €{yearlyPrice?.amount.toFixed(2)}/anno. Cancella quando vuoi.
                                 </p>
                             )}
                         </CardFooter>
