@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSeating } from "@/hooks/useSeating";
+import { useSubscription } from "@/hooks/useSubscription";
+import { isInTrialPeriod } from "@/types/subscription";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,9 +13,13 @@ import { Loader2, Plus, Download, RotateCcw } from "lucide-react";
 import TableCard from "./TableCard";
 import UnassignedGuests from "./UnassignedGuests";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 //import TrashZone from "./TrashZone";
 
 const SeatingEditor = () => {
+  const { subscription } = useSubscription();
+  const isInTrial = isInTrialPeriod(subscription);
+
   const {
     tables,
     guests,
@@ -84,10 +90,10 @@ const SeatingEditor = () => {
           <CardContent>
             <div className="space-y-4">
               <Label htmlFor="capacity">Capienza massima per tavolo</Label>
-              
+
               {/* Container principale: colonna su mobile/tablet, riga su desktop */}
               <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
-                
+
                 {/* GRUPPO 1: Input + Aggiungi Tavolo */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 sm:items-end">
                   <Input
@@ -98,7 +104,7 @@ const SeatingEditor = () => {
                     onChange={(e) => handleCapacityChange(parseInt(e.target.value) || 1)}
                     className="w-20"
                   />
-                  
+
                   <Button
                     onClick={handleAddTable}
                     disabled={isAddingTable}
@@ -113,20 +119,31 @@ const SeatingEditor = () => {
                     Aggiungi Tavolo
                   </Button>
                 </div>
-                
+
                 {/* GRUPPO 2: Scarica CSV + Reset */}
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button onClick={exportExcel} variant="outline" className="w-full sm:w-auto">
-                    <Download className="h-4 w-4 mr-2" />
-                    Esporta Excel
-                  </Button>
-                  
+                  <SimpleTooltip
+                    content={isInTrial ? "Funzione disponibile solo per utenti Premium" : "Esporta lista tavoli in Excel"}
+                  >
+                    <span className="w-full sm:w-auto">
+                      <Button
+                        onClick={exportExcel}
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                        disabled={isInTrial}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Esporta Excel
+                      </Button>
+                    </span>
+                  </SimpleTooltip>
+
                   <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Reset
                   </Button>
                 </div>
-                
+
               </div>
             </div>
           </CardContent>
@@ -136,14 +153,14 @@ const SeatingEditor = () => {
 
         {/* Unassigned guests */}
         {unassignedGuests.length > 0 && (
-        <UnassignedGuests 
-          guests={unassignedGuests} 
-          tables={tables.map(table => ({
-            ...table,
-            currentGuests: assignments.filter(a => a.tavolo_id === table.id).length
-          }))}
-          onAssignMultipleGuests={assignMultipleGuests}
-        />
+          <UnassignedGuests
+            guests={unassignedGuests}
+            tables={tables.map(table => ({
+              ...table,
+              currentGuests: assignments.filter(a => a.tavolo_id === table.id).length
+            }))}
+            onAssignMultipleGuests={assignMultipleGuests}
+          />
         )}
 
         {/* Tables grid */}
@@ -194,7 +211,7 @@ const SeatingEditor = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       <ConfirmDialog
         open={showResetDialog}
         onOpenChange={setShowResetDialog}
