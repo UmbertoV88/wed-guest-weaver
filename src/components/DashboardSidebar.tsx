@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Calendar, ChevronDown, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart, Utensils, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
@@ -55,7 +55,7 @@ const DashboardSidebar = ({
   onSignOut,
   signingOut = false
 }: DashboardSidebarProps) => {
-  const { user: authUser, profile: authProfile } = useAuth();
+  const { user: authUser, profile: authProfile, refreshProfile } = useAuth();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const collapsed = state === "collapsed";
@@ -65,7 +65,11 @@ const DashboardSidebar = ({
   // Use profile from props if provided (for compatibility), otherwise from AuthContext
   const currentProfile = profile || authProfile;
   const currentUser = user || authUser;
-  const weddingDate = currentProfile?.wedding_date ? new Date(currentProfile.wedding_date) : undefined;
+
+  // Use useMemo to ensure weddingDate updates when profile changes
+  const weddingDate = useMemo(() => {
+    return currentProfile?.wedding_date ? new Date(currentProfile.wedding_date) : undefined;
+  }, [currentProfile?.wedding_date]);
 
   useEffect(() => {
     if (!weddingDate) return;
@@ -81,7 +85,7 @@ const DashboardSidebar = ({
       if (days < 0) {
         setCountdown("Matrimonio celebrato! 💕");
       } else if (days === 0) {
-        setCountdown("È oggi! 🎉");
+        setCountdown("Oggi sposi! 💍");
       } else {
         setCountdown(`${days} ${days === 1 ? 'giorno' : 'giorni'}`);
       }
@@ -110,8 +114,10 @@ const DashboardSidebar = ({
 
       if (error) throw error;
 
+      // Refresh profile in AuthContext to update UI immediately
+      await refreshProfile();
+
       setIsCalendarOpen(false);
-      // Profile will be automatically updated via AuthContext
     } catch (error) {
       console.error('Errore salvando la data:', error);
     }
@@ -171,9 +177,11 @@ const DashboardSidebar = ({
                     <div className="text-sm font-semibold text-primary-deep">
                       {countdown}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      al grande giorno
-                    </div>
+                    {!countdown.includes('💕') && !countdown.includes('💍') && (
+                      <div className="text-xs text-muted-foreground">
+                        al grande giorno
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

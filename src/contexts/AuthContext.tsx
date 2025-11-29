@@ -26,6 +26,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: (showConfirmation?: boolean) => Promise<void>;
   extendSession: () => void;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,26 +49,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const queryClient = useQueryClient();
 
   // Fetch profile data when user changes
-  useEffect(() => {
-    const fetchProfile = async (userId: string) => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-        if (!error && data) {
-          setProfile(data as UserProfile);
-        } else {
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
+      if (!error && data) {
+        setProfile(data as UserProfile);
+      } else {
         setProfile(null);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    }
+  };
 
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
+    }
+  };
+
+  useEffect(() => {
     if (user?.id) {
       fetchProfile(user.id);
     } else {
@@ -222,6 +229,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     extendSession,
+    refreshProfile,
   };
 
   return (

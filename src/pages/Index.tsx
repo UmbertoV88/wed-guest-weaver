@@ -47,9 +47,6 @@ const DashboardLayout = () => {
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
       <DashboardSidebar
-        user={user}
-        profile={profile}
-        isWeddingOrganizer={isWeddingOrganizer}
         onSignOut={handleSignOut}
         signingOut={signingOut}
       />

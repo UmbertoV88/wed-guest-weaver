@@ -75,9 +75,6 @@ const Profile = () => {
         <SidebarProvider>
             <div className="flex min-h-screen w-full bg-gray-50">
                 <DashboardSidebar
-                    user={user}
-                    profile={profile}
-                    isWeddingOrganizer={isWeddingOrganizer}
                     onSignOut={signOut}
                     signingOut={signingOut}
                 />

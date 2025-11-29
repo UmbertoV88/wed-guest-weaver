@@ -273,7 +273,7 @@ const FinanceLayout = () => {
     </div>;
   };
   return <div className="flex min-h-screen w-full">
-    <DashboardSidebar user={user} profile={profile} isWeddingOrganizer={true} onSignOut={signOut} signingOut={authLoading} />
+    <DashboardSidebar onSignOut={signOut} signingOut={authLoading} />
 
     <SidebarInset className="flex-1 flex flex-col">
       <CommonHeader showSidebarTrigger={true} />
