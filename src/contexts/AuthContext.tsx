@@ -5,9 +5,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useIdleTimer } from '@/hooks/useIdleTimer';
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
 
+interface UserProfile {
+  id: string;
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  is_wedding_organizer: boolean;
+  wedding_date?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  profile: UserProfile | null;
   loading: boolean;
   signingOut: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -29,10 +41,39 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
   const [showSessionWarning, setShowSessionWarning] = useState(false);
   const queryClient = useQueryClient();
+
+  // Fetch profile data when user changes
+  useEffect(() => {
+    const fetchProfile = async (userId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
+        if (!error && data) {
+          setProfile(data as UserProfile);
+        } else {
+          setProfile(null);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(null);
+      }
+    };
+
+    if (user?.id) {
+      fetchProfile(user.id);
+    } else {
+      setProfile(null);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -174,6 +215,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     session,
+    profile,
     loading,
     signingOut,
     signIn,

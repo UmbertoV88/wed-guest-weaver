@@ -14,6 +14,7 @@ import Finance from "./pages/Finance";
 import PricingPage from "./pages/PricingPage";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedPricingRoute from "./components/ProtectedPricingRoute";
 
@@ -57,6 +58,11 @@ function App() {
               <Route path="/finanza" element={
                 <ProtectedRoute>
                   <Finance />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

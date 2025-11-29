@@ -22,12 +22,28 @@ export const useProfile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      // 1. Try to load from cache first
+      const cacheKey = user ? `wedding_user_profile_${user.id}` : null;
+      if (cacheKey) {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            setProfile(JSON.parse(cached));
+            setLoading(false); // Show cached data immediately
+          } catch (e) {
+            console.error('Error parsing cached profile:', e);
+            localStorage.removeItem(cacheKey);
+          }
+        }
+      }
+
       if (!user) {
         setProfile(null);
         setLoading(false);
         return;
       }
 
+      // 2. Fetch from DB (background update)
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -37,16 +53,26 @@ export const useProfile = () => {
 
         if (error) {
           console.error('Error fetching profile:', error);
-          setProfile(null);
+          if (!cacheKey || !localStorage.getItem(cacheKey)) {
+             setProfile(null);
+          }
         } else {
-          setProfile({
+          const newProfile = {
             ...(data as any),
             wedding_date: (data as any).wedding_date || null
-          });
+          };
+          
+          // Update state and cache
+          setProfile(newProfile);
+          if (cacheKey) {
+            localStorage.setItem(cacheKey, JSON.stringify(newProfile));
+          }
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        setProfile(null);
+        if (!cacheKey || !localStorage.getItem(cacheKey)) {
+           setProfile(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -68,17 +94,18 @@ export const useProfile = () => {
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', user.id)
-      .select()  // <-- AGGIUNGI .select() per ottenere i dati aggiornati
+      .select()
       .single();
     
     if (error) throw error;
     
-    // AGGIUNGI: Aggiorna lo stato locale immediatamente
     if (data) {
-      setProfile({
+      const newProfile = {
         ...(data as any),
         wedding_date: (data as any).wedding_date || null
-      });
+      };
+      setProfile(newProfile);
+      localStorage.setItem(`wedding_user_profile_${user.id}`, JSON.stringify(newProfile));
     }
   };
 
@@ -99,10 +126,14 @@ export const useProfile = () => {
           .eq('user_id', user.id)
           .single();
         
-        if (data) setProfile({
-          ...(data as any),
-          wedding_date: (data as any).wedding_date || null
-        });
+        if (data) {
+          const newProfile = {
+            ...(data as any),
+            wedding_date: (data as any).wedding_date || null
+          };
+          setProfile(newProfile);
+          localStorage.setItem(`wedding_user_profile_${user.id}`, JSON.stringify(newProfile));
+        }
       }
     } catch (error) {
       console.error('Error promoting user:', error);

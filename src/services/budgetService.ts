@@ -301,9 +301,33 @@ export const budgetCategoriesApi = {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
 
-      const { error } = await (supabase as any).rpc('create_default_budget_categories', {
-        p_user_id: user.id
-      });
+      const defaultCategories = [
+        { name: 'Location', color: '#E11D48', sort_order: 1 },
+        { name: 'Catering', color: '#059669', sort_order: 2 },
+        { name: 'Abiti', color: '#7C3AED', sort_order: 3 },
+        { name: 'Fotografo', color: '#EA580C', sort_order: 4 },
+        { name: 'Musica', color: '#0891B2', sort_order: 5 },
+        { name: 'Fiori & Decorazioni', color: '#DC2626', sort_order: 6 },
+        { name: 'Invitazioni', color: '#9333EA', sort_order: 7 },
+        { name: 'Bomboniere', color: '#16A34A', sort_order: 8 },
+        { name: 'Transport', color: '#0369A1', sort_order: 9 },
+        { name: 'Anelli', color: '#CA8A04', sort_order: 10 },
+        { name: 'Altro', color: '#6B7280', sort_order: 11 }
+      ];
+
+      const { error } = await supabase
+        .from('budget_categories')
+        .insert(
+          defaultCategories.map(cat => ({
+            user_id: user.id,
+            name: cat.name,
+            budgeted: 0,
+            spent: 0,
+            color: cat.color,
+            sort_order: cat.sort_order,
+            is_active: false // Default to inactive
+          }))
+        );
 
       if (error) {
         console.error('Error initializing default categories:', error);

@@ -53,8 +53,8 @@ export const useBudget = () => {
       setItems(Array.isArray(itemsResult) ? itemsResult as any : []);
       setVendors(Array.isArray(vendorsResult) ? vendorsResult as any : []);
 
-      // Initialize defaults if no categories
-      if (!categoriesResult || categoriesResult.length === 0) {
+      // Initialize defaults ONLY if no categories exist (neither active nor available)
+      if ((!categoriesResult || categoriesResult.length === 0) && (!availableCategoriesResult || availableCategoriesResult.length === 0)) {
         await initializeDefaults();
       }
 
@@ -604,6 +604,9 @@ export const useBudget = () => {
         // FIX: Use optimistic update instead of full reload
         const categoriesData = await budgetCategoriesApi.getAll();
         setCategories(Array.isArray(categoriesData) ? categoriesData as any : []);
+        
+        const availableData = await budgetCategoriesApi.getAvailable();
+        setAvailableCategories(Array.isArray(availableData) ? availableData as any : []);
       }
     } catch (err) {
       console.error('Error initializing defaults');

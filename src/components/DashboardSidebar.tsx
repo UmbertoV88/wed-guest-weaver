@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Calendar, ChevronDown, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart, Utensils } from "lucide-react";
+import { Calendar, ChevronDown, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart, Utensils, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
 import { it } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Popover,
   PopoverContent,
@@ -24,11 +25,24 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { LogoutConfirmDialog } from "@/components/LogoutConfirmDialog";
-import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+
+interface UserProfile {
+  id: string;
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  is_wedding_organizer: boolean;
+  wedding_date?: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 interface DashboardSidebarProps {
-  user?: { email?: string } | null;
-  profile?: { full_name?: string } | null;
+  user?: SupabaseUser | null;
+  profile?: UserProfile | null;
   isWeddingOrganizer?: boolean;
   onSignOut?: () => void;
   signingOut?: boolean;
@@ -41,13 +55,17 @@ const DashboardSidebar = ({
   onSignOut,
   signingOut = false
 }: DashboardSidebarProps) => {
+  const { user: authUser, profile: authProfile } = useAuth();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const collapsed = state === "collapsed";
   const [countdown, setCountdown] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const { profile: userProfile, updateWeddingDate } = useProfile();
-  const weddingDate = userProfile?.wedding_date ? new Date(userProfile.wedding_date) : undefined;
+
+  // Use profile from props if provided (for compatibility), otherwise from AuthContext
+  const currentProfile = profile || authProfile;
+  const currentUser = user || authUser;
+  const weddingDate = currentProfile?.wedding_date ? new Date(currentProfile.wedding_date) : undefined;
 
   useEffect(() => {
     if (!weddingDate) return;
@@ -77,11 +95,23 @@ const DashboardSidebar = ({
   }, [weddingDate]);
 
   const handleDateSelect = async (date: Date | undefined) => {
-    if (!date) return;
+    if (!date || !currentUser?.id) return;
 
     try {
-      await updateWeddingDate(date);
+      const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          wedding_date: dateString,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', currentUser.id);
+
+      if (error) throw error;
+
       setIsCalendarOpen(false);
+      // Profile will be automatically updated via AuthContext
     } catch (error) {
       console.error('Errore salvando la data:', error);
     }
@@ -190,16 +220,13 @@ const DashboardSidebar = ({
           <>
             {/* Wedding Organizer badge hidden as per user request */}
 
-            {(profile?.full_name || user?.email) && (
-              <div className="text-center text-xs text-muted-foreground">
-                Ciao, {profile?.full_name || user?.email}
-              </div>
-            )}
+
           </>
         )}
 
         {/* Manage Subscription Button */}
-        {!collapsed && (
+        {/* Manage Subscription Button - Moved to Profile page */}
+        {/* {!collapsed && (
           <Button
             variant="outline"
             className="w-full justify-start gap-3"
@@ -215,7 +242,21 @@ const DashboardSidebar = ({
             <DollarSign className="w-4 h-4" />
             <span>Gestisci Abbonamento</span>
           </Button>
-        )}
+        )} */}
+
+        {/* Profile Button */}
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 h-10"
+          onClick={() => navigate('/profile')}
+        >
+          <User className="w-5 h-5" />
+          {!collapsed && (
+            <span className="truncate">
+              {currentProfile?.full_name || 'Profilo'}
+            </span>
+          )}
+        </Button>
 
         {/* Logout Button */}
         {onSignOut && (
