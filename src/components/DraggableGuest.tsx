@@ -8,6 +8,7 @@ import { SeatingGuest } from "@/hooks/useSeating";
 import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
+import { useTranslation } from 'react-i18next';
 
 interface DraggableGuestProps {
   guest: SeatingGuest;
@@ -20,6 +21,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
   onMoveGuest,
   showRemoveButton = true,
 }) => {
+  const { t } = useTranslation();
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
 
   const [{ isDragging }, drag] = useDrag({
@@ -67,7 +69,7 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
                   <SimpleTooltip
                     content={
                       <div className="space-y-1">
-                        <div className="font-semibold text-xs">Allergie:</div>
+                        <div className="font-semibold text-xs">{t('guests.fields.allergies')}:</div>
                         <div className="text-xs">{guest.allergies}</div>
                       </div>
                     }
@@ -147,10 +149,10 @@ const DraggableGuest: React.FC<DraggableGuestProps> = ({
       <ConfirmDialog
         open={showRemoveDialog}
         onOpenChange={setShowRemoveDialog}
-        title="Rimuovi Ospite"
-        description={`Sei sicuro di voler rimuovere ${guest.nome_visualizzato} dal tavolo? L'ospite tornerà nella lista non assegnati.`}
-        confirmText="Rimuovi"
-        cancelText="Annulla"
+        title={t('seating.removeGuest')}
+        description={t('seating.removeGuestDescription', { name: guest.nome_visualizzato })}
+        confirmText={t('common.confirm.remove')}
+        cancelText={t('common.button.cancel')}
         onConfirm={handleConfirmRemove}
         variant="destructive"
       />

@@ -4,6 +4,7 @@ import { Clock, CheckCircle, Trash2 } from "lucide-react";
 import { Guest, GuestStatus } from "@/types/guest";
 import GuestList from "./GuestList";
 import GuestStats from "./GuestStats";
+import { useTranslation } from "react-i18next";
 
 interface GuestTabsProps {
   getGuestsByStatus: (status: GuestStatus) => Guest[];
@@ -23,7 +24,7 @@ interface GuestTabsProps {
   restoreGuest: (guestId: string) => Promise<void>;
   deleteGuest: (guestId: string) => Promise<void>;
   permanentlyDeleteGuest: (guestId: string) => Promise<void>;
-  updateGuest: (guestId: string, formData: any) => Promise<void>;
+  updateGuest: (guestId: string, formData: unknown) => Promise<void>;
   updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<void>;
   updateCompanionStatus: (guestId: string, companionId: string, status: GuestStatus) => Promise<void>;
   confirmCompanion: (guestId: string, companionId: string) => Promise<void>;
@@ -34,7 +35,8 @@ interface GuestTabsProps {
 }
 
 const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion, toggleBomboniera }: GuestTabsProps) => {
-  
+  const { t } = useTranslation();
+
   const stats = getStats();
   const pendingGuests = getGuestsByStatus('pending');
   const confirmedGuests = getGuestsByStatus('confirmed');
@@ -44,34 +46,34 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
     <div className="w-full">
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1">
-          <TabsTrigger 
-            value="pending" 
+          <TabsTrigger
+            value="pending"
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-romantic"
           >
             <Clock className="w-4 h-4" />
-            <span className="hidden sm:inline">Da confermare</span>
+            <span className="hidden sm:inline">{t('guests.tabs.pending')}</span>
             <Badge variant="secondary" className="ml-1">
               {stats.pending}
             </Badge>
           </TabsTrigger>
-          
-          <TabsTrigger 
+
+          <TabsTrigger
             value="confirmed"
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-romantic"
           >
             <CheckCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Confermati</span>
+            <span className="hidden sm:inline">{t('guests.tabs.confirmed')}</span>
             <Badge variant="secondary" className="ml-1">
               {stats.confirmed}
             </Badge>
           </TabsTrigger>
-          
-          <TabsTrigger 
+
+          <TabsTrigger
             value="deleted"
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-romantic"
           >
             <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Eliminati</span>
+            <span className="hidden sm:inline">{t('guests.tabs.declined')}</span>
             <Badge variant="secondary" className="ml-1">
               {stats.deleted}
             </Badge>
@@ -79,18 +81,18 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
         </TabsList>
 
         <div className="mt-6">
-          <GuestStats 
-            stats={stats} 
+          <GuestStats
+            stats={stats}
             getAllGuests={() => [...pendingGuests, ...confirmedGuests, ...deletedGuests]}
             getGuestsByStatus={getGuestsByStatus}
           />
         </div>
 
         <TabsContent value="pending" className="mt-6 animate-fade-in-up">
-          <GuestList 
-            guests={pendingGuests} 
+          <GuestList
+            guests={pendingGuests}
             type="pending"
-            emptyMessage="Nessun invitato da confermare. Aggiungi il primo invitato!"
+            emptyMessage={t('guests.empty.pending')}
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             confirmGuestOnly={confirmGuestOnly}
@@ -111,10 +113,10 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
         </TabsContent>
 
         <TabsContent value="confirmed" className="mt-6 animate-fade-in-up">
-          <GuestList 
-            guests={confirmedGuests} 
+          <GuestList
+            guests={confirmedGuests}
             type="confirmed"
-            emptyMessage="Nessun invitato confermato ancora."
+            emptyMessage={t('guests.empty.confirmed')}
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             confirmGuestOnly={confirmGuestOnly}
@@ -135,10 +137,10 @@ const GuestTabs = ({ getGuestsByStatus, getStats, companionLoading, confirmGuest
         </TabsContent>
 
         <TabsContent value="deleted" className="mt-6 animate-fade-in-up">
-          <GuestList 
-            guests={deletedGuests} 
+          <GuestList
+            guests={deletedGuests}
             type="deleted"
-            emptyMessage="Nessun invitato eliminato."
+            emptyMessage={t('guests.empty.deleted')}
             companionLoading={companionLoading}
             confirmGuest={confirmGuest}
             confirmGuestOnly={confirmGuestOnly}

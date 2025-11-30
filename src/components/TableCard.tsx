@@ -7,6 +7,7 @@ import { Trash2, Users } from "lucide-react";
 import { Table, SeatingGuest } from "@/hooks/useSeating";
 import DraggableGuest from "./DraggableGuest";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useTranslation, Trans } from 'react-i18next';
 
 interface TableCardProps {
   table: Table;
@@ -23,8 +24,9 @@ const TableCard: React.FC<TableCardProps> = ({
   onDeleteTable,
   onMoveGuest,
 }) => {
+  const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  
+
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: 'guest',
     drop: (item: { guestId: number }) => {
@@ -64,7 +66,7 @@ const TableCard: React.FC<TableCardProps> = ({
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">
-              {table.nome_tavolo || `Tavolo ${table.id}`}
+              {table.nome_tavolo || t('seating.tableNameDefault', { id: table.id })}
             </CardTitle>
             <Button
               variant="ghost"
@@ -75,7 +77,7 @@ const TableCard: React.FC<TableCardProps> = ({
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -83,11 +85,11 @@ const TableCard: React.FC<TableCardProps> = ({
                 {guests.length}/{globalCapacity}
               </span>
             </div>
-            
+
             <div className="flex gap-1">
-              {isFull && <Badge variant="destructive">Pieno</Badge>}
-              {isEmpty && <Badge variant="outline">Vuoto</Badge>}
-              {!isFull && !isEmpty && <Badge variant="secondary">Disponibile</Badge>}
+              {isFull && <Badge variant="destructive">{t('seating.status.full')}</Badge>}
+              {isEmpty && <Badge variant="outline">{t('seating.status.empty')}</Badge>}
+              {!isFull && !isEmpty && <Badge variant="secondary">{t('seating.status.available')}</Badge>}
             </div>
           </div>
         </CardHeader>
@@ -99,7 +101,7 @@ const TableCard: React.FC<TableCardProps> = ({
               <div className="text-center">
                 <Users className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  Trascina qui gli ospiti
+                  {t('seating.dragGuestsHere')}
                 </p>
               </div>
             </div>
@@ -117,29 +119,35 @@ const TableCard: React.FC<TableCardProps> = ({
           {/* Capacity warning */}
           {isFull && (
             <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-950 rounded text-xs text-orange-800 dark:text-orange-200">
-              Tavolo pieno! Capienza massima raggiunta.
+              {t('seating.fullWarning')}
             </div>
           )}
         </CardContent>
       </Card>
-      
+
       <ConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title="Elimina Tavolo"
+        title={t('seating.deleteTable')}
         description={
           guests.length > 0 ? (
             <>
-              <p>Il tavolo <strong>{table.nome_tavolo}</strong> contiene <strong>{guests.length} ospiti</strong>.</p>
-              <p className="mt-2">Eliminandolo, gli ospiti torneranno nella lista non assegnati.</p>
-              <p className="mt-2 text-sm text-muted-foreground">Continuare?</p>
+              <p>
+                <Trans
+                  i18nKey="seating.deleteDialog.containsGuests"
+                  values={{ name: table.nome_tavolo, count: guests.length }}
+                  components={{ strong: <strong /> }}
+                />
+              </p>
+              <p className="mt-2">{t('seating.deleteTableDescription')}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t('dialogs.confirm.continue')}</p>
             </>
           ) : (
-            `Sei sicuro di voler eliminare il tavolo "${table.nome_tavolo}"?`
+            t('seating.deleteDialog.confirm', { name: table.nome_tavolo })
           )
         }
-        confirmText="Elimina"
-        cancelText="Annulla"
+        confirmText={t('common.button.delete')}
+        cancelText={t('common.button.cancel')}
         onConfirm={handleConfirmDelete}
         variant="destructive"
       />

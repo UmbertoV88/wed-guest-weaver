@@ -15,7 +15,10 @@ interface BudgetChartProps {
   totalBudget: number;
 }
 
+import { useTranslation } from 'react-i18next';
+
 const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) => {
+  const { t, i18n } = useTranslation();
   const total = categories.reduce((sum, cat) => sum + cat.budgeted, 0);
 
   // Calculate angles for pie chart
@@ -60,7 +63,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('it-IT', {
+    return new Intl.NumberFormat(i18n.language === 'it' ? 'it-IT' : 'en-US', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0
@@ -74,7 +77,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <PieChart className="w-5 h-5" />
-            Distribuzione Budget per Categoria
+            {t('budget.overview.distribution')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -106,7 +109,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
                   <div className="text-xl font-bold text-gray-900">
                     {formatCurrency(totalBudget)}
                   </div>
-                  <div className="text-sm text-gray-600">Budget Totale</div>
+                  <div className="text-sm text-gray-600">{t('budget.overview.totalBudget')}</div>
                 </div>
               </div>
             </div>
@@ -134,7 +137,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5" />
-            Preventivo vs Speso
+            {t('budget.overview.estimatedVsSpent')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -170,7 +173,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ categories, totalBudget }) =>
                     <div className="flex items-center gap-1 mt-1">
                       <TrendingUp className="w-3 h-3 text-red-500" />
                       <span className="text-xs text-red-500">
-                        Superato di {formatCurrency(category.spent - category.budgeted)}
+                        {t('budget.overview.exceededBy', { amount: formatCurrency(category.spent - category.budgeted) })}
                       </span>
                     </div>
                   )}

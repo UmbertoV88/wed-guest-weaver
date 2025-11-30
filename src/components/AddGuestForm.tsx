@@ -19,12 +19,14 @@ import {
 import { Guest, CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
 
 import { guestFormSchema, GuestFormInput } from "@/schemas/guestSchema";
+import { useTranslation } from "react-i18next";
 
 interface AddGuestFormProps {
   addGuest: (formData: GuestFormInput) => Promise<Guest>;
 }
 
 const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [attemptedNext, setAttemptedNext] = useState(false);
@@ -132,36 +134,36 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <User className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Nome dell'invitato</h3>
-              <p className="text-muted-foreground">Chi vuoi invitare al matrimonio?</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step1.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step1.subtitle')}</p>
             </div>
 
             <div>
-              <Label htmlFor="name">Nome completo *</Label>
+              <Label htmlFor="name">{t('guests.form.nameLabel')}</Label>
               <Input
                 id="name"
                 {...register("name")}
-                placeholder="Es: Mario Rossi"
+                placeholder={t('guests.form.namePlaceholder')}
                 className={errors.name || (attemptedNext && !watch("name")?.trim()) ? 'border-destructive' : ''}
               />
               {(errors.name || (attemptedNext && !watch("name")?.trim())) && (
                 <p className="text-destructive text-sm mt-1">
-                  {errors.name?.message || "Il nome è obbligatorio"}
+                  {errors.name?.message || t('guests.form.errors.nameRequired')}
                 </p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="ageGroup">Fascia d'età *</Label>
+              <Label htmlFor="ageGroup">{t('guests.form.ageGroupLabel')}</Label>
               <select
                 id="ageGroup"
                 value={ageGroup}
-                onChange={(e) => setValue("ageGroup", e.target.value as any)}
+                onChange={(e) => setValue("ageGroup", e.target.value as "Adulto" | "Ragazzo" | "Bambino")}
                 className={`w-full px-3 py-2 border rounded-md bg-background ${errors.ageGroup ? 'border-destructive' : 'border-border'}`}
               >
-                <option value="">Seleziona fascia d'età</option>
+                <option value="">{t('guests.form.ageGroupPlaceholder')}</option>
                 {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>{t(`guests.ageGroups.${key === 'Adulto' ? 'adult' : key === 'Ragazzo' ? 'teen' : key === 'Bambino' ? 'child' : 'baby'}`)}</option>
                 ))}
               </select>
               {errors.ageGroup && (
@@ -176,8 +178,8 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <Users className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Categoria invitato</h3>
-              <p className="text-muted-foreground">Come classifichi questo invitato?</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step2.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step2.subtitle')}</p>
             </div>
 
             <div className="grid gap-3">
@@ -185,13 +187,13 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setValue("category", key as any)}
+                  onClick={() => setValue("category", key as "family-his" | "family-hers" | "friends" | "colleagues")}
                   className={`p-4 rounded-lg border-2 text-left transition-romantic ${category === key
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'border-border hover:border-primary/50'
                     }`}
                 >
-                  <span className="font-medium">{label}</span>
+                  <span className="font-medium">{t(`guests.categories.${key}`)}</span>
                 </button>
               ))}
               {errors.category && (
@@ -206,12 +208,12 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <Users className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Accompagnatori</h3>
-              <p className="text-muted-foreground">Quante persone accompagneranno {watch("name")}?</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step3.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step3.subtitle', { name: watch("name") })}</p>
             </div>
 
             <div>
-              <Label htmlFor="companionCount">Numero di accompagnatori</Label>
+              <Label htmlFor="companionCount">{t('guests.form.companionCountLabel')}</Label>
               <select
                 id="companionCount"
                 value={companionCount}
@@ -229,16 +231,16 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
 
             {companionCount > 0 && (
               <div className="space-y-3">
-                <h4 className="font-medium">Nome e fascia d'età accompagnatori:</h4>
+                <h4 className="font-medium">{t('guests.form.companionsDetailsLabel')}</h4>
                 {fields.map((field, index) => (
                   <div key={field.id} className="space-y-3 p-3 border rounded-lg">
-                    <Label className="text-sm font-medium">Accompagnatore {index + 1}</Label>
+                    <Label className="text-sm font-medium">{t('guests.form.companionLabel', { index: index + 1 })}</Label>
                     <div>
-                      <Label htmlFor={`companion-name-${index}`}>Nome completo *</Label>
+                      <Label htmlFor={`companion-name-${index}`}>{t('guests.form.nameLabel')}</Label>
                       <Input
                         id={`companion-name-${index}`}
                         {...register(`companions.${index}.name`)}
-                        placeholder="Nome completo"
+                        placeholder={t('guests.form.namePlaceholder')}
                         className={errors.companions?.[index]?.name ? 'border-destructive' : ''}
                       />
                       {errors.companions?.[index]?.name && (
@@ -248,15 +250,15 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                       )}
                     </div>
                     <div>
-                      <Label htmlFor={`companion-age-${index}`}>Fascia d'età *</Label>
+                      <Label htmlFor={`companion-age-${index}`}>{t('guests.form.ageGroupLabel')}</Label>
                       <select
                         id={`companion-age-${index}`}
                         {...register(`companions.${index}.ageGroup`)}
                         className={`w-full px-3 py-2 border rounded-md bg-background ${errors.companions?.[index]?.ageGroup ? 'border-destructive' : 'border-border'}`}
                       >
-                        <option value="">Seleziona fascia d'età</option>
+                        <option value="">{t('guests.form.ageGroupPlaceholder')}</option>
                         {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
-                          <option key={key} value={key}>{label}</option>
+                          <option key={key} value={key}>{t(`guests.ageGroups.${key === 'Adulto' ? 'adult' : key === 'Ragazzo' ? 'teen' : key === 'Bambino' ? 'child' : 'baby'}`)}</option>
                         ))}
                       </select>
                       {errors.companions?.[index]?.ageGroup && (
@@ -277,16 +279,16 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <AlertTriangle className="w-12 h-12 text-warning mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Allergeni e intolleranze</h3>
-              <p className="text-muted-foreground">Informazioni importanti per il catering</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step4.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step4.subtitle')}</p>
             </div>
 
             <div>
-              <Label htmlFor="allergies">Allergeni/intolleranze di {watch("name")}</Label>
+              <Label htmlFor="allergies">{t('guests.form.allergiesLabel', { name: watch("name") })}</Label>
               <Textarea
                 id="allergies"
                 {...register("allergies")}
-                placeholder="Es: glutine, lattosio, frutta secca, crostacei..."
+                placeholder={t('guests.form.allergiesPlaceholder')}
                 maxLength={200}
                 className="min-h-[100px]"
               />
@@ -294,16 +296,16 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 <p className="text-destructive text-sm mt-1">{errors.allergies.message}</p>
               )}
               <p className="text-xs text-muted-foreground mt-1">
-                Caratteri rimasti: {200 - (watch("allergies")?.length || 0)}
+                {t('guests.form.charsRemaining', { count: 200 - (watch("allergies")?.length || 0) })}
               </p>
             </div>
 
             {fields.map((field, index) => (
               <div key={field.id}>
-                <Label>Allergeni/intolleranze di {field.name}</Label>
+                <Label>{t('guests.form.allergiesLabel', { name: field.name })}</Label>
                 <Textarea
                   {...register(`companions.${index}.allergies`)}
-                  placeholder="Es: glutine, lattosio, frutta secca, crostacei..."
+                  placeholder={t('guests.form.allergiesPlaceholder')}
                   maxLength={200}
                   className="min-h-[80px]"
                 />
@@ -317,34 +319,34 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           </div>
         );
 
-      case 5:
+      case 5: {
         const formValues = watch();
         return (
           <div className="space-y-4">
             <div className="text-center mb-6">
               <Check className="w-12 h-12 text-success mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Riepilogo invitato</h3>
-              <p className="text-muted-foreground">Controlla i dati prima di salvare</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step5.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step5.subtitle')}</p>
             </div>
 
             <Card className="p-4 bg-muted/30 border-primary/20">
               <div className="space-y-3">
                 <div>
-                  <strong>Nome:</strong> {formValues.name}
+                  <strong>{t('guests.form.summary.name')}</strong> {formValues.name}
                 </div>
                 <div>
-                  <strong>Fascia d'età:</strong> {formValues.ageGroup ? AGE_GROUP_LABELS[formValues.ageGroup] : 'Non specificata'}
+                  <strong>{t('guests.form.summary.ageGroup')}</strong> {formValues.ageGroup ? t(`guests.ageGroups.${formValues.ageGroup === 'Adulto' ? 'adult' : formValues.ageGroup === 'Ragazzo' ? 'teen' : formValues.ageGroup === 'Bambino' ? 'child' : 'baby'}`) : t('guests.form.notSpecified')}
                 </div>
                 <div>
-                  <strong>Categoria:</strong> {CATEGORY_LABELS[formValues.category]}
+                  <strong>{t('guests.form.summary.category')}</strong> {t(`guests.categories.${formValues.category}`)}
                 </div>
                 <div>
-                  <strong>Accompagnatori:</strong> {formValues.companionCount}
+                  <strong>{t('guests.form.summary.companions')}</strong> {formValues.companionCount}
                   {fields.length > 0 && (
                     <div className="ml-4 text-sm text-muted-foreground space-y-1">
                       {fields.map((field, idx) => (
                         <div key={field.id}>
-                          {field.name} ({field.ageGroup ? AGE_GROUP_LABELS[field.ageGroup] : 'Fascia d\'età non specificata'})
+                          {field.name} ({field.ageGroup ? t(`guests.ageGroups.${field.ageGroup === 'Adulto' ? 'adult' : field.ageGroup === 'Ragazzo' ? 'teen' : field.ageGroup === 'Bambino' ? 'child' : 'baby'}`) : t('guests.form.notSpecified')})
                         </div>
                       ))}
                     </div>
@@ -352,12 +354,12 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
                 </div>
                 {formValues.allergies && (
                   <div>
-                    <strong>Allergeni {formValues.name}:</strong> {formValues.allergies}
+                    <strong>{t('guests.form.summary.allergies', { name: formValues.name })}</strong> {formValues.allergies}
                   </div>
                 )}
                 {fields.some(field => field.allergies) && (
                   <div>
-                    <strong>Allergeni accompagnatori:</strong>
+                    <strong>{t('guests.form.summary.companionAllergies')}</strong>
                     <div className="ml-4 text-sm">
                       {fields
                         .filter(field => field.allergies)
@@ -371,6 +373,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
             </Card>
           </div>
         );
+      }
     }
   };
 
@@ -382,7 +385,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
         className="bg-hero text-white shadow-elegant hover:shadow-floating transition-romantic"
       >
         <Plus className="w-5 h-5 mr-2" />
-        Aggiungi nuovo invitato
+        {t('guests.form.buttons.add')}
       </Button>
     );
   }
@@ -392,7 +395,7 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium">Passo {currentStep} di {totalSteps}</span>
+          <span className="text-sm font-medium">{t('guests.form.steps', { current: currentStep, total: totalSteps })}</span>
           <Button
             onClick={resetForm}
             variant="ghost"
@@ -422,18 +425,18 @@ const AddGuestForm = ({ addGuest }: AddGuestFormProps) => {
           variant="outline"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Indietro
+          {t('common.actions.back')}
         </Button>
 
         {currentStep < totalSteps ? (
           <Button onClick={nextStep}>
-            Avanti
+            {t('common.actions.next')}
             <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         ) : (
           <Button onClick={onSubmit} className="bg-success hover:bg-success/90 text-white">
             <Check className="w-4 h-4 mr-1" />
-            Salva invitato
+            {t('guests.form.buttons.save')}
           </Button>
         )}
       </div>

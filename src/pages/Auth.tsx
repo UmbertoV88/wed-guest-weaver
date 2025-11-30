@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
 
 import CommonHeader from '@/components/CommonHeader';
 import { signInSchema, signUpSchema, SignInInput, SignUpInput } from '@/schemas/authSchema';
@@ -21,6 +22,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'signup' ? 'signup' : 'signin';
+  const { t } = useTranslation();
 
   const {
     register: registerSignIn,
@@ -77,32 +79,32 @@ const Auth = () => {
       <div className="flex items-center justify-center p-4 pt-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <p className="text-gray-600">Accedi per gestire la lista degli invitati</p>
+            <p className="text-gray-600">{t('auth.subtitle')}</p>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Accesso Sicuro</CardTitle>
+              <CardTitle>{t('auth.title')}</CardTitle>
               <CardDescription>
-                Accedi al tuo account per gestire gli invitati del matrimonio
+                {t('auth.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue={defaultTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin">Accedi</TabsTrigger>
-                  <TabsTrigger value="signup">Registrati</TabsTrigger>
+                  <TabsTrigger value="signin">{t('auth.tabs.signin')}</TabsTrigger>
+                  <TabsTrigger value="signup">{t('auth.tabs.signup')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="signin">
                   <form onSubmit={onSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email">Email</Label>
+                      <Label htmlFor="signin-email">{t('auth.fields.email')}</Label>
                       <Input
                         {...registerSignIn("email")}
                         id="signin-email"
                         type="email"
-                        placeholder="tua@email.com"
+                        placeholder={t('auth.fields.emailPlaceholder')}
                         className={signInErrors.email ? "border-destructive" : ""}
                       />
                       {signInErrors.email && (
@@ -110,13 +112,13 @@ const Auth = () => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password">Password</Label>
+                      <Label htmlFor="signin-password">{t('auth.fields.password')}</Label>
                       <div className="relative">
                         <Input
                           {...registerSignIn("password")}
                           id="signin-password"
                           type={showSignInPassword ? "text" : "password"}
-                          placeholder="La tua password"
+                          placeholder={t('auth.fields.passwordPlaceholder')}
                           className={`pr-10 ${signInErrors.password ? "border-destructive" : ""}`}
                         />
                         <button
@@ -136,7 +138,7 @@ const Auth = () => {
                       )}
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Accesso in corso..." : "Accedi"}
+                      {loading ? t('auth.buttons.signingIn') : t('auth.buttons.signin')}
                     </Button>
                   </form>
                 </TabsContent>
@@ -144,12 +146,12 @@ const Auth = () => {
                 <TabsContent value="signup">
                   <form onSubmit={onSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-name">Nome completo</Label>
+                      <Label htmlFor="signup-name">{t('auth.fields.fullName')}</Label>
                       <Input
                         {...registerSignUp("fullName")}
                         id="signup-name"
                         type="text"
-                        placeholder="Il tuo nome completo"
+                        placeholder={t('auth.fields.fullNamePlaceholder')}
                         className={signUpErrors.fullName ? "border-destructive" : ""}
                       />
                       {signUpErrors.fullName && (
@@ -157,12 +159,12 @@ const Auth = () => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
+                      <Label htmlFor="signup-email">{t('auth.fields.email')}</Label>
                       <Input
                         {...registerSignUp("email")}
                         id="signup-email"
                         type="email"
-                        placeholder="tua@email.com"
+                        placeholder={t('auth.fields.emailPlaceholder')}
                         className={signUpErrors.email ? "border-destructive" : ""}
                       />
                       {signUpErrors.email && (
@@ -170,13 +172,13 @@ const Auth = () => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
+                      <Label htmlFor="signup-password">{t('auth.fields.password')}</Label>
                       <div className="relative">
                         <Input
                           {...registerSignUp("password")}
                           id="signup-password"
                           type={showSignUpPassword ? "text" : "password"}
-                          placeholder="Crea una password (min. 8 caratteri)"
+                          placeholder={t('auth.fields.passwordPlaceholderSignup')}
                           className={`pr-10 ${signUpErrors.password ? "border-destructive" : ""}`}
                         />
                         <button
@@ -195,11 +197,11 @@ const Auth = () => {
                         <p className="text-destructive text-sm">{signUpErrors.password.message}</p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un carattere speciale
+                        {t('auth.passwordRequirements')}
                       </p>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Registrazione in corso..." : "Registrati"}
+                      {loading ? t('auth.buttons.signingUp') : t('auth.buttons.signup')}
                     </Button>
                   </form>
                 </TabsContent>
@@ -209,13 +211,13 @@ const Auth = () => {
 
           <div className="text-center mt-6 space-y-2">
             <p className="text-xs text-gray-500">
-              I tuoi dati sono protetti e sicuri. Solo gli organizzatori del matrimonio possono accedere alle informazioni degli invitati.
+              {t('auth.dataProtection')}
             </p>
             <Link
               to="/"
               className="inline-block text-sm text-primary hover:text-primary-deep transition-colors"
             >
-              Scopri di più sul nostro Wedding Planner
+              {t('auth.learnMore')}
             </Link>
           </div>
         </div>

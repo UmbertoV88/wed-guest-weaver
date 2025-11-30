@@ -16,7 +16,10 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 //import TrashZone from "./TrashZone";
 
+import { useTranslation } from 'react-i18next';
+
 const SeatingEditor = () => {
+  const { t } = useTranslation();
   const { subscription } = useSubscription();
   const isInTrial = isInTrialPeriod(subscription);
 
@@ -48,7 +51,7 @@ const SeatingEditor = () => {
   const handleAddTable = () => {
     const tableNumber = tables.length + 1;
     addTable({
-      nome_tavolo: `Tavolo ${tableNumber}`,
+      nome_tavolo: t('seating.tableNameDefault', { id: tableNumber }),
       capacita_max: globalCapacity,
     });
     setIsAddingTable(true);
@@ -74,7 +77,7 @@ const SeatingEditor = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Caricamento disposizione tavoli...</span>
+        <span className="ml-2">{t('seating.loading')}</span>
       </div>
     );
   }
@@ -85,11 +88,11 @@ const SeatingEditor = () => {
         {/* Controls */}
         <Card>
           <CardHeader>
-            <CardTitle>Impostazioni Tavoli</CardTitle>
+            <CardTitle>{t('seating.settings')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <Label htmlFor="capacity">Capienza massima per tavolo</Label>
+              <Label htmlFor="capacity">{t('seating.capacity')}</Label>
 
               {/* Container principale: colonna su mobile/tablet, riga su desktop */}
               <div className="flex flex-col lg:flex-row gap-4 lg:items-end lg:justify-between">
@@ -116,14 +119,14 @@ const SeatingEditor = () => {
                     ) : (
                       <Plus className="h-4 w-4 mr-2" />
                     )}
-                    Aggiungi Tavolo
+                    {t('seating.addTable')}
                   </Button>
                 </div>
 
                 {/* GRUPPO 2: Scarica CSV + Reset */}
                 <div className="flex flex-col sm:flex-row gap-2">
                   <SimpleTooltip
-                    content={isInTrial ? "Funzione disponibile solo per utenti Premium" : "Esporta lista tavoli in Excel"}
+                    content={isInTrial ? t('seating.premiumTooltip') : t('seating.exportTooltip')}
                   >
                     <span className="w-full sm:w-auto">
                       <Button
@@ -133,14 +136,14 @@ const SeatingEditor = () => {
                         disabled={isInTrial}
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Esporta Excel
+                        {t('common.button.export')} Excel
                       </Button>
                     </span>
                   </SimpleTooltip>
 
                   <Button onClick={handleReset} variant="outline" className="w-full sm:w-auto">
                     <RotateCcw className="h-4 w-4 mr-2" />
-                    Reset
+                    {t('seating.reset')}
                   </Button>
                 </div>
 
@@ -189,23 +192,23 @@ const SeatingEditor = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-primary">{tables.length}</div>
-                <div className="text-sm text-muted-foreground">Tavoli</div>
+                <div className="text-sm text-muted-foreground">{t('seating.stats.tables')}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-primary">{guests.length}</div>
-                <div className="text-sm text-muted-foreground">Invitati totali</div>
+                <div className="text-sm text-muted-foreground">{t('seating.stats.totalGuests')}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-green-600">
                   {guests.filter(g => g.tableId).length}
                 </div>
-                <div className="text-sm text-muted-foreground">Assegnati</div>
+                <div className="text-sm text-muted-foreground">{t('seating.stats.assigned')}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-orange-600">
                   {unassignedGuests.length}
                 </div>
-                <div className="text-sm text-muted-foreground">Non assegnati</div>
+                <div className="text-sm text-muted-foreground">{t('seating.stats.unassigned')}</div>
               </div>
             </div>
           </CardContent>
@@ -215,18 +218,18 @@ const SeatingEditor = () => {
       <ConfirmDialog
         open={showResetDialog}
         onOpenChange={setShowResetDialog}
-        title="Reset Assegnazioni"
+        title={t('seating.resetDialog.title')}
         description={
           <>
-            <p>Sei sicuro di voler resettare tutte le assegnazioni dei tavoli?</p>
-            <p className="mt-2 font-semibold">Tutti gli ospiti torneranno nella lista "Non Assegnati".</p>
+            <p>{t('seating.resetDialog.description')}</p>
+            <p className="mt-2 font-semibold">{t('seating.resetDialog.warning')}</p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Questa azione non può essere annullata.
+              {t('guests.deleteConfirm.description')}
             </p>
           </>
         }
-        confirmText="Reset"
-        cancelText="Annulla"
+        confirmText={t('seating.resetDialog.confirm')}
+        cancelText={t('common.button.cancel')}
         onConfirm={handleConfirmReset}
         variant="destructive"
       />

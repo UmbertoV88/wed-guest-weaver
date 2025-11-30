@@ -8,13 +8,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { it } from "date-fns/locale";
+import { it, enUS } from "date-fns/locale";
 import { reminderApi } from "@/services/reminderService";
+import { useTranslation } from "react-i18next";
 
 interface ReminderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  vendor: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  vendor: any; // TODO: Create proper Vendor type
   onReminderCreated: () => void;
 }
 
@@ -24,6 +26,8 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
   vendor,
   onReminderCreated
 }) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'it' ? it : enUS;
   const [date, setDate] = useState<Date>();
   const [customMessage, setCustomMessage] = useState("");
   const [cancelAutoReminders, setCancelAutoReminders] = useState(false);
@@ -32,8 +36,8 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
   const handleSubmit = async () => {
     if (!date) {
       console.error("Toast removed:", {
-        title: "Errore",
-        description: "Seleziona una data per il promemoria",
+        title: t('common.status.error'),
+        description: t('budget.reminders.errors.dateRequired'),
         variant: "destructive"
       });
       return;
@@ -58,24 +62,24 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
 
       if (result) {
         console.error("Toast removed:", {
-          title: "✅ Promemoria creato",
-          description: `Ti ricorderemo il ${format(date, 'dd MMMM yyyy', { locale: it })}`
+          title: t('budget.reminders.success'),
+          description: t('budget.reminders.successDescription', { date: format(date, 'dd MMMM yyyy', { locale: dateLocale }) })
         });
         onReminderCreated();
         onOpenChange(false);
-        
+
         // Reset form
         setDate(undefined);
         setCustomMessage("");
         setCancelAutoReminders(false);
       } else {
-        throw new Error('Errore nella creazione del promemoria');
+        throw new Error(t('budget.reminders.errors.createFailed'));
       }
     } catch (error) {
       console.error('Error creating reminder:', error);
       console.error("Toast removed:", {
-        title: "Errore",
-        description: "Impossibile creare il promemoria",
+        title: t('common.status.error'),
+        description: t('budget.reminders.errors.createFailed'),
         variant: "destructive"
       });
     } finally {
@@ -87,17 +91,17 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Imposta Promemoria per {vendor?.name}</DialogTitle>
+          <DialogTitle>{t('budget.reminders.dialogTitle', { name: vendor?.name })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>Data Promemoria</Label>
+            <Label>{t('budget.reminders.dateLabel')}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'dd MMMM yyyy', { locale: it }) : "Seleziona data"}
+                  {date ? format(date, 'dd MMMM yyyy', { locale: dateLocale }) : t('budget.reminders.selectDate')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -105,16 +109,16 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
                   mode="single"
                   selected={date}
                   onSelect={setDate}
-                  locale={it}
+                  locale={dateLocale}
                 />
               </PopoverContent>
             </Popover>
           </div>
 
           <div className="space-y-2">
-            <Label>Messaggio Personalizzato (opzionale)</Label>
+            <Label>{t('budget.reminders.messageLabel')}</Label>
             <Textarea
-              placeholder="Es: Ricordati di portare i documenti..."
+              placeholder={t('budget.reminders.messagePlaceholder')}
               value={customMessage}
               onChange={(e) => setCustomMessage(e.target.value)}
               rows={3}
@@ -130,7 +134,7 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
                   onCheckedChange={(checked) => setCancelAutoReminders(checked as boolean)}
                 />
                 <label htmlFor="cancel-auto" className="text-sm text-yellow-800">
-                  Disattiva i promemoria automatici (7 giorni prima e giorno stesso)
+                  {t('budget.reminders.disableAuto')}
                 </label>
               </div>
             </div>
@@ -139,10 +143,10 @@ export const ReminderDialog: React.FC<ReminderDialogProps> = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annulla
+            {t('common.actions.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Creazione..." : "Crea Promemoria"}
+            {loading ? t('budget.reminders.creating') : t('budget.reminders.create')}
           </Button>
         </DialogFooter>
       </DialogContent>

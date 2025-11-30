@@ -16,7 +16,14 @@ import CategoryManager from '@/components/budget/CategoryManager';
 import VendorManager from '@/components/budget/VendorManager';
 import PaymentTracker from '@/components/budget/PaymentTracker';
 import { ReminderNotifications } from '@/components/budget/ReminderNotifications';
+import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
+import { it, enUS } from 'date-fns/locale';
+
 const FinanceLayout = () => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'it' ? it : enUS;
+
   const {
     user,
     signOut,
@@ -75,9 +82,7 @@ const FinanceLayout = () => {
     // Helper per formattare la data in formato "DD MMM"
     const formatPaymentDate = (dateString: string | null) => {
       if (!dateString) return 'N/A';
-      const date = new Date(dateString);
-      const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
-      return `${date.getDate()} ${months[date.getMonth()]}`;
+      return format(new Date(dateString), 'd MMM', { locale: dateLocale });
     };
 
     // Calcolare il prossimo pagamento
@@ -120,7 +125,7 @@ const FinanceLayout = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Caricamento budget...</p>
+            <p className="text-muted-foreground">{t('common.status.loading')}</p>
           </div>
         </div>
       </div>;
@@ -136,9 +141,9 @@ const FinanceLayout = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-gold bg-clip-text text-transparent">
-            Budget Matrimonio
+            {t('budget.title')}
           </h1>
-          <p className="text-muted-foreground">Gestisci il budget per il tuo giorno speciale</p>
+          <p className="text-muted-foreground">{t('budget.subtitle')}</p>
         </div>
       </div>
 
@@ -146,8 +151,8 @@ const FinanceLayout = () => {
       {(remainingToAllocate < 0 || remainingAfterSpent < 0) && <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          {remainingToAllocate < 0 && <div>Budget allocato supera il totale di €{Math.abs(remainingToAllocate).toLocaleString()}</div>}
-          {remainingAfterSpent < 0 && <div>Spese superano il budget totale di €{Math.abs(remainingAfterSpent).toLocaleString()}</div>}
+          {remainingToAllocate < 0 && <div>{t('budget.alerts.allocatedExceeded', { amount: `€${Math.abs(remainingToAllocate).toLocaleString()}` })}</div>}
+          {remainingAfterSpent < 0 && <div>{t('budget.alerts.spentExceeded', { amount: `€${Math.abs(remainingAfterSpent).toLocaleString()}` })}</div>}
         </AlertDescription>
       </Alert>}
 
@@ -161,19 +166,19 @@ const FinanceLayout = () => {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">
             <PieChart className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Panoramica</span>
+            <span className="hidden sm:inline">{t('budget.tabs.overview')}</span>
           </TabsTrigger>
           <TabsTrigger value="categories">
             <Settings className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Categorie</span>
+            <span className="hidden sm:inline">{t('budget.tabs.categories')}</span>
           </TabsTrigger>
           <TabsTrigger value="vendors">
             <Users className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Fornitori</span>
+            <span className="hidden sm:inline">{t('budget.tabs.vendors')}</span>
           </TabsTrigger>
           <TabsTrigger value="payments">
             <CreditCard className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Pagamenti</span>
+            <span className="hidden sm:inline">{t('budget.tabs.payments')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -186,12 +191,12 @@ const FinanceLayout = () => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-blue-700">Categoria più costosa</p>
+                    <p className="text-sm font-medium text-blue-700">{t('budget.overview.mostExpensiveCategory')}</p>
                     <p className="text-2xl font-bold text-blue-900">
                       {categories.length > 0 ? categories.reduce((max, cat) => cat.budgeted > max.budgeted ? cat : max).name : 'N/A'}
                     </p>
                     <p className="text-sm text-blue-600">
-                      €{categories.length > 0 ? categories.reduce((max, cat) => cat.budgeted > max.budgeted ? cat : max).budgeted.toLocaleString() : '0'} stimati
+                      €{categories.length > 0 ? categories.reduce((max, cat) => cat.budgeted > max.budgeted ? cat : max).budgeted.toLocaleString() : '0'} {t('budget.overview.estimated')}
                     </p>
                   </div>
                   <DollarSign className="h-8 w-8 text-blue-600" />
@@ -203,7 +208,7 @@ const FinanceLayout = () => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-green-700">Prossimo pagamento</p>
+                    <p className="text-sm font-medium text-green-700">{t('budget.overview.nextPayment')}</p>
                     {nextPayment ? (
                       <>
                         <p className="text-2xl font-bold text-green-900">{nextPayment.date}</p>
@@ -214,7 +219,7 @@ const FinanceLayout = () => {
                     ) : (
                       <>
                         <p className="text-2xl font-bold text-green-900">--</p>
-                        <p className="text-sm text-green-600">Nessun pagamento in sospeso</p>
+                        <p className="text-sm text-green-600">{t('budget.overview.noPendingPayments')}</p>
                       </>
                     )}
                   </div>
@@ -227,11 +232,11 @@ const FinanceLayout = () => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-purple-700">Risparmio potenziale</p>
+                    <p className="text-sm font-medium text-purple-700">{t('budget.overview.potentialSavings')}</p>
                     <p className="text-2xl font-bold text-purple-900">
                       €{remainingAfterSpent.toLocaleString()}
                     </p>
-                    <p className="text-sm text-purple-600">Non ancora allocato</p>
+                    <p className="text-sm text-purple-600">{t('budget.overview.notAllocatedYet')}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-purple-600" />
                 </div>
@@ -287,18 +292,20 @@ const FinanceLayout = () => {
   </div>;
 };
 const Finance = () => {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    document.title = "Budget Matrimonio - Gestisci le finanze del tuo matrimonio";
+    document.title = t('budget.meta.title');
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Gestisci il budget del tuo matrimonio con React Query. Imposta un budget totale e alloca le risorse nelle diverse categorie.');
+      metaDescription.setAttribute('content', t('budget.meta.description'));
     } else {
       const meta = document.createElement('meta');
       meta.name = 'description';
-      meta.content = 'Gestisci il budget del tuo matrimonio con React Query. Imposta un budget totale e alloca le risorse nelle diverse categorie.';
+      meta.content = t('budget.meta.description');
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
-  }, []);
+  }, [t]);
   return <SidebarProvider>
     <FinanceLayout />
   </SidebarProvider>;

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Heart, Calendar, ChevronDown, LogOut, Crown, Menu, Camera, DollarSign, Users, MapPin } from "lucide-react";
 import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
-import { it } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -20,6 +19,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { LogoutConfirmDialog } from "@/components/LogoutConfirmDialog";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { it as itLocale, enUS } from "date-fns/locale";
 
 interface WeddingHeaderProps {
   className?: string;
@@ -42,6 +43,8 @@ const WeddingHeader = ({
   const [countdown, setCountdown] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'it' ? itLocale : enUS;
 
   useEffect(() => {
     // Load saved date from localStorage
@@ -61,11 +64,11 @@ const WeddingHeader = ({
       const minutes = differenceInMinutes(weddingDate, now) % 60;
 
       if (days < 0) {
-        setCountdown("Matrimonio celebrato! 💕");
+        setCountdown(t('dashboard.sidebar.countdown.married'));
       } else if (days === 0) {
-        setCountdown("È oggi! 🎉");
+        setCountdown(t('dashboard.sidebar.countdown.today'));
       } else {
-        setCountdown(`${days} giorni, ${hours}h, ${minutes}m`);
+        setCountdown(`${days} ${t('dashboard.sidebar.countdown.days', { count: days })}`);
       }
     };
 
@@ -73,7 +76,7 @@ const WeddingHeader = ({
     const interval = setInterval(updateCountdown, 60000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [weddingDate]);
+  }, [weddingDate, t]);
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -84,10 +87,8 @@ const WeddingHeader = ({
   };
 
   const menuSections = [
-    // { icon: Camera, label: "Fotografo", href: "/fotografo" },
-    { icon: DollarSign, label: "Budget", href: "/finanza" },
-    { icon: Users, label: "Invitati", href: "/" },
-    // { icon: MapPin, label: "Location", href: "/location" },
+    { icon: DollarSign, label: t('dashboard.sidebar.menu.budget'), href: "/finanza" },
+    { icon: Users, label: t('dashboard.sidebar.menu.guests'), href: "/" },
   ];
 
   return (
@@ -105,10 +106,10 @@ const WeddingHeader = ({
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary-deep to-gold bg-clip-text text-transparent">
-                  Gestione Invitati Matrimonio
+                  {t('dashboard.header.title')}
                 </h1>
                 <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">
-                  Organizza il tuo giorno speciale con eleganza
+                  {t('dashboard.header.subtitle')}
                 </p>
               </div>
             </div>
@@ -122,13 +123,13 @@ const WeddingHeader = ({
               </SheetTrigger>
               <SheetContent side="right" className="w-80 sm:w-96">
                 <SheetHeader>
-                  <SheetTitle className="text-left">Menu</SheetTitle>
+                  <SheetTitle className="text-left">{t('dashboard.header.menu')}</SheetTitle>
                 </SheetHeader>
 
                 <div className="mt-6 space-y-6">
                   {/* Calendar and Countdown Section */}
                   <div className="space-y-4">
-                    <div className="text-sm font-semibold text-muted-foreground">Data Matrimonio</div>
+                    <div className="text-sm font-semibold text-muted-foreground">{t('dashboard.sidebar.weddingDate')}</div>
 
                     {/* Wedding Date Picker */}
                     <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -139,8 +140,8 @@ const WeddingHeader = ({
                         >
                           <Calendar className="w-4 h-4 text-primary" />
                           {weddingDate
-                            ? format(weddingDate, "dd MMM yyyy", { locale: it })
-                            : "Scegli data matrimonio"
+                            ? format(weddingDate, "dd MMM yyyy", { locale: dateLocale })
+                            : t('dashboard.sidebar.chooseDate')
                           }
                           <ChevronDown className="w-4 h-4 ml-auto" />
                         </Button>
@@ -165,7 +166,7 @@ const WeddingHeader = ({
                             {countdown}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            al grande giorno
+                            {t('dashboard.sidebar.countdown.toTheBigDay')}
                           </div>
                         </div>
                       </div>
@@ -176,7 +177,7 @@ const WeddingHeader = ({
 
                   {/* Menu Sections */}
                   <div className="space-y-2">
-                    <div className="text-sm font-semibold text-muted-foreground">Sezioni</div>
+                    <div className="text-sm font-semibold text-muted-foreground">{t('dashboard.sidebar.sections')}</div>
                     {menuSections.map((section) => {
                       const IconComponent = section.icon;
                       return (
@@ -212,7 +213,7 @@ const WeddingHeader = ({
                     {/* User Greeting */}
                     {(profile?.full_name || user?.email) && (
                       <div className="text-center text-sm text-muted-foreground">
-                        Ciao, {profile?.full_name || user?.email}
+                        {t('dashboard.header.greeting', { name: profile?.full_name || user?.email })}
                       </div>
                     )}
 
@@ -227,7 +228,7 @@ const WeddingHeader = ({
                         className="w-full"
                         showConfirmation={true}
                       >
-                        {signingOut ? "Uscendo..." : "Esci"}
+                        {signingOut ? t('common.status.loading') : t('header.logout')}
                       </LogoutConfirmDialog>
                     )}
                   </div>

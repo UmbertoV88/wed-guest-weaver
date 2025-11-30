@@ -23,19 +23,23 @@ import {
 import { toast } from "sonner";
 import { User, CreditCard, Trash2, Mail, Calendar, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
-import { it } from 'date-fns/locale';
+import { it, enUS } from 'date-fns/locale';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import { useTranslation } from 'react-i18next';
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import CommonHeader from "@/components/CommonHeader";
 
 const Profile = () => {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
     const { user, signOut, signingOut } = useAuth();
     const { subscription, loading: subLoading } = useSubscription();
     const { profile, isWeddingOrganizer } = useProfile();
     const [isDeleting, setIsDeleting] = useState(false);
     const [isManagingSub, setIsManagingSub] = useState(false);
+
+    const dateLocale = i18n.language === 'it' ? it : enUS;
 
     const handleManageSubscription = async () => {
         try {
@@ -44,7 +48,7 @@ const Profile = () => {
             window.location.href = url;
         } catch (error) {
             console.error('Error opening portal:', error);
-            toast.error("Errore nell'apertura del portale abbonamento");
+            toast.error(t('profile.toasts.portalError'));
         } finally {
             setIsManagingSub(false);
         }
@@ -58,12 +62,12 @@ const Profile = () => {
 
             if (error) throw error;
 
-            toast.success("Account eliminato con successo");
+            toast.success(t('profile.toasts.deleteSuccess'));
             await signOut();
             navigate('/');
         } catch (error) {
             console.error('Error deleting account:', error);
-            toast.error("Errore durante l'eliminazione dell'account. Riprova più tardi.");
+            toast.error(t('profile.toasts.deleteError'));
         } finally {
             setIsDeleting(false);
         }
@@ -85,8 +89,8 @@ const Profile = () => {
                     <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
                         <div className="max-w-3xl mx-auto space-y-8">
                             <div>
-                                <h1 className="text-3xl font-bold text-gray-900">Il tuo Profilo</h1>
-                                <p className="text-gray-500 mt-2">Gestisci le tue informazioni personali e l'abbonamento.</p>
+                                <h1 className="text-3xl font-bold text-gray-900">{t('profile.title')}</h1>
+                                <p className="text-gray-500 mt-2">{t('profile.subtitle')}</p>
                             </div>
 
                             {/* User Info Card */}
@@ -94,13 +98,13 @@ const Profile = () => {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <User className="w-5 h-5 text-primary" />
-                                        Informazioni Personali
+                                        {t('profile.personalInfo.title')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-sm font-medium text-gray-500">Email</label>
+                                            <label className="text-sm font-medium text-gray-500">{t('profile.personalInfo.email')}</label>
                                             <div className="flex items-center gap-2 text-gray-900">
                                                 <Mail className="w-4 h-4 text-gray-400" />
                                                 {user.email}
@@ -108,12 +112,12 @@ const Profile = () => {
                                         </div>
 
                                         <div className="space-y-1">
-                                            <label className="text-sm font-medium text-gray-500">Data Matrimonio</label>
+                                            <label className="text-sm font-medium text-gray-500">{t('profile.personalInfo.weddingDate')}</label>
                                             <div className="flex items-center gap-2 text-gray-900">
                                                 <Calendar className="w-4 h-4 text-gray-400" />
                                                 {profile?.wedding_date
-                                                    ? format(new Date(profile.wedding_date), "d MMMM yyyy", { locale: it })
-                                                    : "Non impostata"
+                                                    ? format(new Date(profile.wedding_date), "d MMMM yyyy", { locale: dateLocale })
+                                                    : t('profile.personalInfo.notSet')
                                                 }
                                             </div>
                                         </div>
@@ -126,24 +130,24 @@ const Profile = () => {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <CreditCard className="w-5 h-5 text-primary" />
-                                        Abbonamento
+                                        {t('profile.subscription.title')}
                                     </CardTitle>
                                     <CardDescription>
-                                        Gestisci il tuo piano e i metodi di pagamento
+                                        {t('profile.subscription.description')}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
                                         <div className="space-y-1">
-                                            <div className="font-medium">Stato Attuale</div>
+                                            <div className="font-medium">{t('profile.subscription.currentStatus')}</div>
                                             <div className="flex items-center gap-2">
                                                 <Badge variant={subscription?.subscription_status === 'active' ? 'default' : 'secondary'}>
-                                                    {subscription?.subscription_status === 'active' ? 'Attivo' :
-                                                        subscription?.subscription_status === 'trialing' ? 'Periodo di Prova' :
-                                                            subscription?.subscription_status === 'canceled' ? 'Cancellato' : 'Inattivo'}
+                                                    {subscription?.subscription_status === 'active' ? t('profile.subscription.status.active') :
+                                                        subscription?.subscription_status === 'trialing' ? t('profile.subscription.status.trialing') :
+                                                            subscription?.subscription_status === 'canceled' ? t('profile.subscription.status.canceled') : t('profile.subscription.status.inactive')}
                                                 </Badge>
                                                 {subscription?.subscription_type === 'yearly' && (
-                                                    <Badge variant="outline" className="text-primary border-primary">Annuale</Badge>
+                                                    <Badge variant="outline" className="text-primary border-primary">{t('profile.subscription.yearly')}</Badge>
                                                 )}
                                             </div>
                                         </div>
@@ -153,13 +157,13 @@ const Profile = () => {
                                             onClick={handleManageSubscription}
                                             disabled={isManagingSub}
                                         >
-                                            {isManagingSub ? 'Caricamento...' : 'Gestisci Abbonamento'}
+                                            {isManagingSub ? t('profile.subscription.loading') : t('profile.subscription.manage')}
                                         </Button>
                                     </div>
 
                                     {subscription?.trial_ends_at && subscription.subscription_status === 'trialing' && (
                                         <p className="text-sm text-muted-foreground">
-                                            Il periodo di prova scade il {format(new Date(subscription.trial_ends_at), "d MMMM yyyy 'alle' HH:mm", { locale: it })}
+                                            {t('profile.subscription.trialEnds', { date: format(new Date(subscription.trial_ends_at), "d MMMM yyyy 'alle' HH:mm", { locale: dateLocale }) })}
                                         </p>
                                     )}
                                 </CardContent>
@@ -170,35 +174,34 @@ const Profile = () => {
                                 <CardHeader>
                                     <CardTitle className="text-red-600 flex items-center gap-2">
                                         <Trash2 className="w-5 h-5" />
-                                        Zona Pericolo
+                                        {t('profile.dangerZone.title')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-gray-600 mb-4">
-                                        L'eliminazione dell'account è irreversibile. Tutti i tuoi dati, inclusi la lista invitati, i tavoli e il budget, verranno cancellati permanentemente.
-                                        Anche l'abbonamento verrà terminato immediatamente.
+                                        {t('profile.dangerZone.description')}
                                     </p>
 
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button variant="destructive" className="w-full sm:w-auto">
-                                                Elimina Account
+                                                {t('profile.dangerZone.deleteAccount')}
                                             </Button>
                                         </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
-                                                <AlertDialogTitle>Sei assolutamente sicuro?</AlertDialogTitle>
+                                                <AlertDialogTitle>{t('profile.dangerZone.confirmTitle')}</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    Questa azione non può essere annullata. Eliminerà permanentemente il tuo account e rimuoverà tutti i tuoi dati dai nostri server.
+                                                    {t('profile.dangerZone.confirmDescription')}
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Annulla</AlertDialogCancel>
+                                                <AlertDialogCancel>{t('profile.dangerZone.cancel')}</AlertDialogCancel>
                                                 <AlertDialogAction
                                                     onClick={handleDeleteAccount}
                                                     className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
                                                 >
-                                                    {isDeleting ? 'Eliminazione...' : 'Sì, elimina il mio account'}
+                                                    {isDeleting ? t('profile.dangerZone.deleting') : t('profile.dangerZone.confirm')}
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>

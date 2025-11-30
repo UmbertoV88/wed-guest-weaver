@@ -4,12 +4,14 @@ import { useProfile } from "@/hooks/useProfile";
 import CommonHeader from "@/components/CommonHeader";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import SeatingEditor from "@/components/SeatingEditor";
+import { useTranslation } from 'react-i18next';
 import {
   SidebarProvider,
   SidebarInset,
 } from "@/components/ui/sidebar";
 
 const SeatingLayout = () => {
+  const { t } = useTranslation();
   const { user, signOut, signingOut } = useAuth();
   const { profile, isWeddingOrganizer } = useProfile();
 
@@ -34,10 +36,10 @@ const SeatingLayout = () => {
           <section className="text-center space-y-6">
             <div className="space-y-3 animate-fade-in-up">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                Disposizione Tavoli
+                {t('seating.title')}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Organizza la disposizione degli invitati ai tavoli. Trascina gli ospiti per assegnarli ai tavoli e gestisci la capienza massima.
+                {t('seating.description')}
               </p>
             </div>
           </section>
@@ -53,18 +55,18 @@ const SeatingLayout = () => {
 };
 
 const Seating = () => {
+  const { t } = useTranslation();
+
   useEffect(() => {
     // Update document title for better SEO
-    document.title = "Disposizione Tavoli - Organizza il tuo matrimonio";
+    document.title = t('seating.meta.title');
 
     // Add meta description for SEO
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content',
-        'Organizza la disposizione degli invitati ai tavoli per il tuo matrimonio. Drag and drop intuitivo per assegnare i posti a sedere.'
-      );
+      metaDescription.setAttribute('content', t('seating.meta.description'));
     }
-  }, []);
+  }, [t]);
 
   return (
     <SidebarProvider>

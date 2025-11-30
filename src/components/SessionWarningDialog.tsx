@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface SessionWarningDialogProps {
   open: boolean;
@@ -26,6 +27,7 @@ export const SessionWarningDialog = ({
   warningTimeMs
 }: SessionWarningDialogProps) => {
   const [timeLeft, setTimeLeft] = useState(Math.floor(warningTimeMs / 1000));
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +59,7 @@ export const SessionWarningDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-warning" />
-            Sessione in Scadenza
+            {t('dialogs.sessionWarning.title')}
           </AlertDialogTitle>
           <AlertDialogDescription>
             La tua sessione scadrà tra{' '}
@@ -69,11 +71,11 @@ export const SessionWarningDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onLogout}>
-            Disconnetti
+            {t('dialogs.sessionWarning.logout')}
           </AlertDialogCancel>
           <AlertDialogAction onClick={onExtendSession}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Estendi Sessione
+            {t('dialogs.sessionWarning.stayLoggedIn')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

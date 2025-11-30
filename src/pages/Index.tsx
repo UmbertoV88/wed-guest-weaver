@@ -13,10 +13,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
+import { useTranslation } from "react-i18next";
 
 const DashboardLayout = () => {
   const { user, signOut, signingOut } = useAuth();
   const { profile, isWeddingOrganizer } = useProfile();
+  const { t } = useTranslation();
   const {
     addGuest,
     getGuestsByStatus,
@@ -60,12 +62,12 @@ const DashboardLayout = () => {
           <section className="text-center space-y-6">
             <div className="space-y-3 animate-fade-in-up">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                {isWeddingOrganizer ? 'Gestisci tutti i matrimoni' : 'Crea la lista perfetta degli invitati'}
+                {isWeddingOrganizer ? t('dashboard.title.organizer') : t('dashboard.title.couple')}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 {isWeddingOrganizer
-                  ? 'Come wedding organizer, puoi gestire gli invitati di tutte le coppie che organizzi.'
-                  : 'Gestisci facilmente tutti gli invitati al tuo matrimonio. Aggiungi nomi, categorie, accompagnatori e note speciali per un evento indimenticabile.'
+                  ? t('dashboard.subtitle.organizer')
+                  : t('dashboard.subtitle.couple')
                 }
               </p>
             </div>
@@ -103,30 +105,30 @@ const DashboardLayout = () => {
           <footer className="text-center py-12 border-t border-primary/10 bg-elegant rounded-lg animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <div className="max-w-3xl mx-auto space-y-4">
               <h3 className="text-xl font-semibold text-foreground mb-4">
-                Suggerimenti per organizzare il tuo matrimonio
+                {t('dashboard.tips.title')}
               </h3>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-sm text-muted-foreground">
                 <div className="p-4 bg-white/60 rounded-lg shadow-soft">
-                  <h4 className="font-semibold text-primary mb-2">📝 Pianifica in anticipo</h4>
-                  <SimpleTooltip content="Inizia presto per evitare stress!">
-                    <p>Inizia a creare la lista degli invitati almeno 3-4 mesi prima del matrimonio</p>
+                  <h4 className="font-semibold text-primary mb-2">📝 {t('dashboard.tips.tip1.title')}</h4>
+                  <SimpleTooltip content={t('dashboard.tips.tip1.tooltip')}>
+                    <p>{t('dashboard.tips.tip1.description')}</p>
                   </SimpleTooltip>
                 </div>
 
                 <div className="p-4 bg-white/60 rounded-lg shadow-soft">
-                  <h4 className="font-semibold text-primary mb-2">🍽️ Considera le allergie</h4>
-                  <p>Raccogli informazioni su allergie e intolleranze per offrire un menù perfetto</p>
+                  <h4 className="font-semibold text-primary mb-2">🍽️ {t('dashboard.tips.tip2.title')}</h4>
+                  <p>{t('dashboard.tips.tip2.description')}</p>
                 </div>
 
                 <div className="p-4 bg-white/60 rounded-lg shadow-soft">
-                  <h4 className="font-semibold text-primary mb-2">💌 Conferme tempestive</h4>
-                  <p>Richiedi conferme di partecipazione almeno 2 settimane prima dell'evento</p>
+                  <h4 className="font-semibold text-primary mb-2">💌 {t('dashboard.tips.tip3.title')}</h4>
+                  <p>{t('dashboard.tips.tip3.description')}</p>
                 </div>
               </div>
 
               <p className="text-xs text-muted-foregor-mt-8">
-                💝 Tutti i tuoi dati sono salvati in modo sicuro nel tuo database personale
+                {t('dashboard.tips.dataSecure')}
               </p>
             </div>
           </footer>
@@ -137,18 +139,16 @@ const DashboardLayout = () => {
 };
 
 const Index = () => {
-  useEffect(() => {
-    // Update document title for better SEO
-    document.title = "Gestione Invitati Matrimonio - Organizza il tuo giorno speciale";
+  const { t } = useTranslation();
 
-    // Add meta description for SEO
+  useEffect(() => {
+    document.title = t('dashboard.meta.title');
+
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content',
-        'App completa per la gestione degli invitati al matrimonio. Organizza, conferma e gestisci tutti gli invitati per il tuo giorno speciale con eleganza e facilità.'
-      );
+      metaDescription.setAttribute('content', t('dashboard.meta.description'));
     }
-  }, []);
+  }, [t]);
 
   return (
     <SidebarProvider>

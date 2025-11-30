@@ -19,30 +19,32 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
+import { useTranslation } from "react-i18next";
 
 interface GuestListProps {
   guests: Guest[];
   type: "pending" | "confirmed" | "deleted";
   emptyMessage: string;
   companionLoading?: string | null;
-  confirmGuest: (guestId: string) => Promise<any>;
-  confirmGuestOnly: (guestId: string) => Promise<any>;
-  revertGuestOnly: (guestId: string) => Promise<any>;
-  confirmGuestAndAllCompanions: (guestId: string) => Promise<any>;
-  restoreGuest: (guestId: string) => Promise<any>;
-  deleteGuest: (guestId: string) => Promise<any>;
-  permanentlyDeleteGuest: (guestId: string) => Promise<any>;
-  updateGuest: (guestId: string, formData: any) => Promise<any>;
-  updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<any>;
-  updateCompanionStatus: (guestId: string, companionId: string, status: GuestStatus) => Promise<any>;
-  confirmCompanion: (guestId: string, companionId: string) => Promise<any>;
-  deleteCompanion: (guestId: string, companionId: string) => Promise<any>;
-  restoreCompanion: (guestId: string, companionId: string) => Promise<any>;
-  permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<any>;
-  toggleBomboniera?: (invitatiId: string, checked: boolean) => Promise<any>;
+  confirmGuest: (guestId: string) => Promise<void>;
+  confirmGuestOnly: (guestId: string) => Promise<void>;
+  revertGuestOnly: (guestId: string) => Promise<void>;
+  confirmGuestAndAllCompanions: (guestId: string) => Promise<void>;
+  restoreGuest: (guestId: string) => Promise<void>;
+  deleteGuest: (guestId: string) => Promise<void>;
+  permanentlyDeleteGuest: (guestId: string) => Promise<void>;
+  updateGuest: (guestId: string, formData: unknown) => Promise<void>;
+  updateGuestStatus: (guestId: string, status: GuestStatus) => Promise<void>;
+  updateCompanionStatus: (guestId: string, companionId: string, status: GuestStatus) => Promise<void>;
+  confirmCompanion: (guestId: string, companionId: string) => Promise<void>;
+  deleteCompanion: (guestId: string, companionId: string) => Promise<void>;
+  restoreCompanion: (guestId: string, companionId: string) => Promise<void>;
+  permanentlyDeleteCompanion: (guestId: string, companionId: string) => Promise<void>;
+  toggleBomboniera?: (invitatiId: string, checked: boolean) => Promise<void>;
 }
 
 const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest, confirmGuestOnly, revertGuestOnly, confirmGuestAndAllCompanions, restoreGuest, deleteGuest, permanentlyDeleteGuest, updateGuest, updateGuestStatus, updateCompanionStatus, confirmCompanion, deleteCompanion, restoreCompanion, permanentlyDeleteCompanion, toggleBomboniera }: GuestListProps) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -94,8 +96,8 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
   const handlePermanentDelete = async (guestId: string, guestName: string) => {
     setDeleteDialog({
       open: true,
-      title: "Elimina definitivamente invitato",
-      description: `Sei sicuro di voler eliminare definitivamente ${guestName}? Questa azione non può essere annullata.`,
+      title: t('guests.deleteDialog.title'),
+      description: t('guests.deleteDialog.description', { name: guestName }),
       onConfirm: async () => {
         try {
           await permanentlyDeleteGuest(guestId);
@@ -141,7 +143,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Cerca invitati..."
+                placeholder={t('guests.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 w-full"
@@ -156,7 +158,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm w-full sm:w-auto"
             >
-              <option value="all">Tutte le categorie</option>
+              <option value="all">{t('guests.categories.all')}</option>
               {categories.map(category => (
                 <option key={category} value={category}>
                   {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}
@@ -167,7 +169,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
         </div>
 
         <div className="mt-3 text-sm text-muted-foreground">
-          Visualizzando {filteredGuests.length} di {guests.length} invitati
+          {t('guests.showing', { count: filteredGuests.length, total: guests.length })}
         </div>
       </Card>
 
@@ -178,11 +180,11 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
             <Users className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            {searchTerm || selectedCategory !== "all" ? "Nessun risultato" : "Lista vuota"}
+            {searchTerm || selectedCategory !== "all" ? t('guests.empty.search') : t('guests.empty.list')}
           </h3>
           <p className="text-muted-foreground">
             {searchTerm || selectedCategory !== "all"
-              ? "Prova a modificare i filtri di ricerca."
+              ? t('guests.empty.filter')
               : emptyMessage
             }
           </p>
@@ -207,7 +209,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           <SimpleTooltip
                             content={
                               <div className="space-y-1">
-                                <div className="font-semibold text-xs">Allergie:</div>
+                                <div className="font-semibold text-xs">{t('guests.allergies')}</div>
                                 <div className="text-xs">{guest.allergies}</div>
                               </div>
                             }
@@ -259,7 +261,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs bg-success/10 hover:bg-success/20 text-success"
                               >
                                 <UserCheck className="w-4 h-4" />
-                                <span className="hidden lg:inline lg:ml-1">Conferma</span>
+                                <span className="hidden lg:inline lg:ml-1">{t('guests.actions.confirm')}</span>
                               </Button>
                               <Button
                                 onClick={() => handleDelete(guest.id, guest.name)}
@@ -268,7 +270,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs text-destructive hover:bg-destructive/10"
                               >
                                 <Trash2 className="w-4 h-4" />
-                                <span className="hidden lg:inline lg:ml-1">Elimina</span>
+                                <span className="hidden lg:inline lg:ml-1">{t('guests.actions.delete')}</span>
                               </Button>
                             </>
                           )}
@@ -281,7 +283,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs text-primary hover:bg-primary/10"
                               >
                                 <RotateCcw className="w-4 h-4" />
-                                <span className="hidden lg:inline lg:ml-1">Ripristina</span>
+                                <span className="hidden lg:inline lg:ml-1">{t('guests.actions.restore')}</span>
                               </Button>
                               <Button
                                 onClick={() => handleDelete(guest.id, guest.name)}
@@ -290,7 +292,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs text-destructive hover:bg-destructive/10"
                               >
                                 <Trash2 className="w-4 h-4" />
-                                <span className="hidden lg:inline lg:ml-1">Elimina</span>
+                                <span className="hidden lg:inline lg:ml-1">{t('guests.actions.delete')}</span>
                               </Button>
                             </>
                           )}
@@ -303,7 +305,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs text-primary hover:bg-primary/10"
                               >
                                 <RotateCcw className="w-4 h-4" />
-                                <span className="hidden lg:inline lg:ml-1">Ripristina</span>
+                                <span className="hidden lg:inline lg:ml-1">{t('guests.actions.restore')}</span>
                               </Button>
                               <Button
                                 onClick={() => handlePermanentDelete(guest.id, guest.name)}
@@ -312,7 +314,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                 className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs text-destructive hover:bg-destructive/10"
                               >
                                 <Trash2 className="w-4 h-4" />
-                                <span className="hidden lg:inline lg:ml-1">Elimina</span>
+                                <span className="hidden lg:inline lg:ml-1">{t('guests.actions.delete')}</span>
                               </Button>
                             </>
                           )}
@@ -335,7 +337,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "family-hers":
                             return (
                               <SimpleTooltip
-                                content="Famiglia della Sposa"
+                                content={t('guests.categories.family-hers')}
                                 className="bg-white border-2 border-pink-300 shadow-lg text-pink-700 font-medium"
                               >
                                 <span className="inline-block">{badge}</span>
@@ -344,7 +346,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "family-his":
                             return (
                               <SimpleTooltip
-                                content="Famiglia dello Sposo"
+                                content={t('guests.categories.family-his')}
                                 className="bg-white border-2 border-blue-300 shadow-lg text-blue-700 font-medium"
                               >
                                 <span className="inline-block">{badge}</span>
@@ -353,7 +355,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "friends":
                             return (
                               <SimpleTooltip
-                                content="Amici"
+                                content={t('guests.categories.friends')}
                                 className="bg-white border-2 border-gray-300 shadow-lg text-gray-700 font-medium"
                               >
                                 <span className="inline-block">{badge}</span>
@@ -362,7 +364,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "colleagues":
                             return (
                               <SimpleTooltip
-                                content="Colleghi"
+                                content={t('guests.categories.colleagues')}
                                 className="bg-white border-2 border-gray-300 shadow-lg text-gray-700 font-medium"
                               >
                                 <span className="inline-block">{badge}</span>
@@ -385,7 +387,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "Adulto":
                             return (
                               <SimpleTooltip
-                                content="Adulto"
+                                content={t('guests.ageGroups.adult')}
                                 className="bg-white border-2 border-green-300 shadow-lg text-green-700 font-medium"
                               >
                                 <span className="inline-block">{ageBadge}</span>
@@ -394,7 +396,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "Ragazzo":
                             return (
                               <SimpleTooltip
-                                content="Ragazzo"
+                                content={t('guests.ageGroups.teen')}
                                 className="bg-white border-2 border-orange-300 shadow-lg text-orange-700 font-medium"
                               >
                                 <span className="inline-block">{ageBadge}</span>
@@ -403,7 +405,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           case "Bambino":
                             return (
                               <SimpleTooltip
-                                content="Bambino"
+                                content={t('guests.ageGroups.child')}
                                 className="bg-white border-2 border-purple-300 shadow-lg text-purple-700 font-medium"
                               >
                                 <span className="inline-block">{ageBadge}</span>
@@ -421,7 +423,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium">
                           <Users className="w-3 h-3" />
-                          <span>Accompagnatori:</span>
+                          <span>{t('guests.companions')}</span>
                         </div>
                         <div className="pl-3 sm:pl-5 space-y-3">
                           {guest.companions.map(companion => (
@@ -435,7 +437,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         <SimpleTooltip
                                           content={
                                             <div className="space-y-1">
-                                              <div className="font-semibold text-xs">Allergie:</div>
+                                              <div className="font-semibold text-xs">{t('guests.allergies')}</div>
                                               <div className="text-xs">{companion.allergies}</div>
                                             </div>
                                           }
@@ -465,7 +467,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         case "Adulto":
                                           return (
                                             <SimpleTooltip
-                                              content="Adulto"
+                                              content={t('guests.ageGroups.adult')}
                                               className="bg-white border-2 border-green-300 shadow-lg text-green-700 font-medium"
                                             >
                                               <span className="inline-block">{ageBadge}</span>
@@ -474,7 +476,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         case "Ragazzo":
                                           return (
                                             <SimpleTooltip
-                                              content="Ragazzo"
+                                              content={t('guests.ageGroups.teen')}
                                               className="bg-white border-2 border-orange-300 shadow-lg text-orange-700 font-medium"
                                             >
                                               <span className="inline-block">{ageBadge}</span>
@@ -483,7 +485,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         case "Bambino":
                                           return (
                                             <SimpleTooltip
-                                              content="Bambino"
+                                              content={t('guests.ageGroups.child')}
                                               className="bg-white border-2 border-purple-300 shadow-lg text-purple-700 font-medium"
                                             >
                                               <span className="inline-block">{ageBadge}</span>
@@ -529,7 +531,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         disabled={companionLoading === companion.id}
                                       >
                                         <UserCheck className="w-4 h-4" />
-                                        <span className="hidden lg:inline lg:ml-1">Conferma</span>
+                                        <span className="hidden lg:inline lg:ml-1">{t('guests.actions.confirm')}</span>
                                       </Button>
                                       <Button
                                         onClick={() => {
@@ -541,7 +543,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         disabled={companionLoading === companion.id}
                                       >
                                         <Trash2 className="w-4 h-4" />
-                                        <span className="hidden lg:inline lg:ml-1">Elimina</span>
+                                        <span className="hidden lg:inline lg:ml-1">{t('guests.actions.delete')}</span>
                                       </Button>
                                     </>
                                   )}
@@ -557,7 +559,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         disabled={companionLoading === companion.id}
                                       >
                                         <RotateCcw className="w-4 h-4" />
-                                        <span className="hidden lg:inline lg:ml-1">Ripristina</span>
+                                        <span className="hidden lg:inline lg:ml-1">{t('guests.actions.restore')}</span>
                                       </Button>
                                       <Button
                                         onClick={() => {
@@ -569,7 +571,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         disabled={companionLoading === companion.id}
                                       >
                                         <Trash2 className="w-4 h-4" />
-                                        <span className="hidden lg:inline lg:ml-1">Elimina</span>
+                                        <span className="hidden lg:inline lg:ml-1">{t('guests.actions.delete')}</span>
                                       </Button>
                                     </>
                                   )}
@@ -585,14 +587,14 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         disabled={companionLoading === companion.id}
                                       >
                                         <RotateCcw className="w-4 h-4" />
-                                        <span className="hidden lg:inline lg:ml-1">Ripristina</span>
+                                        <span className="hidden lg:inline lg:ml-1">{t('guests.actions.restore')}</span>
                                       </Button>
                                       <Button
                                         onClick={() => {
                                           setDeleteDialog({
                                             open: true,
-                                            title: "Eliminare definitivamente?",
-                                            description: `Sei sicuro di voler eliminare definitivamente ${companion.name}? Questa azione non può essere annullata.`,
+                                            title: t('guests.deleteDialog.companionTitle'),
+                                            description: t('guests.deleteDialog.companionDescription', { name: companion.name }),
                                             onConfirm: () => {
                                               permanentlyDeleteCompanion(guest.id, companion.id);
                                               setDeleteDialog({ ...deleteDialog, open: false });
@@ -605,7 +607,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                                         disabled={companionLoading === companion.id}
                                       >
                                         <Trash2 className="w-4 h-4" />
-                                        <span className="hidden lg:inline lg:ml-1">Elimina</span>
+                                        <span className="hidden lg:inline lg:ml-1">{t('guests.actions.delete')}</span>
                                       </Button>
                                     </>
                                   )}
@@ -634,7 +636,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                               className="bg-success hover:bg-success/90 text-white"
                             >
                               <UserCheck className="w-4 h-4 mr-1" />
-                              Conferma tutto
+                              {t('guests.actions.confirmAll')}
                             </Button>
                           )}
                           {guest.companions.length > 0 && (
@@ -644,7 +646,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                               variant="destructive"
                             >
                               <Trash2 className="w-4 h-4 mr-1" />
-                              Elimina tutto
+                              {t('guests.actions.deleteAll')}
                             </Button>
                           )}
                         </>
@@ -657,7 +659,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                           variant="outline"
                         >
                           <RotateCcw className="w-4 h-4 mr-1" />
-                          Riporta a da confermare
+                          {t('guests.actions.revertToPending')}
                         </Button>
                       )}
 
@@ -669,7 +671,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                             variant="outline"
                           >
                             <RotateCcw className="w-4 h-4 mr-1" />
-                            Ripristina
+                            {t('guests.actions.restore')}
                           </Button>
                           <Button
                             onClick={() => handlePermanentDelete(guest.id, guest.name)}
@@ -677,7 +679,7 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
                             variant="destructive"
                           >
                             <Trash2 className="w-4 h-4 mr-1" />
-                            Elimina per sempre
+                            {t('guests.actions.permanentDelete')}
                           </Button>
                         </>
                       )}
@@ -695,8 +697,8 @@ const GuestList = ({ guests, type, emptyMessage, companionLoading, confirmGuest,
         onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
         title={deleteDialog.title}
         description={deleteDialog.description}
-        confirmText="Elimina"
-        cancelText="Annulla"
+        confirmText={t('guests.actions.delete')}
+        cancelText={t('common.actions.cancel')}
         onConfirm={deleteDialog.onConfirm}
         variant="destructive"
       />

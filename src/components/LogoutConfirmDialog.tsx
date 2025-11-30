@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface LogoutConfirmDialogProps {
   onSignOut: () => Promise<void>;
@@ -26,6 +27,7 @@ export const LogoutConfirmDialog = ({
   collapsed = false
 }: LogoutConfirmDialogProps) => {
   const [showDialog, setShowDialog] = useState(false);
+  const { t } = useTranslation();
 
   const handleLogoutClick = () => {
     if (showConfirmation) {
@@ -54,16 +56,16 @@ export const LogoutConfirmDialog = ({
         disabled={signingOut}
       >
         <LogOut className={cn("w-4 h-4", signingOut && "animate-spin")} />
-        {!collapsed && (children || (signingOut ? "Uscendo..." : "Esci"))}
+        {!collapsed && (children || (signingOut ? t('common.status.loading') : t('header.logout')))}
       </Button>
 
       <ConfirmDialog
         open={showDialog}
         onOpenChange={setShowDialog}
-        title="Conferma Logout"
-        description="Sei sicuro di voler uscire dall'applicazione?"
-        confirmText="Esci"
-        cancelText="Annulla"
+        title={t('dialogs.logout.title')}
+        description={t('dialogs.logout.message')}
+        confirmText={t('dialogs.logout.confirm')}
+        cancelText={t('dialogs.logout.cancel')}
         onConfirm={handleConfirm}
         variant="destructive"
       />

@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, X } from "lucide-react";
 import { reminderApi } from "@/services/reminderService";
 import type { PaymentReminder } from "@/types/budget";
+import { useTranslation } from "react-i18next";
 
 export const ReminderNotifications: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [reminders, setReminders] = useState<PaymentReminder[]>([]);
 
   const loadReminders = async () => {
@@ -16,7 +18,7 @@ export const ReminderNotifications: React.FC = () => {
 
   useEffect(() => {
     loadReminders();
-    
+
     // Poll ogni 5 minuti
     const interval = setInterval(loadReminders, 5 * 60 * 1000);
     return () => clearInterval(interval);
@@ -39,14 +41,14 @@ export const ReminderNotifications: React.FC = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge className="bg-orange-100 text-orange-800">
-                    Promemoria Pagamento
+                    {t('budget.reminders.notificationTitle')}
                   </Badge>
                 </div>
                 <p className="text-sm font-medium text-gray-900">
-                  {reminder.custom_message || "Hai un pagamento in scadenza"}
+                  {reminder.custom_message || t('budget.reminders.defaultMessage')}
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
-                  Scadenza: {new Date(reminder.scheduled_date).toLocaleDateString('it-IT')}
+                  {t('budget.payments.dueOn', { date: new Date(reminder.scheduled_date).toLocaleDateString(i18n.language === 'it' ? 'it-IT' : 'en-US') })}
                 </p>
               </div>
               <Button

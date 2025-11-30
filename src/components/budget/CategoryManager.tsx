@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useTranslation } from 'react-i18next';
 import {
   Package,
   MapPin,
@@ -101,6 +102,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   getItemsByCategory = () => [],
   getVendorsByCategory = () => [],
 }) => {
+  const { t, i18n } = useTranslation();
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [showAddForm, setShowAddForm] = useState(false);
@@ -181,7 +183,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("it-IT", {
+    return new Intl.NumberFormat(i18n.language === 'it' ? "it-IT" : "en-US", {
       style: "currency",
       currency: "EUR",
     }).format(amount);
@@ -191,26 +193,26 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     const percentage = (spent / budgeted) * 100;
 
     if (percentage === 0) {
-      return <Badge variant="secondary">Non iniziato</Badge>;
+      return <Badge variant="secondary">{t('budget.categories.status.notStarted')}</Badge>;
     }
     if (percentage < 50) {
-      return <Badge className="bg-blue-500 hover:bg-blue-600">In corso</Badge>;
+      return <Badge className="bg-blue-500 hover:bg-blue-600">{t('budget.categories.status.inProgress')}</Badge>;
     }
     if (percentage < 100) {
-      return <Badge className="bg-yellow-500 hover:bg-yellow-600">Quasi completato</Badge>;
+      return <Badge className="bg-yellow-500 hover:bg-yellow-600">{t('budget.categories.status.almostComplete')}</Badge>;
     }
     if (percentage === 100) {
-      return <Badge className="bg-green-500 hover:bg-green-600">Completato</Badge>;
+      return <Badge className="bg-green-500 hover:bg-green-600">{t('budget.categories.status.completed')}</Badge>;
     }
-    return <Badge variant="destructive">Budget superato</Badge>;
+    return <Badge variant="destructive">{t('budget.categories.status.exceeded')}</Badge>;
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
     const category = categories.find((cat) => cat.id === categoryId);
     if (!category) {
       console.error("Toast removed:", {
-        title: "Errore",
-        description: "Categoria non trovata",
+        title: t('common.status.error'),
+        description: t('budget.categories.errors.notFound'),
         variant: "destructive",
       });
       return;
@@ -232,8 +234,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     } catch (error) {
       console.error("Errore durante il recupero delle informazioni:", error);
       console.error("Toast removed:", {
-        title: "Errore",
-        description: "Impossibile recuperare le informazioni sulla categoria",
+        title: t('common.status.error'),
+        description: t('budget.categories.errors.fetchInfoFailed'),
         variant: "destructive",
       });
     }
@@ -252,8 +254,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     } catch (error) {
       console.error("Errore durante l'eliminazione della categoria:", error);
       console.error("Toast removed:", {
-        title: "Errore durante l'eliminazione",
-        description: "Si è verificato un errore. Riprova più tardi.",
+        title: t('budget.categories.errors.deleteFailed'),
+        description: t('common.status.error'),
         variant: "destructive",
       });
     } finally {
@@ -317,15 +319,15 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestione Categorie</h2>
-          <p className="text-gray-600">Modifica i budget e traccia le spese per ogni categoria</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('budget.categories.title')}</h2>
+          <p className="text-gray-600">{t('budget.categories.subtitle')}</p>
         </div>
         <Button
           className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
           onClick={() => setShowAddForm(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Aggiungi Categoria
+          {t('budget.categories.add')}
         </Button>
       </div>
 
@@ -333,18 +335,18 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       {showAddForm && (
         <Card ref={addFormRef} className="border-2 border-pink-200">
           <CardHeader>
-            <CardTitle className="text-pink-700">Aggiungi Nuova Categoria</CardTitle>
+            <CardTitle className="text-pink-700">{t('budget.categories.newTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="new-category-select">Nome Categoria *</Label>
+                <Label htmlFor="new-category-select">{t('budget.categories.nameLabel')}</Label>
                 <Select
                   value={newCategory.categoryId}
                   onValueChange={(value) => setNewCategory((prev) => ({ ...prev, categoryId: value }))}
                 >
                   <SelectTrigger id="new-category-select" className="bg-white">
-                    <SelectValue placeholder="Seleziona una categoria" />
+                    <SelectValue placeholder={t('budget.categories.selectPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent className="bg-white z-50">
                     {availableCategories.map((cat) => (
@@ -356,7 +358,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                 </Select>
               </div>
               <div>
-                <Label htmlFor="new-category-cost">Budget Stimato *</Label>
+                <Label htmlFor="new-category-cost">{t('budget.categories.budgetLabel')}</Label>
                 <div className="relative">
                   <Euro className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
@@ -375,8 +377,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                 onClick={async () => {
                   if (!newCategory.categoryId || !newCategory.estimatedCost) {
                     console.error("Toast removed:", {
-                      title: "Errore",
-                      description: "Compila tutti i campi obbligatori",
+                      title: t('common.status.error'),
+                      description: t('budget.categories.errors.fillAllFields'),
                       variant: "destructive",
                     });
                     return;
@@ -397,11 +399,11 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Aggiungi Categoria
+                {t('budget.categories.add')}
               </Button>
               <Button variant="outline" onClick={() => setShowAddForm(false)} className="flex-1">
                 <X className="w-4 h-4 mr-2" />
-                Annulla
+                {t('common.actions.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -409,8 +411,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       )}
 
       <div className="text-sm text-muted-foreground mb-4">
-        Budget totale disponibile: €{totalBudget.toLocaleString()} | Da allocare: €
-        {remainingToAllocate.toLocaleString()}
+        {t('budget.categories.totalAvailable', { total: `€${totalBudget.toLocaleString()}`, remaining: `€${remainingToAllocate.toLocaleString()}` })}
       </div>
 
       {/* Enhanced Category Accordion */}
@@ -468,7 +469,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                         {/* Badge Bomboniere - SOLO se categoria è "Bomboniere" */}
                         {category.name.toLowerCase().includes('bomboniere') && bombonieraCount > 0 && (
                           <Badge variant="secondary" className="bg-pink-100 text-pink-700 border-pink-300">
-                            🎁 {bombonieraCount} Bomboniere
+                            {t('budget.categories.bomboniereBadge', { count: bombonieraCount })}
                           </Badge>
                         )}
 
@@ -477,11 +478,11 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           category.name.toLowerCase().includes('ricevimento') &&
                           confirmedGuestsCount > 0 && (
                             <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-300">
-                              👥 {confirmedGuestsCount} Ospiti
+                              {t('budget.categories.guestsBadge', { count: confirmedGuestsCount })}
                             </Badge>
                           )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{categoryPercentage}% del budget</p>
+                      <p className="text-xs text-muted-foreground">{t('budget.overview.percentOfBudget', { percent: categoryPercentage })}</p>
                     </div>
                   </div>
 
@@ -492,7 +493,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                       <p className="font-semibold text-sm">
                         {formatCurrency(actualSpent)} / {formatCurrency(category.budgeted)}
                       </p>
-                      <p className="text-xs text-muted-foreground">{Math.round(progressPercentage)}% utilizzato</p>
+                      <p className="text-xs text-muted-foreground">{t('budget.categories.percentUsed', { percent: Math.round(progressPercentage) })}</p>
                     </div>
                   </div>
                 </div>
@@ -503,7 +504,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                   {isEditing ? (
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor={`name-${category.id}`}>Nome Categoria</Label>
+                        <Label htmlFor={`name-${category.id}`}>{t('budget.categories.nameLabel')}</Label>
                         <Input
                           id={`name-${category.id}`}
                           value={editForm.name}
@@ -511,7 +512,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`budget-${category.id}`}>Budget Stimato</Label>
+                        <Label htmlFor={`budget-${category.id}`}>{t('budget.categories.budgetLabel')}</Label>
                         <Input
                           id={`budget-${category.id}`}
                           type="number"
@@ -532,7 +533,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           className="flex-1 bg-green-600 hover:bg-green-700"
                         >
                           <Check className="w-4 h-4 mr-2" />
-                          Salva
+                          {t('common.actions.save')}
                         </Button>
                         <Button
                           variant="outline"
@@ -543,7 +544,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           className="flex-1"
                         >
                           <X className="w-4 h-4 mr-2" />
-                          Annulla
+                          {t('common.actions.cancel')}
                         </Button>
                       </div>
                     </div>
@@ -552,31 +553,31 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                       {/* Budget Progress */}
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Progresso spesa</span>
+                          <span className="text-gray-600">{t('budget.categories.progress')}</span>
                           <span className="font-medium">
                             {formatCurrency(actualSpent)} / {formatCurrency(category.budgeted)}
                           </span>
                         </div>
                         <Progress value={Math.min(progressPercentage, 100)} className="h-3" />
                         <div className="flex justify-between text-xs text-gray-500">
-                          <span>{Math.round(progressPercentage)}% utilizzato</span>
+                          <span>{t('budget.categories.percentUsed', { percent: Math.round(progressPercentage) })}</span>
                           <span>
                             {actualSpent < category.budgeted
-                              ? `Rimanente: ${formatCurrency(category.budgeted - actualSpent)}`
-                              : `Superato: ${formatCurrency(actualSpent - category.budgeted)}`}
+                              ? t('budget.categories.remaining', { amount: formatCurrency(category.budgeted - actualSpent) })
+                              : t('budget.categories.exceeded', { amount: formatCurrency(actualSpent - category.budgeted) })}
                           </span>
                         </div>
                       </div>
 
                       {/* Dettaglio spese - SOLO FORNITORI */}
                       <div className="border-t pt-4">
-                        <h4 className="font-medium text-gray-900 mb-2">Dettaglio spese</h4>
+                        <h4 className="font-medium text-gray-900 mb-2">{t('budget.categories.expensesDetail')}</h4>
                         <div className="space-y-1 text-sm">
                           {(() => {
                             const categoryVendors = getVendorsByCategory(category.id);
 
                             if (categoryVendors.length === 0) {
-                              return <p className="text-gray-500">Nessun fornitore associato</p>;
+                              return <p className="text-gray-500">{t('budget.categories.noVendors')}</p>;
                             }
 
                             return (
@@ -609,7 +610,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                                           {formatCurrency(paid)} / {formatCurrency(total)}
                                         </p>
                                         <p className="text-xs text-green-600 font-medium">
-                                          {Math.round(percentage)}% pagato
+                                          {t('budget.categories.paidPercent', { percent: Math.round(percentage) })}
                                         </p>
                                       </div>
                                     </div>
@@ -637,7 +638,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           disabled={isDeleting}
                         >
                           <Edit3 className="w-4 h-4 md:mr-2" />
-                          <span className="hidden md:inline">Modifica</span>
+                          <span className="hidden md:inline">{t('budget.categories.actions.edit')}</span>
                         </Button>
                         <Button
                           variant="outline"
@@ -647,7 +648,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           onClick={() => handleAddExpenseClick(category.id)}
                         >
                           <Plus className="w-4 h-4 mr-2" />
-                          Aggiungi Spesa
+                          {t('budget.categories.actions.addExpense')}
                         </Button>
                         {/* ✅ PULSANTE ELIMINAZIONE CORRETTO CON LOADING STATE */}
                         <Button
@@ -661,7 +662,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
                           ) : (
                             <Trash2 className="w-4 h-4 md:mr-1" />
                           )}
-                          <span className="hidden md:inline">{isDeleting ? "Eliminando..." : "Elimina"}</span>
+                          <span className="hidden md:inline">{isDeleting ? t('budget.categories.actions.deleting') : t('budget.categories.actions.delete')}</span>
                         </Button>
                       </div>
                     </>
@@ -677,40 +678,40 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="⚠️ Conferma Eliminazione Categoria"
+        title={t('budget.categories.deleteDialog.title')}
         description={
           categoryToDelete ? (
             <div className="space-y-3">
-              <p className="font-semibold text-gray-900">Stai per eliminare la categoria "{categoryToDelete.name}"</p>
+              <p className="font-semibold text-gray-900">{t('budget.categories.deleteDialog.confirmName', { name: categoryToDelete.name })}</p>
 
               {categoryToDelete.spent > 0 && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-800 font-medium">
-                    💰 Totale speso: €{categoryToDelete.spent.toLocaleString("it-IT", { minimumFractionDigits: 2 })}
+                    💰 {t('budget.categories.deleteDialog.totalSpent', { amount: categoryToDelete.spent.toLocaleString(i18n.language === 'it' ? "it-IT" : "en-US", { minimumFractionDigits: 2 }) })}
                   </p>
                 </div>
               )}
 
               {(categoryToDelete.vendorsCount > 0 || categoryToDelete.itemsCount > 0) && (
                 <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-1">
-                  <p className="text-sm text-orange-800 font-medium">Verranno eliminati definitivamente:</p>
+                  <p className="text-sm text-orange-800 font-medium">{t('budget.categories.deleteDialog.willDelete')}</p>
                   {categoryToDelete.vendorsCount > 0 && (
-                    <p className="text-sm text-orange-700">• {categoryToDelete.vendorsCount} fornitore/i</p>
+                    <p className="text-sm text-orange-700">• {t('budget.categories.deleteDialog.vendorsCount', { count: categoryToDelete.vendorsCount })}</p>
                   )}
                   {categoryToDelete.itemsCount > 0 && (
-                    <p className="text-sm text-orange-700">• {categoryToDelete.itemsCount} spesa/e</p>
+                    <p className="text-sm text-orange-700">• {t('budget.categories.deleteDialog.itemsCount', { count: categoryToDelete.itemsCount })}</p>
                   )}
                 </div>
               )}
 
-              <p className="text-sm text-gray-600 font-medium">⚠️ Questa operazione è irreversibile!</p>
+              <p className="text-sm text-gray-600 font-medium">⚠️ {t('budget.categories.deleteDialog.irreversible')}</p>
             </div>
           ) : (
-            "Confermi l'eliminazione?"
+            t('budget.categories.deleteDialog.confirm')
           )
         }
-        confirmText="Sì, elimina definitivamente"
-        cancelText="Annulla"
+        confirmText={t('budget.categories.deleteDialog.confirmButton')}
+        cancelText={t('common.actions.cancel')}
         onConfirm={confirmDeleteCategory}
         variant="destructive"
       />

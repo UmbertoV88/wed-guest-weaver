@@ -8,6 +8,7 @@ import { Users, AlertCircle, UserPlus, AlertTriangle, Crown } from "lucide-react
 import { SeatingGuest } from "@/hooks/useSeating";
 import { CATEGORY_LABELS, AGE_GROUP_LABELS, CATEGORY_ICONS, AGE_GROUP_ICONS } from "@/types/guest";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Table {
   id: number;
@@ -27,6 +28,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
   tables,
   onAssignMultipleGuests
 }) => {
+  const { t } = useTranslation();
   const [selectedGuests, setSelectedGuests] = useState<number[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [isAssigning, setIsAssigning] = useState(false);
@@ -98,14 +100,14 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
               <div
                 key={guest.id}
                 className={`flex items-center space-x-2 p-1.5 rounded-lg border transition-colors w-full ${guest.gruppo === 'family-his'
-                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
-                    : guest.gruppo === 'family-hers'
-                      ? 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800'
-                      : guest.gruppo === 'friends'
-                        ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
-                        : guest.gruppo === 'colleagues'
-                          ? 'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700'
-                          : 'bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:border-gray-800'
+                  ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
+                  : guest.gruppo === 'family-hers'
+                    ? 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800'
+                    : guest.gruppo === 'friends'
+                      ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+                      : guest.gruppo === 'colleagues'
+                        ? 'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700'
+                        : 'bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:border-gray-800'
                   }`}
               >
                 <Checkbox
@@ -120,7 +122,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
                       <SimpleTooltip
                         content={
                           <div className="space-y-1">
-                            <div className="font-semibold text-xs">Allergie:</div>
+                            <div className="font-semibold text-xs">{t('guests.allergies')}</div>
                             <div className="text-xs">{guest.allergies}</div>
                           </div>
                         }
@@ -162,7 +164,7 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-orange-600" />
-            Ospiti Non Assegnati
+            {t('seating.unassigned.title')}
           </CardTitle>
           <Badge variant="outline" className="bg-white dark:bg-gray-950">
             <Users className="h-3 w-3 mr-1" />
@@ -172,23 +174,23 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
 
         {/* Filtro per gruppo */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <label className="text-sm font-medium">Filtra per gruppo:</label>
+          <label className="text-sm font-medium">{t('seating.unassigned.filter')}</label>
           <Select value={groupFilter} onValueChange={setGroupFilter}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tutti i gruppi</SelectItem>
-              <SelectItem value="family-his">Famiglia di lui</SelectItem>
-              <SelectItem value="family-hers">Famiglia di lei</SelectItem>
-              <SelectItem value="friends">Amici</SelectItem>
-              <SelectItem value="colleagues">Colleghi</SelectItem>
+              <SelectItem value="all">{t('guests.categories.all')}</SelectItem>
+              <SelectItem value="family-his">{t('guests.categories.family-his')}</SelectItem>
+              <SelectItem value="family-hers">{t('guests.categories.family-hers')}</SelectItem>
+              <SelectItem value="friends">{t('guests.categories.friends')}</SelectItem>
+              <SelectItem value="colleagues">{t('guests.categories.colleagues')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Seleziona gli ospiti e scegli un tavolo per l'assegnazione
+          {t('seating.unassigned.instruction')}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -197,8 +199,8 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
             <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
             <p className="text-muted-foreground">
               {groupFilter === "all"
-                ? "Tutti gli ospiti sono stati assegnati ai tavoli!"
-                : `Nessun ospite nel gruppo selezionato da assegnare`}
+                ? t('seating.unassigned.emptyAll')
+                : t('seating.unassigned.emptyFilter')}
             </p>
           </div>
         ) : (
@@ -208,56 +210,56 @@ const UnassignedGuests: React.FC<UnassignedGuestsProps> = ({
               <div className="p-4 bg-muted/50 rounded-lg border">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-sm font-medium">
-                    {selectedGuests.length} ospiti selezionati
+                    {t('seating.unassigned.selected', { count: selectedGuests.length })}
                   </p>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedGuests([])}
                   >
-                    Deseleziona tutti
+                    {t('common.clearSelection')}
                   </Button>
                 </div>
-                <div className="flex gap-2">
-                  <Select value={selectedTable} onValueChange={setSelectedTable}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Seleziona tavolo..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tables.map((table) => {
-                        const availableSpots = getAvailableSpots(table);
-                        const canAccommodate = availableSpots >= selectedGuests.length;
-                        return (
-                          <SelectItem
-                            key={table.id}
-                            value={table.id.toString()}
-                            disabled={!canAccommodate}
-                          >
-                            {table.nome_tavolo} ({availableSpots}/{table.capacita_max} liberi)
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    onClick={handleAssign}
-                    disabled={!selectedTable || selectedGuests.length === 0 || isAssigning}
-                    className="shrink-0"
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    {isAssigning ? "Assegnando..." : "Assegna"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Select value={selectedTable} onValueChange={setSelectedTable}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder={t('guests.actions.selectTable')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tables.map((table) => {
+                          const availableSpots = getAvailableSpots(table);
+                          const canAccommodate = availableSpots >= selectedGuests.length;
+                          return (
+                            <SelectItem
+                              key={table.id}
+                              value={table.id.toString()}
+                              disabled={!canAccommodate}
+                            >
+                              {table.nome_tavolo} ({availableSpots}/{table.capacita_max} liberi)
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      onClick={handleAssign}
+                      disabled={!selectedTable || selectedGuests.length === 0 || isAssigning}
+                      className="shrink-0"
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      {isAssigning ? t('guests.actions.assigning') : t('guests.actions.assign')}
+                    </Button>
+                  </div>
                 </div>
-              </div>
             )}
-            {/* Guest Lists */}
-            <div className="space-y-6">
-              {renderGuestList(confirmedGuests, "Confermati", "text-green-700 dark:text-green-300")}
-              {renderGuestList(pendingGuests, "In Attesa", "text-muted-foreground")}
-            </div>
-          </>
-        )}
-      </CardContent>
+                {/* Guest Lists */}
+                <div className="space-y-6">
+                  {renderGuestList(confirmedGuests, t('dashboard.stats.confirmed'), "text-green-700 dark:text-green-300")}
+                  {renderGuestList(pendingGuests, t('dashboard.stats.pending'), "text-muted-foreground")}
+                </div>
+              </>
+            )}
+          </CardContent>
     </Card>
   );
 };

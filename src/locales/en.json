@@ -1,0 +1,779 @@
+{
+    "common": {
+        "button": {
+            "save": "Save",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "edit": "Edit",
+            "add": "Add",
+            "close": "Close",
+            "confirm": "Confirm",
+            "back": "Back",
+            "next": "Next",
+            "submit": "Submit",
+            "search": "Search",
+            "filter": "Filter",
+            "export": "Export",
+            "import": "Import",
+            "download": "Download",
+            "upload": "Upload",
+            "yes": "Yes",
+            "no": "No"
+        },
+        "status": {
+            "loading": "Loading...",
+            "saving": "Saving...",
+            "saved": "Saved",
+            "error": "Error",
+            "success": "Success"
+        },
+        "language": {
+            "italian": "Italiano",
+            "english": "English"
+        },
+        "clearSelection": "Clear selection",
+        "actions": {
+            "back": "Back",
+            "next": "Next",
+            "cancel": "Cancel",
+            "edit": "Edit",
+            "add": "Add Guest",
+            "import": "Import from Excel",
+            "export": "Export Excel",
+            "confirm": "Confirm",
+            "delete": "Delete",
+            "restore": "Restore",
+            "permanentDelete": "Delete Permanently",
+            "confirmAll": "Confirm All",
+            "deleteAll": "Delete All",
+            "revertToPending": "Revert to Pending"
+        },
+        "types": {
+            "main": "Main Guest",
+            "companion": "Companion"
+        },
+        "fields": {
+            "notes": "Notes",
+            "intolerances": "Intolerances",
+            "menu": "Menu",
+            "age": "Age",
+            "category": "Category",
+            "allergies": "Allergies"
+        }
+    },
+    "header": {
+        "login": "Login",
+        "signup": "Sign Up",
+        "logout": "Logout",
+        "profile": "Profile"
+    },
+    "auth": {
+        "title": "Secure Access",
+        "description": "Sign in to your account to manage wedding guests",
+        "subtitle": "Sign in to manage the guest list",
+        "actions": {
+            "login": "Login",
+            "signup": "Sign Up",
+            "cancel": "Cancel",
+            "confirm": "Confirm",
+            "back": "Back",
+            "next": "Next",
+            "edit": "Edit"
+        },
+        "tabs": {
+            "signin": "Sign In",
+            "signup": "Sign Up"
+        },
+        "fields": {
+            "email": "Email",
+            "password": "Password",
+            "fullName": "Full name",
+            "emailPlaceholder": "your@email.com",
+            "passwordPlaceholder": "Your password",
+            "passwordPlaceholderSignup": "Create a password (min. 8 characters)",
+            "fullNamePlaceholder": "Your full name"
+        },
+        "buttons": {
+            "signin": "Sign In",
+            "signup": "Sign Up",
+            "signingIn": "Signing in...",
+            "signingUp": "Signing up..."
+        },
+        "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character",
+        "dataProtection": "Your data is protected and secure. Only wedding organizers can access guest information.",
+        "learnMore": "Learn more about our Wedding Planner"
+    },
+    "landing": {
+        "meta": {
+            "title": "Wedding Guest Management System - Organize Your Perfect Day",
+            "description": "Complete system to manage wedding guests in 7 days. Transform chaos into elegance with our intelligent system."
+        },
+        "hero": {
+            "title": "TRANSFORM CHAOS",
+            "titleHighlight": "INTO ELEGANCE",
+            "subtitle": "Organize the perfect wedding and manage all guests in just 7 days",
+            "description": "(even if you've only used chaotic Excel lists so far)",
+            "cta": "FREE 48-HOUR TRIAL",
+            "pricing": "✨ Then only €19.90/month · No card required for trial"
+        },
+        "howItWorks": {
+            "title": "Your Perfect Wedding",
+            "titleHighlight": "In 3 Simple Steps",
+            "subtitle": "Forget Excel and chaotic lists. Our system guides you step by step.",
+            "step1": {
+                "title": "Add Guests",
+                "description": "Quickly enter all your guests with the guided wizard"
+            },
+            "step2": {
+                "title": "Track Confirmations",
+                "description": "Monitor in real-time who has confirmed, who is pending"
+            },
+            "step3": {
+                "title": "Perfect Day",
+                "description": "Enjoy your wedding without organizational worries"
+            }
+        },
+        "features": {
+            "title": "Everything You Need",
+            "titleHighlight": "In One System",
+            "guestManagement": {
+                "title": "Guest Management",
+                "description": "Organize guests and companions effortlessly"
+            },
+            "statistics": {
+                "title": "Real-Time Statistics",
+                "description": "Monitor confirmations and attendance in real-time"
+            },
+            "allergies": {
+                "title": "Allergies & Intolerances",
+                "description": "Track all special dietary requirements"
+            },
+            "categories": {
+                "title": "Custom Categories",
+                "description": "Organize by family, friends, colleagues and more"
+            }
+        },
+        "stats": {
+            "weddings": "Weddings Organized",
+            "guests": "Guests Managed",
+            "satisfaction": "Customer Satisfaction",
+            "setup": "Complete Setup"
+        },
+        "testimonials": {
+            "title": "What",
+            "titleHighlight": "Happy Couples Say",
+            "testimonial1": {
+                "text": "Incredible! In one week we organized everything. No more sleepless nights worrying about who confirmed. The system is simply perfect!",
+                "author": "Sofia & Marco",
+                "date": "Married in June 2024"
+            },
+            "testimonial2": {
+                "text": "After months of chaos with Excel, this system saved us. All allergies tracked, real-time statistics. Recommended to everyone!",
+                "author": "Laura & Andrea",
+                "date": "Married in September 2024"
+            },
+            "testimonial3": {
+                "text": "As a wedding planner, I recommend it to all my couples. Saves hours of work and stress. The best investment for a peaceful wedding.",
+                "author": "Francesca R.",
+                "role": "Professional Wedding Planner"
+            }
+        },
+        "finalCta": {
+            "title": "Ready For Your",
+            "titleHighlight": "Perfect Wedding?",
+            "subtitle": "Start with a 48-hour free trial. Then choose the plan that suits you best.",
+            "trialTitle": "✨ FREE 48-HOUR TRIAL",
+            "trialSubtitle": "No credit card required to start",
+            "monthlyPlan": "Monthly Plan",
+            "monthlyPrice": "€19.90",
+            "monthlyPeriod": "per month",
+            "annualPlan": "🔥 Most Popular",
+            "annualPrice": "€179.90",
+            "annualPeriod": "per year · Save €58.90",
+            "cta": "START FREE TRIAL",
+            "securePayment": "Secure Payment",
+            "freeTrial": "48 Hours Free",
+            "cancelAnytime": "Cancel Anytime"
+        },
+        "footer": {
+            "copyright": "© 2024 Perfect Wedding System. All rights reserved.",
+            "disclaimer": "Results may vary. The system is a support tool for wedding organization."
+        }
+    },
+    "dashboard": {
+        "meta": {
+            "title": "Wedding Guest Management - Organize Your Special Day",
+            "description": "Complete app for wedding guest management. Organize, confirm and manage all guests for your special day with elegance and ease."
+        },
+        "header": {
+            "title": "Wedding Guest Management",
+            "subtitle": "Organize your special day with elegance",
+            "menu": "Menu",
+            "greeting": "Hello, {{name}}"
+        },
+        "title": {
+            "couple": "Create the perfect guest list",
+            "organizer": "Manage all weddings"
+        },
+        "subtitle": {
+            "couple": "Easily manage all your wedding guests. Add names, categories, companions and special notes for an unforgettable event.",
+            "organizer": "As a wedding organizer, you can manage guests for all the couples you organize."
+        },
+        "tips": {
+            "title": "Tips for organizing your wedding",
+            "tip1": {
+                "title": "Plan ahead",
+                "tooltip": "Start early to avoid stress!",
+                "description": "Start creating the guest list at least 3-4 months before the wedding"
+            },
+            "tip2": {
+                "title": "Consider allergies",
+                "description": "Collect information on allergies and intolerances to offer a perfect menu"
+            },
+            "tip3": {
+                "title": "Timely confirmations",
+                "description": "Request attendance confirmations at least 2 weeks before the event"
+            },
+            "dataSecure": "💝 All your data is securely saved in your personal database"
+        },
+        "sidebar": {
+            "weddingDate": "Wedding Date",
+            "chooseDate": "Choose date",
+            "countdown": {
+                "married": "Wedding celebrated! 💕",
+                "today": "Getting married today! 💍",
+                "days_one": "{{count}} day",
+                "days_other": "{{count}} days",
+                "toTheBigDay": "to the big day"
+            },
+            "sections": "Sections",
+            "menu": {
+                "guests": "Guests",
+                "tables": "Tables",
+                "budget": "Budget"
+            }
+        },
+        "stats": {
+            "totalGuests": "Total Guests",
+            "confirmed": "Confirmed",
+            "pending": "Pending",
+            "declined": "Declined",
+            "adults": "Adults",
+            "children": "Children",
+            "subtitles": {
+                "total": "main guests",
+                "confirmed": "Guaranteed attendance",
+                "pending": "Awaiting response",
+                "categories": "Different groups"
+            },
+            "categoryDistribution": "Category Distribution",
+            "perCategory": "By Category"
+        }
+    },
+    "guests": {
+        "title": "Guest Management",
+        "addGuest": "Add Guest",
+        "editGuest": "Edit Guest",
+        "deleteGuest": "Delete Guest",
+        "searchPlaceholder": "Search guests...",
+        "noGuests": "No guests found",
+        "status": {
+            "confirmed": "Confirmed",
+            "pending": "Pending",
+            "declined": "Declined"
+        },
+        "fields": {
+            "name": "Name",
+            "email": "Email",
+            "phone": "Phone",
+            "category": "Category",
+            "status": "Status",
+            "companions": "Companions",
+            "allergies": "Allergies",
+            "notes": "Notes",
+            "table": "Table"
+        },
+        "deleteConfirm": {
+            "title": "Are you sure?",
+            "description": "This action cannot be undone. The guest will be permanently deleted.",
+            "cancel": "Cancel",
+            "confirm": "Delete"
+        },
+        "tabs": {
+            "all": "All",
+            "confirmed": "Confirmed",
+            "pending": "Pending",
+            "declined": "Declined"
+        },
+        "empty": {
+            "pending": "No guests to confirm. Add your first guest!",
+            "confirmed": "No confirmed guests yet.",
+            "deleted": "No deleted guests.",
+            "search": "No results",
+            "list": "Empty list",
+            "filter": "Try changing the search filters."
+        },
+        "showing": "Showing {{count}} of {{total}} guests",
+        "allergies": "Allergies:",
+        "categories": {
+            "all": "All categories",
+            "family-hers": "Bride's Family",
+            "family-his": "Groom's Family",
+            "friends": "Friends",
+            "colleagues": "Colleagues"
+        },
+        "ageGroups": {
+            "adult": "Adult",
+            "teen": "Teen",
+            "child": "Child",
+            "baby": "Baby"
+        },
+        "actions": {
+            "confirm": "Confirm",
+            "delete": "Delete",
+            "restore": "Restore",
+            "permanentDelete": "Delete forever",
+            "confirmAll": "Confirm all",
+            "deleteAll": "Delete all",
+            "revertToPending": "Revert to pending",
+            "assign": "Assign",
+            "assigning": "Assigning...",
+            "deselectAll": "Deselect all",
+            "selectTable": "Select table..."
+        },
+        "deleteDialog": {
+            "title": "Permanently delete guest",
+            "description": "Are you sure you want to permanently delete {{name}}? This action cannot be undone.",
+            "companionTitle": "Permanently delete?",
+            "companionDescription": "Are you sure you want to permanently delete {{name}}? This action cannot be undone."
+        },
+        "companions": "Companions:",
+        "form": {
+            "step1": {
+                "title": "Guest Name",
+                "subtitle": "Who do you want to invite?",
+                "editSubtitle": "Edit guest details"
+            },
+            "step2": {
+                "title": "Guest Category",
+                "subtitle": "How do you classify this guest?"
+            },
+            "step3": {
+                "title": "Companions",
+                "subtitle": "How many people will accompany {{name}}?",
+                "editSubtitle": "Edit companions for {{name}}"
+            },
+            "step4": {
+                "title": "Allergies & Intolerances",
+                "subtitle": "Important information for catering"
+            },
+            "step5": {
+                "title": "Guest Summary",
+                "subtitle": "Review details before saving",
+                "editTitle": "Changes Summary",
+                "editSubtitle": "Review changes before saving"
+            },
+            "nameLabel": "Full name *",
+            "namePlaceholder": "Ex: John Doe",
+            "emailPlaceholder": "email@example.com",
+            "phonePlaceholder": "+39 123 456 7890",
+            "notesPlaceholder": "Additional notes...",
+            "ageGroupLabel": "Age Group *",
+            "ageGroupPlaceholder": "Select age group",
+            "companionCountLabel": "Number of companions",
+            "companionsDetailsLabel": "Companions name and age group:",
+            "companionLabel": "Companion {{index}}",
+            "allergiesLabel": "Allergies/intolerances for {{name}}",
+            "allergiesPlaceholder": "Ex: gluten, lactose, nuts, shellfish...",
+            "charsRemaining": "Characters remaining: {{count}}",
+            "summary": {
+                "name": "Name:",
+                "ageGroup": "Age Group:",
+                "category": "Category:",
+                "companions": "Companions:",
+                "allergies": "Allergies {{name}}:",
+                "companionAllergies": "Companion Allergies:"
+            },
+            "notSpecified": "Not specified",
+            "buttons": {
+                "add": "Add New Guest",
+                "save": "Save Guest",
+                "saveChanges": "Save Changes"
+            },
+            "steps": "Step {{current}} of {{total}}",
+            "errors": {
+                "nameRequired": "Name is required"
+            }
+        }
+    },
+    "seating": {
+        "title": "Table Management",
+        "description": "Organize guest seating arrangements. Drag and drop guests to assign them to tables and manage maximum capacity.",
+        "meta": {
+            "title": "Table Arrangements - Organize your wedding",
+            "description": "Organize guest seating arrangements for your wedding. Intuitive drag and drop to assign seats."
+        },
+        "unassigned": {
+            "title": "Unassigned Guests",
+            "filter": "Filter by group:",
+            "instruction": "Select guests and choose a table to assign them",
+            "emptyAll": "All guests have been assigned to tables!",
+            "emptyFilter": "No guests in the selected group to assign",
+            "selected": "{{count}} guests selected"
+        },
+        "addTable": "Add Table",
+        "editTable": "Edit Table",
+        "deleteTable": "Delete Table",
+        "deleteTableDescription": "By deleting it, guests will return to the unassigned list.",
+        "tableName": "Table Name",
+        "capacity": "Capacity",
+        "assigned": "Assigned",
+        "unassignedLabel": "Unassigned",
+        "dragHere": "Drag here to delete",
+        "noTables": "No tables created",
+        "createFirst": "Create your first table",
+        "settings": "Table Settings",
+        "loading": "Loading seating arrangements...",
+        "exportTooltip": "Export table list to Excel",
+        "premiumTooltip": "Feature available for Premium users only",
+        "reset": "Reset",
+        "stats": {
+            "tables": "Tables",
+            "totalGuests": "Total Guests",
+            "assigned": "Assigned",
+            "unassigned": "Unassigned"
+        },
+        "resetDialog": {
+            "title": "Reset Assignments",
+            "description": "Are you sure you want to reset all table assignments?",
+            "warning": "All guests will return to the \"Unassigned\" list.",
+            "confirm": "Reset"
+        },
+        "tableNameDefault": "Table {{id}}",
+        "status": {
+            "full": "Full",
+            "empty": "Empty",
+            "available": "Available"
+        },
+        "dragGuestsHere": "Drag guests here",
+        "fullWarning": "Table full! Maximum capacity reached.",
+        "deleteDialog": {
+            "containsGuests": "Table <strong>{{name}}</strong> contains <strong>{{count}} guests</strong>.",
+            "confirm": "Are you sure you want to delete table \"{{name}}\"?"
+        },
+        "removeGuest": "Remove Guest",
+        "removeGuestDescription": "Are you sure you want to remove {{name}} from the table? The guest will return to the unassigned list.",
+        "removeGuestDescriptionGeneric": "Are you sure you want to remove this guest from the table assignment? The guest will return to the unassigned list.",
+        "trashZone": {
+            "title": "Removal Zone",
+            "description": "Drag guests here to remove them from tables",
+            "hint": "Removed guests will return to the \"Unassigned\" list"
+        }
+    },
+    "budget": {
+        "title": "Wedding Budget",
+        "subtitle": "Manage the budget for your special day",
+        "meta": {
+            "title": "Wedding Budget - Manage your wedding finances",
+            "description": "Manage your wedding budget with React Query. Set a total budget and allocate resources across different categories."
+        },
+        "alerts": {
+            "allocatedExceeded": "Allocated budget exceeds total by {{amount}}",
+            "spentExceeded": "Expenses exceed total budget by {{amount}}"
+        },
+        "tabs": {
+            "overview": "Overview",
+            "categories": "Categories",
+            "vendors": "Vendors",
+            "payments": "Payments"
+        },
+        "overview": {
+            "totalBudget": "Total Budget",
+            "clickToEdit": "Click to edit",
+            "spentSoFar": "Spent So Far",
+            "percentOfBudget": "{{percent}}% of budget",
+            "remainingBudget": "Remaining Budget",
+            "withinLimits": "Within limits",
+            "budgetExceeded": "Budget exceeded",
+            "daysToWedding": "Days to Wedding",
+            "vendorsPaid": "{{paid}}/{{total}} vendors paid",
+            "mostExpensiveCategory": "Most expensive category",
+            "estimated": "estimated",
+            "nextPayment": "Next payment",
+            "noPendingPayments": "No pending payments",
+            "potentialSavings": "Potential savings",
+            "notAllocatedYet": "Not allocated yet",
+            "distribution": "Budget Distribution by Category",
+            "estimatedVsSpent": "Estimated vs Spent",
+            "exceededBy": "Exceeded by {{amount}}"
+        },
+        "categories": {
+            "title": "Category Management",
+            "subtitle": "Edit budgets and track expenses for each category",
+            "add": "Add Category",
+            "newTitle": "Add New Category",
+            "nameLabel": "Category Name",
+            "selectPlaceholder": "Select a category",
+            "budgetLabel": "Estimated Budget",
+            "totalAvailable": "Total available budget: {{total}} | To allocate: {{remaining}}",
+            "status": {
+                "notStarted": "Not started",
+                "inProgress": "In progress",
+                "almostComplete": "Almost complete",
+                "completed": "Completed",
+                "exceeded": "Budget exceeded"
+            },
+            "bomboniereBadge": "🎁 {{count}} Favors",
+            "guestsBadge": "👥 {{count}} Guests",
+            "guestsSuffix": "guests",
+            "percentUsed": "{{percent}}% used",
+            "progress": "Spending progress",
+            "remaining": "Remaining: {{amount}}",
+            "exceeded": "Exceeded: {{amount}}",
+            "expensesDetail": "Expenses detail",
+            "noVendors": "No associated vendors",
+            "paidPercent": "{{percent}}% paid",
+            "actions": {
+                "edit": "Edit",
+                "addExpense": "Add Expense",
+                "delete": "Delete",
+                "deleting": "Deleting...",
+                "save": "Save",
+                "cancel": "Cancel"
+            },
+            "deleteDialog": {
+                "title": "⚠️ Confirm Category Deletion",
+                "warning": "You are about to delete the category \"{{name}}\"",
+                "spentWarning": "💰 Total spent: {{amount}}",
+                "itemsWarning": "Will be permanently deleted:",
+                "vendorsCount": "• {{count}} vendor(s)",
+                "itemsCount": "• {{count}} expense(s)",
+                "irreversible": "⚠️ This operation is irreversible!",
+                "confirm": "Yes, delete permanently",
+                "cancel": "Cancel"
+            },
+            "errors": {
+                "notFound": "Category not found",
+                "fetchInfo": "Unable to retrieve category information",
+                "delete": "Error deleting category",
+                "fillRequired": "Fill in all required fields"
+            }
+        },
+        "vendors": {
+            "title": "Vendor Management",
+            "subtitle": "Manage your vendors and track payments",
+            "add": "Add Vendor",
+            "searchPlaceholder": "Search vendors...",
+            "addTitle": "Add New Vendor",
+            "editTitle": "Edit Vendor: {{name}}",
+            "nameLabel": "Vendor Name",
+            "categoryLabel": "Category",
+            "costLabel": "Cost *",
+            "unitCostLabel": "Unit Cost *",
+            "dueDateLabel": "Due Date",
+            "selectDate": "Select date",
+            "emailLabel": "Email",
+            "phoneLabel": "Phone",
+            "websiteLabel": "Website",
+            "addressLabel": "Address",
+            "notesLabel": "Notes",
+            "optionalDueDate": "Optional: date by which to pay the vendor",
+            "urlHelper": "https:// will be added automatically",
+            "selectPlaceholder": "Select a category",
+            "noVendors": "No vendors found",
+            "detailsTitle": "Vendor Details",
+            "paymentTitle": "Record Payment",
+            "deleteTitle": "Delete Vendor",
+            "deleteConfirm": "Are you sure you want to delete this vendor?",
+            "paymentAmount": "Payment Amount",
+            "paymentDate": "Payment Date",
+            "paymentNotes": "Payment Notes",
+            "paymentAdd": "Record Payment",
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete",
+                "save": "Save Changes",
+                "cancel": "Cancel"
+            },
+            "status": {
+                "paid": "Paid",
+                "partial": "Partial",
+                "pending": "Pending",
+                "unknown": "Unknown"
+            },
+            "errors": {
+                "nameRequired": "Vendor name is required",
+                "nameLength": "Name must be at least 2 characters",
+                "categoryRequired": "Select a category",
+                "costRequired": "Cost is required",
+                "costInvalid": "Enter a valid cost greater than 0",
+                "costExcessive": "Cost seems excessive (max €100,000)",
+                "emailInvalid": "Invalid email format",
+                "addError": "Error adding vendor"
+            }
+        },
+        "payments": {
+            "title": "Upcoming Payments",
+            "subtitle": "Monitor and manage your scheduled payments",
+            "totalToPay": "Total to Pay",
+            "remainingPayments": "{{count}} remaining payment",
+            "remainingPayments_plural": "{{count}} remaining payments",
+            "overduePayments": "Overdue Payments",
+            "totalOverdue": "{{amount}} total",
+            "noOverdue": "No overdue payments",
+            "urgentPayments": "Urgent (7 days)",
+            "totalUrgent": "{{amount}} total",
+            "noUrgent": "No urgent payments",
+            "historyTitle": "Payment History",
+            "filterPlaceholder": "Filter payments",
+            "filters": {
+                "all": "All",
+                "toPay": "To Pay",
+                "paid": "Paid",
+                "overdue": "Overdue",
+                "urgent": "Urgent",
+                "upcoming": "Upcoming",
+                "planned": "Planned",
+                "noDeadline": "No Deadline"
+            },
+            "paidOn": "Paid on {{date}}",
+            "dueOn": "Due: {{date}}",
+            "totalPaidAmount": "💰 Total amount paid: {{amount}}",
+            "expiresToday": "Expires today",
+            "expiresTomorrow": "Expires tomorrow",
+            "expiresInDays": "Expires in {{days}} days",
+            "overdueByDays": "Overdue by {{days}} days",
+            "noDueDate": "No due date set",
+            "fullyPaid": "Vendor fully paid ✓",
+            "reminderButton": "Reminder",
+            "markAsPaidButton": "Mark as Paid",
+            "noPayments": "No scheduled payments",
+            "noPaymentsSubtitle": "Your future payments will appear here",
+            "errors": {
+                "invalidAmount": "Enter a valid amount",
+                "paymentUnavailable": "Payment function unavailable",
+                "vendorNotFound": "Vendor not found"
+            }
+        },
+        "reminders": {
+            "dialogTitle": "Set Reminder for {{name}}",
+            "dateLabel": "Reminder Date",
+            "messageLabel": "Custom Message (optional)",
+            "messagePlaceholder": "Ex: Remember to bring documents...",
+            "disableAuto": "Disable auto reminders (7 days before and due date)",
+            "create": "Create Reminder",
+            "creating": "Creating...",
+            "notificationTitle": "Payment Reminder",
+            "defaultMessage": "You have a payment due",
+            "success": "✅ Reminder Set",
+            "successDescription": "You will be notified on {{date}}",
+            "errors": {
+                "dateRequired": "Select a date for the reminder",
+                "createFailed": "Unable to create reminder"
+            }
+        }
+    },
+    "profile": {
+        "title": "Your Profile",
+        "subtitle": "Manage your personal information and subscription.",
+        "personalInfo": {
+            "title": "Personal Information",
+            "email": "Email",
+            "weddingDate": "Wedding Date",
+            "notSet": "Not set"
+        },
+        "subscription": {
+            "title": "Subscription",
+            "description": "Manage your plan and payment methods",
+            "currentStatus": "Current Status",
+            "status": {
+                "active": "Active",
+                "trialing": "Trial Period",
+                "canceled": "Canceled",
+                "inactive": "Inactive"
+            },
+            "yearly": "Yearly",
+            "manage": "Manage Subscription",
+            "loading": "Loading...",
+            "trialEnds": "Trial period ends on {{date}}"
+        },
+        "dangerZone": {
+            "title": "Danger Zone",
+            "description": "Deleting your account is irreversible. All your data, including guest list, tables, and budget, will be permanently deleted. Your subscription will also be terminated immediately.",
+            "deleteAccount": "Delete Account",
+            "confirmTitle": "Are you absolutely sure?",
+            "confirmDescription": "This action cannot be undone. It will permanently delete your account and remove all your data from our servers.",
+            "cancel": "Cancel",
+            "confirm": "Yes, delete my account",
+            "deleting": "Deleting..."
+        },
+        "toasts": {
+            "portalError": "Error opening subscription portal",
+            "deleteSuccess": "Account deleted successfully",
+            "deleteError": "Error deleting account. Please try again later."
+        }
+    },
+    "pricing": {
+        "title": "Choose Your Plan",
+        "subtitle": "Start with a 48-hour free trial",
+        "monthly": "Monthly",
+        "annual": "Annual",
+        "save": "Save",
+        "perMonth": "per month",
+        "perYear": "per year",
+        "freeTrial": "48-Hour Free Trial",
+        "thenOnly": "Then only",
+        "startTrial": "Start Free Trial",
+        "subscribe": "Subscribe Now",
+        "features": {
+            "unlimitedGuests": "Unlimited guests",
+            "tableManagement": "Table management",
+            "budgetTracking": "Budget tracking",
+            "allergiesTracking": "Allergies tracking",
+            "realTimeStats": "Real-time statistics",
+            "export": "Data export",
+            "support": "Priority support"
+        },
+        "trialUsed": "You have already used the free trial"
+    },
+    "payment": {
+        "success": {
+            "title": "Payment Completed!",
+            "message": "Your subscription has been successfully activated.",
+            "goToDashboard": "Go to Dashboard"
+        },
+        "canceled": {
+            "title": "Payment Canceled",
+            "message": "Payment was canceled. You can try again whenever you want.",
+            "retry": "Try Again",
+            "goBack": "Go Back"
+        }
+    },
+    "notFound": {
+        "title": "Page Not Found",
+        "message": "The page you are looking for does not exist.",
+        "goHome": "Go Home"
+    },
+    "dialogs": {
+        "logout": {
+            "title": "Confirm Logout",
+            "message": "Are you sure you want to log out?",
+            "cancel": "Cancel",
+            "confirm": "Logout"
+        },
+        "sessionWarning": {
+            "title": "Session Expiring",
+            "message": "Your session is about to expire. Do you want to stay logged in?",
+            "stayLoggedIn": "Stay Logged In",
+            "logout": "Logout"
+        },
+        "confirm": {
+            "title": "Confirm",
+            "message": "Are you sure you want to proceed?",
+            "cancel": "Cancel",
+            "confirm": "Confirm",
+            "continue": "Continue?",
+            "remove": "Remove"
+        }
+    }
+}

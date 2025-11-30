@@ -1,0 +1,779 @@
+{
+    "common": {
+        "button": {
+            "save": "Salva",
+            "cancel": "Annulla",
+            "delete": "Elimina",
+            "edit": "Modifica",
+            "add": "Aggiungi",
+            "close": "Chiudi",
+            "confirm": "Conferma",
+            "back": "Indietro",
+            "next": "Avanti",
+            "submit": "Invia",
+            "search": "Cerca",
+            "filter": "Filtra",
+            "export": "Esporta",
+            "import": "Importa",
+            "download": "Scarica",
+            "upload": "Carica",
+            "yes": "Sì",
+            "no": "No"
+        },
+        "status": {
+            "loading": "Caricamento...",
+            "saving": "Salvataggio...",
+            "saved": "Salvato",
+            "error": "Errore",
+            "success": "Successo"
+        },
+        "language": {
+            "italian": "Italiano",
+            "english": "English"
+        },
+        "clearSelection": "Deseleziona tutti",
+        "actions": {
+            "back": "Indietro",
+            "next": "Avanti",
+            "cancel": "Annulla",
+            "edit": "Modifica",
+            "add": "Aggiungi ospite",
+            "import": "Importa da Excel",
+            "export": "Esporta Excel",
+            "confirm": "Conferma",
+            "delete": "Elimina",
+            "restore": "Ripristina",
+            "permanentDelete": "Elimina definitivamente",
+            "confirmAll": "Conferma tutto",
+            "deleteAll": "Elimina tutto",
+            "revertToPending": "Riporta in attesa"
+        },
+        "types": {
+            "main": "Principale",
+            "companion": "Accompagnatore"
+        },
+        "fields": {
+            "notes": "Note",
+            "intolerances": "Intolleranze",
+            "menu": "Menu",
+            "age": "Età",
+            "category": "Categoria",
+            "allergies": "Allergie"
+        }
+    },
+    "header": {
+        "login": "Accedi",
+        "signup": "Registrati",
+        "logout": "Esci",
+        "profile": "Profilo"
+    },
+    "auth": {
+        "title": "Accesso Sicuro",
+        "description": "Accedi al tuo account per gestire gli invitati del matrimonio",
+        "subtitle": "Accedi per gestire la lista degli invitati",
+        "actions": {
+            "login": "Accedi",
+            "signup": "Registrati",
+            "cancel": "Annulla",
+            "confirm": "Conferma",
+            "back": "Indietro",
+            "next": "Avanti",
+            "edit": "Modifica"
+        },
+        "tabs": {
+            "signin": "Accedi",
+            "signup": "Registrati"
+        },
+        "fields": {
+            "email": "Email",
+            "password": "Password",
+            "fullName": "Nome completo",
+            "emailPlaceholder": "tua@email.com",
+            "passwordPlaceholder": "La tua password",
+            "passwordPlaceholderSignup": "Crea una password (min. 8 caratteri)",
+            "fullNamePlaceholder": "Il tuo nome completo"
+        },
+        "buttons": {
+            "signin": "Accedi",
+            "signup": "Registrati",
+            "signingIn": "Accesso in corso...",
+            "signingUp": "Registrazione in corso..."
+        },
+        "passwordRequirements": "La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un carattere speciale",
+        "dataProtection": "I tuoi dati sono protetti e sicuri. Solo gli organizzatori del matrimonio possono accedere alle informazioni degli invitati.",
+        "learnMore": "Scopri di più sul nostro Wedding Planner"
+    },
+    "landing": {
+        "meta": {
+            "title": "Sistema Gestione Invitati Matrimonio - Organizza il Tuo Giorno Perfetto",
+            "description": "Sistema completo per gestire invitati matrimonio in 7 giorni. Trasforma il caos in eleganza con il nostro sistema intelligente."
+        },
+        "hero": {
+            "title": "TRASFORMA IL CAOS",
+            "titleHighlight": "IN ELEGANZA",
+            "subtitle": "Organizza il matrimonio perfetto e gestisci tutti gli invitati in soli 7 giorni",
+            "description": "(anche se finora hai usato solo liste Excel caotiche)",
+            "cta": "PROVA GRATIS 48 ORE",
+            "pricing": "✨ Poi solo €19.90/mese · Nessuna carta richiesta per il trial"
+        },
+        "howItWorks": {
+            "title": "Il Tuo Matrimonio Perfetto",
+            "titleHighlight": "In 3 Semplici Step",
+            "subtitle": "Dimentica Excel e liste caotiche. Il nostro sistema ti guida passo dopo passo.",
+            "step1": {
+                "title": "Aggiungi Invitati",
+                "description": "Inserisci rapidamente tutti i tuoi invitati con il wizard guidato"
+            },
+            "step2": {
+                "title": "Traccia Conferme",
+                "description": "Monitora in tempo reale chi ha confermato, chi è in attesa"
+            },
+            "step3": {
+                "title": "Giorno Perfetto",
+                "description": "Goditi il tuo matrimonio senza preoccupazioni organizzative"
+            }
+        },
+        "features": {
+            "title": "Tutto Quello Che Ti Serve",
+            "titleHighlight": "In Un Solo Sistema",
+            "guestManagement": {
+                "title": "Gestione Invitati",
+                "description": "Organizza invitati e accompagnatori senza sforzo"
+            },
+            "statistics": {
+                "title": "Statistiche Real-Time",
+                "description": "Monitora conferme e presenze in tempo reale"
+            },
+            "allergies": {
+                "title": "Allergie & Intolleranze",
+                "description": "Traccia tutte le esigenze alimentari speciali"
+            },
+            "categories": {
+                "title": "Categorie Custom",
+                "description": "Organizza per famiglia, amici, colleghi e altro"
+            }
+        },
+        "stats": {
+            "weddings": "Matrimoni Organizzati",
+            "guests": "Invitati Gestiti",
+            "satisfaction": "Soddisfazione Clienti",
+            "setup": "Setup Completo"
+        },
+        "testimonials": {
+            "title": "Cosa Dicono",
+            "titleHighlight": "Le Coppie Felici",
+            "testimonial1": {
+                "text": "Incredibile! In una settimana abbiamo organizzato tutto. Non più notti insonni preoccupandoci di chi ha confermato. Il sistema è semplicemente perfetto!",
+                "author": "Sofia & Marco",
+                "date": "Sposati a Giugno 2024"
+            },
+            "testimonial2": {
+                "text": "Dopo mesi di caos con Excel, questo sistema ci ha salvato. Tutte le allergie tracciate, statistiche in tempo reale. Consigliato a tutti!",
+                "author": "Laura & Andrea",
+                "date": "Sposati a Settembre 2024"
+            },
+            "testimonial3": {
+                "text": "Come wedding planner, lo consiglio a tutte le mie coppie. Risparmia ore di lavoro e stress. Il miglior investimento per un matrimonio sereno.",
+                "author": "Francesca R.",
+                "role": "Wedding Planner Professionale"
+            }
+        },
+        "finalCta": {
+            "title": "Pronto Per Il Tuo",
+            "titleHighlight": "Matrimonio Perfetto?",
+            "subtitle": "Inizia con 48 ore di prova gratuita. Poi scegli il piano più adatto a te.",
+            "trialTitle": "✨ PROVA GRATUITA 48 ORE",
+            "trialSubtitle": "Nessuna carta di credito richiesta per iniziare",
+            "monthlyPlan": "Piano Mensile",
+            "monthlyPrice": "€19.90",
+            "monthlyPeriod": "al mese",
+            "annualPlan": "🔥 Più Popolare",
+            "annualPrice": "€179.90",
+            "annualPeriod": "all'anno · Risparmi €58.90",
+            "cta": "INIZIA PROVA GRATUITA",
+            "securePayment": "Pagamento Sicuro",
+            "freeTrial": "48 Ore Gratis",
+            "cancelAnytime": "Cancella Quando Vuoi"
+        },
+        "footer": {
+            "copyright": "© 2024 Sistema Matrimonio Perfetto. Tutti i diritti riservati.",
+            "disclaimer": "I risultati possono variare. Il sistema è uno strumento di supporto all'organizzazione del matrimonio."
+        }
+    },
+    "dashboard": {
+        "meta": {
+            "title": "Gestione Invitati Matrimonio - Organizza il tuo giorno speciale",
+            "description": "App completa per la gestione degli invitati al matrimonio. Organizza, conferma e gestisci tutti gli invitati per il tuo giorno speciale con eleganza e facilità."
+        },
+        "header": {
+            "title": "Gestione Invitati Matrimonio",
+            "subtitle": "Organizza il tuo giorno speciale con eleganza",
+            "menu": "Menu",
+            "greeting": "Ciao, {{name}}"
+        },
+        "title": {
+            "couple": "Crea la lista perfetta degli invitati",
+            "organizer": "Gestisci tutti i matrimoni"
+        },
+        "subtitle": {
+            "couple": "Gestisci facilmente tutti gli invitati al tuo matrimonio. Aggiungi nomi, categorie, accompagnatori e note speciali per un evento indimenticabile.",
+            "organizer": "Come wedding organizer, puoi gestire gli invitati di tutte le coppie che organizzi."
+        },
+        "tips": {
+            "title": "Suggerimenti per organizzare il tuo matrimonio",
+            "tip1": {
+                "title": "Pianifica in anticipo",
+                "tooltip": "Inizia presto per evitare stress!",
+                "description": "Inizia a creare la lista degli invitati almeno 3-4 mesi prima del matrimonio"
+            },
+            "tip2": {
+                "title": "Considera le allergie",
+                "description": "Raccogli informazioni su allergie e intolleranze per offrire un menù perfetto"
+            },
+            "tip3": {
+                "title": "Conferme tempestive",
+                "description": "Richiedi conferme di partecipazione almeno 2 settimane prima dell'evento"
+            },
+            "dataSecure": "💝 Tutti i tuoi dati sono salvati in modo sicuro nel tuo database personale"
+        },
+        "sidebar": {
+            "weddingDate": "Data Matrimonio",
+            "chooseDate": "Scegli data",
+            "countdown": {
+                "married": "Matrimonio celebrato! 💕",
+                "today": "Oggi sposi! 💍",
+                "days_one": "{{count}} giorno",
+                "days_other": "{{count}} giorni",
+                "toTheBigDay": "al grande giorno"
+            },
+            "sections": "Sezioni",
+            "menu": {
+                "guests": "Invitati",
+                "tables": "Tavoli",
+                "budget": "Budget"
+            }
+        },
+        "stats": {
+            "totalGuests": "Totale Invitati",
+            "confirmed": "Confermati",
+            "pending": "In Attesa",
+            "declined": "Rifiutati",
+            "adults": "Adulti",
+            "children": "Bambini",
+            "subtitles": {
+                "total": "persone principali",
+                "confirmed": "Presenza garantita",
+                "pending": "In attesa di risposta",
+                "categories": "Gruppi diversi"
+            },
+            "categoryDistribution": "Distribuzione per Categoria",
+            "perCategory": "Per Categoria"
+        }
+    },
+    "guests": {
+        "title": "Gestione Invitati",
+        "addGuest": "Aggiungi Invitato",
+        "editGuest": "Modifica Invitato",
+        "deleteGuest": "Elimina Invitato",
+        "searchPlaceholder": "Cerca invitati...",
+        "noGuests": "Nessun invitato trovato",
+        "status": {
+            "confirmed": "Confermato",
+            "pending": "In Attesa",
+            "declined": "Rifiutato"
+        },
+        "fields": {
+            "name": "Nome",
+            "email": "Email",
+            "phone": "Telefono",
+            "category": "Categoria",
+            "status": "Stato",
+            "companions": "Accompagnatori",
+            "allergies": "Allergie",
+            "notes": "Note",
+            "table": "Tavolo"
+        },
+        "deleteConfirm": {
+            "title": "Sei sicuro?",
+            "description": "Questa azione non può essere annullata. L'invitato verrà eliminato permanentemente.",
+            "cancel": "Annulla",
+            "confirm": "Elimina"
+        },
+        "tabs": {
+            "all": "Tutti",
+            "confirmed": "Confermati",
+            "pending": "In Attesa",
+            "declined": "Rifiutati"
+        },
+        "empty": {
+            "pending": "Nessun invitato da confermare. Aggiungi il primo invitato!",
+            "confirmed": "Nessun invitato confermato ancora.",
+            "deleted": "Nessun invitato eliminato.",
+            "search": "Nessun risultato",
+            "list": "Lista vuota",
+            "filter": "Prova a modificare i filtri di ricerca."
+        },
+        "showing": "Visualizzando {{count}} di {{total}} invitati",
+        "allergies": "Allergie:",
+        "categories": {
+            "all": "Tutte le categorie",
+            "family-hers": "Famiglia della Sposa",
+            "family-his": "Famiglia dello Sposo",
+            "friends": "Amici",
+            "colleagues": "Colleghi"
+        },
+        "ageGroups": {
+            "adult": "Adulto",
+            "teen": "Ragazzo",
+            "child": "Bambino",
+            "baby": "Neonato"
+        },
+        "actions": {
+            "confirm": "Conferma",
+            "delete": "Elimina",
+            "restore": "Ripristina",
+            "permanentDelete": "Elimina per sempre",
+            "confirmAll": "Conferma tutto",
+            "deleteAll": "Elimina tutto",
+            "revertToPending": "Riporta a da confermare",
+            "assign": "Assegna",
+            "assigning": "Assegnando...",
+            "deselectAll": "Deseleziona tutti",
+            "selectTable": "Seleziona tavolo..."
+        },
+        "deleteDialog": {
+            "title": "Elimina definitivamente invitato",
+            "description": "Sei sicuro di voler eliminare definitivamente {{name}}? Questa azione non può essere annullata.",
+            "companionTitle": "Eliminare definitivamente?",
+            "companionDescription": "Sei sicuro di voler eliminare definitivamente {{name}}? Questa azione non può essere annullata."
+        },
+        "companions": "Accompagnatori:",
+        "form": {
+            "step1": {
+                "title": "Nome dell'invitato",
+                "subtitle": "Chi vuoi invitare al matrimonio?",
+                "editSubtitle": "Modifica i dettagli dell'invitato"
+            },
+            "step2": {
+                "title": "Categoria invitato",
+                "subtitle": "Come classifichi questo invitato?"
+            },
+            "step3": {
+                "title": "Accompagnatori",
+                "subtitle": "Quante persone accompagneranno {{name}}?",
+                "editSubtitle": "Modifica gli accompagnatori di {{name}}"
+            },
+            "step4": {
+                "title": "Allergeni e intolleranze",
+                "subtitle": "Informazioni importanti per il catering"
+            },
+            "step5": {
+                "title": "Riepilogo invitato",
+                "subtitle": "Controlla i dati prima di salvare",
+                "editTitle": "Riepilogo modifiche",
+                "editSubtitle": "Controlla le modifiche prima di salvare"
+            },
+            "nameLabel": "Nome completo *",
+            "namePlaceholder": "Es: Mario Rossi",
+            "emailPlaceholder": "email@esempio.com",
+            "phonePlaceholder": "+39 123 456 7890",
+            "notesPlaceholder": "Note aggiuntive...",
+            "ageGroupLabel": "Fascia d'età *",
+            "ageGroupPlaceholder": "Seleziona fascia d'età",
+            "companionCountLabel": "Numero di accompagnatori",
+            "companionsDetailsLabel": "Nome e fascia d'età accompagnatori:",
+            "companionLabel": "Accompagnatore {{index}}",
+            "allergiesLabel": "Allergeni/intolleranze di {{name}}",
+            "allergiesPlaceholder": "Es: glutine, lattosio, frutta secca, crostacei...",
+            "charsRemaining": "Caratteri rimasti: {{count}}",
+            "summary": {
+                "name": "Nome:",
+                "ageGroup": "Fascia d'età:",
+                "category": "Categoria:",
+                "companions": "Accompagnatori:",
+                "allergies": "Allergeni {{name}}:",
+                "companionAllergies": "Allergeni accompagnatori:"
+            },
+            "notSpecified": "Non specificata",
+            "buttons": {
+                "add": "Aggiungi nuovo invitato",
+                "save": "Salva invitato",
+                "saveChanges": "Salva modifiche"
+            },
+            "steps": "Passo {{current}} di {{total}}",
+            "errors": {
+                "nameRequired": "Il nome è obbligatorio"
+            }
+        }
+    },
+    "seating": {
+        "title": "Gestione Tavoli",
+        "description": "Organizza la disposizione degli invitati ai tavoli. Trascina gli ospiti per assegnarli ai tavoli e gestisci la capienza massima.",
+        "meta": {
+            "title": "Disposizione Tavoli - Organizza il tuo matrimonio",
+            "description": "Organizza la disposizione degli invitati ai tavoli per il tuo matrimonio. Drag and drop intuitivo per assegnare i posti a sedere."
+        },
+        "unassigned": {
+            "title": "Ospiti Non Assegnati",
+            "filter": "Filtra per gruppo:",
+            "instruction": "Seleziona gli ospiti e scegli un tavolo per l'assegnazione",
+            "emptyAll": "Tutti gli ospiti sono stati assegnati ai tavoli!",
+            "emptyFilter": "Nessun ospite nel gruppo selezionato da assegnare",
+            "selected": "{{count}} ospiti selezionati"
+        },
+        "addTable": "Aggiungi Tavolo",
+        "editTable": "Modifica Tavolo",
+        "deleteTable": "Elimina Tavolo",
+        "deleteTableDescription": "Eliminandolo, gli ospiti torneranno nella lista non assegnati.",
+        "tableName": "Nome Tavolo",
+        "capacity": "Capacità",
+        "assigned": "Assegnati",
+        "unassignedLabel": "Non Assegnati",
+        "dragHere": "Trascina qui per eliminare",
+        "noTables": "Nessun tavolo creato",
+        "createFirst": "Crea il tuo primo tavolo",
+        "settings": "Impostazioni Tavoli",
+        "loading": "Caricamento disposizione tavoli...",
+        "exportTooltip": "Esporta lista tavoli in Excel",
+        "premiumTooltip": "Funzione disponibile solo per utenti Premium",
+        "reset": "Reset",
+        "stats": {
+            "tables": "Tavoli",
+            "totalGuests": "Invitati totali",
+            "assigned": "Assegnati",
+            "unassigned": "Non assegnati"
+        },
+        "resetDialog": {
+            "title": "Reset Assegnazioni",
+            "description": "Sei sicuro di voler resettare tutte le assegnazioni dei tavoli?",
+            "warning": "Tutti gli ospiti torneranno nella lista \"Non Assegnati\".",
+            "confirm": "Reset"
+        },
+        "tableNameDefault": "Tavolo {{id}}",
+        "status": {
+            "full": "Pieno",
+            "empty": "Vuoto",
+            "available": "Disponibile"
+        },
+        "dragGuestsHere": "Trascina qui gli ospiti",
+        "fullWarning": "Tavolo pieno! Capienza massima raggiunta.",
+        "deleteDialog": {
+            "containsGuests": "Il tavolo <strong>{{name}}</strong> contiene <strong>{{count}} ospiti</strong>.",
+            "confirm": "Sei sicuro di voler eliminare il tavolo \"{{name}}\"?"
+        },
+        "removeGuest": "Rimuovi Ospite",
+        "removeGuestDescription": "Sei sicuro di voler rimuovere {{name}} dal tavolo? L'ospite tornerà nella lista non assegnati.",
+        "removeGuestDescriptionGeneric": "Sei sicuro di voler rimuovere questo ospite dall'assegnazione del tavolo? L'ospite tornerà nella lista non assegnati.",
+        "trashZone": {
+            "title": "Zona Rimozione",
+            "description": "Trascina qui gli ospiti per rimuoverli dai tavoli",
+            "hint": "Gli ospiti rimossi torneranno nella lista \"Non Assegnati\""
+        }
+    },
+    "budget": {
+        "title": "Budget Matrimonio",
+        "subtitle": "Gestisci il budget per il tuo giorno speciale",
+        "meta": {
+            "title": "Budget Matrimonio - Gestisci le finanze del tuo matrimonio",
+            "description": "Gestisci il budget del tuo matrimonio con React Query. Imposta un budget totale e alloca le risorse nelle diverse categorie."
+        },
+        "alerts": {
+            "allocatedExceeded": "Budget allocato supera il totale di {{amount}}",
+            "spentExceeded": "Spese superano il budget totale di {{amount}}"
+        },
+        "tabs": {
+            "overview": "Panoramica",
+            "categories": "Categorie",
+            "vendors": "Fornitori",
+            "payments": "Pagamenti"
+        },
+        "overview": {
+            "totalBudget": "Budget Totale",
+            "clickToEdit": "Clicca per modificare",
+            "spentSoFar": "Speso Finora",
+            "percentOfBudget": "{{percent}}% del budget",
+            "remainingBudget": "Budget Rimanente",
+            "withinLimits": "Nei limiti",
+            "budgetExceeded": "Budget superato",
+            "daysToWedding": "Giorni al Matrimonio",
+            "vendorsPaid": "{{paid}}/{{total}} fornitori pagati",
+            "mostExpensiveCategory": "Categoria più costosa",
+            "estimated": "stimati",
+            "nextPayment": "Prossimo pagamento",
+            "noPendingPayments": "Nessun pagamento in sospeso",
+            "potentialSavings": "Risparmio potenziale",
+            "notAllocatedYet": "Non ancora allocato",
+            "distribution": "Distribuzione Budget per Categoria",
+            "estimatedVsSpent": "Preventivo vs Speso",
+            "exceededBy": "Superato di {{amount}}"
+        },
+        "categories": {
+            "title": "Gestione Categorie",
+            "subtitle": "Modifica i budget e traccia le spese per ogni categoria",
+            "add": "Aggiungi Categoria",
+            "newTitle": "Aggiungi Nuova Categoria",
+            "nameLabel": "Nome Categoria",
+            "selectPlaceholder": "Seleziona una categoria",
+            "budgetLabel": "Budget Stimato",
+            "totalAvailable": "Budget totale disponibile: {{total}} | Da allocare: {{remaining}}",
+            "status": {
+                "notStarted": "Non iniziato",
+                "inProgress": "In corso",
+                "almostComplete": "Quasi completato",
+                "completed": "Completato",
+                "exceeded": "Budget superato"
+            },
+            "bomboniereBadge": "🎁 {{count}} Bomboniere",
+            "guestsBadge": "👥 {{count}} Ospiti",
+            "guestsSuffix": "ospiti",
+            "percentUsed": "{{percent}}% utilizzato",
+            "progress": "Progresso spesa",
+            "remaining": "Rimanente: {{amount}}",
+            "exceeded": "Superato: {{amount}}",
+            "expensesDetail": "Dettaglio spese",
+            "noVendors": "Nessun fornitore associato",
+            "paidPercent": "{{percent}}% pagato",
+            "actions": {
+                "edit": "Modifica",
+                "addExpense": "Aggiungi Spesa",
+                "delete": "Elimina",
+                "deleting": "Eliminando...",
+                "save": "Salva",
+                "cancel": "Annulla"
+            },
+            "deleteDialog": {
+                "title": "⚠️ Conferma Eliminazione Categoria",
+                "warning": "Stai per eliminare la categoria \"{{name}}\"",
+                "spentWarning": "💰 Totale speso: {{amount}}",
+                "itemsWarning": "Verranno eliminati definitivamente:",
+                "vendorsCount": "• {{count}} fornitore/i",
+                "itemsCount": "• {{count}} spesa/e",
+                "irreversible": "⚠️ Questa operazione è irreversibile!",
+                "confirm": "Sì, elimina definitivamente",
+                "cancel": "Annulla"
+            },
+            "errors": {
+                "notFound": "Categoria non trovata",
+                "fetchInfo": "Impossibile recuperare le informazioni sulla categoria",
+                "delete": "Errore durante l'eliminazione della categoria",
+                "fillRequired": "Compila tutti i campi obbligatori"
+            }
+        },
+        "vendors": {
+            "title": "Gestione Fornitori",
+            "subtitle": "Gestisci i tuoi fornitori e traccia i pagamenti",
+            "add": "Aggiungi Fornitore",
+            "searchPlaceholder": "Cerca fornitori...",
+            "addTitle": "Aggiungi Nuovo Fornitore",
+            "editTitle": "Modifica Fornitore: {{name}}",
+            "nameLabel": "Nome Fornitore",
+            "categoryLabel": "Categoria",
+            "costLabel": "Costo *",
+            "unitCostLabel": "Costo unitario *",
+            "dueDateLabel": "Data Scadenza",
+            "selectDate": "Seleziona data",
+            "emailLabel": "Email",
+            "phoneLabel": "Telefono",
+            "websiteLabel": "Sito Web",
+            "addressLabel": "Indirizzo",
+            "notesLabel": "Note",
+            "optionalDueDate": "Opzionale: data entro cui pagare il fornitore",
+            "urlHelper": "https:// verrà aggiunto automaticamente",
+            "selectPlaceholder": "Seleziona una categoria",
+            "noVendors": "Nessun fornitore trovato",
+            "detailsTitle": "Dettagli Fornitore",
+            "paymentTitle": "Registra Pagamento",
+            "deleteTitle": "Elimina Fornitore",
+            "deleteConfirm": "Sei sicuro di voler eliminare questo fornitore?",
+            "paymentAmount": "Importo Pagamento",
+            "paymentDate": "Data Pagamento",
+            "paymentNotes": "Note Pagamento",
+            "paymentAdd": "Registra Pagamento",
+            "actions": {
+                "edit": "Modifica",
+                "delete": "Elimina",
+                "save": "Salva Modifiche",
+                "cancel": "Annulla"
+            },
+            "status": {
+                "paid": "Pagato",
+                "partial": "Parziale",
+                "pending": "In sospeso",
+                "unknown": "Sconosciuto"
+            },
+            "errors": {
+                "nameRequired": "Nome fornitore è obbligatorio",
+                "nameLength": "Il nome deve avere almeno 2 caratteri",
+                "categoryRequired": "Seleziona una categoria",
+                "costRequired": "Costo è obbligatorio",
+                "costInvalid": "Inserisci un costo valido maggiore di 0",
+                "costExcessive": "Il costo sembra eccessivo (max €100.000)",
+                "emailInvalid": "Formato email non valido",
+                "addError": "Errore durante l'aggiunta del fornitore"
+            }
+        },
+        "payments": {
+            "title": "Pagamenti in Scadenza",
+            "subtitle": "Monitora e gestisci i tuoi pagamenti programmati",
+            "totalToPay": "Totale da Pagare",
+            "remainingPayments": "{{count}} pagamento rimanente",
+            "remainingPayments_plural": "{{count}} pagamenti rimanenti",
+            "overduePayments": "Pagamenti Scaduti",
+            "totalOverdue": "{{amount}} totali",
+            "noOverdue": "Nessun pagamento scaduto",
+            "urgentPayments": "Urgenti (7 giorni)",
+            "totalUrgent": "{{amount}} totali",
+            "noUrgent": "Nessun pagamento urgente",
+            "historyTitle": "Cronologia Pagamenti",
+            "filterPlaceholder": "Filtra pagamenti",
+            "filters": {
+                "all": "Tutti",
+                "toPay": "Da pagare",
+                "paid": "Pagati",
+                "overdue": "Scaduti",
+                "urgent": "Urgenti",
+                "upcoming": "Prossimo",
+                "planned": "Pianificato",
+                "noDeadline": "Nessuna Scadenza"
+            },
+            "paidOn": "Pagato il {{date}}",
+            "dueOn": "Scadenza: {{date}}",
+            "totalPaidAmount": "💰 Importo totale pagato: {{amount}}",
+            "expiresToday": "Scade oggi",
+            "expiresTomorrow": "Scade domani",
+            "expiresInDays": "Scade tra {{days}} giorni",
+            "overdueByDays": "Scaduto da {{days}} giorni",
+            "noDueDate": "Nessuna data di scadenza impostata",
+            "fullyPaid": "Fornitore completamente pagato ✓",
+            "reminderButton": "Promemoria",
+            "markAsPaidButton": "Segna Come Pagato",
+            "noPayments": "Nessun pagamento programmato",
+            "noPaymentsSubtitle": "I tuoi pagamenti futuri appariranno qui",
+            "errors": {
+                "invalidAmount": "Inserisci un importo valido",
+                "paymentUnavailable": "Funzione di pagamento non disponibile",
+                "vendorNotFound": "Fornitore non trovato"
+            }
+        },
+        "reminders": {
+            "dialogTitle": "Imposta Promemoria per {{name}}",
+            "dateLabel": "Data Promemoria",
+            "messageLabel": "Messaggio Personalizzato (opzionale)",
+            "messagePlaceholder": "Es: Ricordati di portare i documenti...",
+            "disableAuto": "Disattiva i promemoria automatici (7 giorni prima e giorno stesso)",
+            "create": "Crea Promemoria",
+            "creating": "Creazione...",
+            "notificationTitle": "Promemoria Pagamento",
+            "defaultMessage": "Hai un pagamento in scadenza",
+            "success": "✅ Promemoria Impostato",
+            "successDescription": "Riceverai una notifica il {{date}}",
+            "errors": {
+                "dateRequired": "Seleziona una data per il promemoria",
+                "createFailed": "Impossibile creare il promemoria"
+            }
+        }
+    },
+    "profile": {
+        "title": "Il tuo Profilo",
+        "subtitle": "Gestisci le tue informazioni personali e l'abbonamento.",
+        "personalInfo": {
+            "title": "Informazioni Personali",
+            "email": "Email",
+            "weddingDate": "Data Matrimonio",
+            "notSet": "Non impostata"
+        },
+        "subscription": {
+            "title": "Abbonamento",
+            "description": "Gestisci il tuo piano e i metodi di pagamento",
+            "currentStatus": "Stato Attuale",
+            "status": {
+                "active": "Attivo",
+                "trialing": "Periodo di Prova",
+                "canceled": "Cancellato",
+                "inactive": "Inattivo"
+            },
+            "yearly": "Annuale",
+            "manage": "Gestisci Abbonamento",
+            "loading": "Caricamento...",
+            "trialEnds": "Il periodo di prova scade il {{date}}"
+        },
+        "dangerZone": {
+            "title": "Zona Pericolo",
+            "description": "L'eliminazione dell'account è irreversibile. Tutti i tuoi dati, inclusi la lista invitati, i tavoli e il budget, verranno cancellati permanentemente. Anche l'abbonamento verrà terminato immediatamente.",
+            "deleteAccount": "Elimina Account",
+            "confirmTitle": "Sei assolutamente sicuro?",
+            "confirmDescription": "Questa azione non può essere annullata. Eliminerà permanentemente il tuo account e rimuoverà tutti i tuoi dati dai nostri server.",
+            "cancel": "Annulla",
+            "confirm": "Sì, elimina il mio account",
+            "deleting": "Eliminazione..."
+        },
+        "toasts": {
+            "portalError": "Errore nell'apertura del portale abbonamento",
+            "deleteSuccess": "Account eliminato con successo",
+            "deleteError": "Errore durante l'eliminazione dell'account. Riprova più tardi."
+        }
+    },
+    "pricing": {
+        "title": "Scegli il Tuo Piano",
+        "subtitle": "Inizia con 48 ore di prova gratuita",
+        "monthly": "Mensile",
+        "annual": "Annuale",
+        "save": "Risparmi",
+        "perMonth": "al mese",
+        "perYear": "all'anno",
+        "freeTrial": "Prova Gratuita 48 Ore",
+        "thenOnly": "Poi solo",
+        "startTrial": "Inizia Prova Gratuita",
+        "subscribe": "Abbonati Ora",
+        "features": {
+            "unlimitedGuests": "Invitati illimitati",
+            "tableManagement": "Gestione tavoli",
+            "budgetTracking": "Tracciamento budget",
+            "allergiesTracking": "Tracciamento allergie",
+            "realTimeStats": "Statistiche in tempo reale",
+            "export": "Esportazione dati",
+            "support": "Supporto prioritario"
+        },
+        "trialUsed": "Hai già utilizzato la prova gratuita"
+    },
+    "payment": {
+        "success": {
+            "title": "Pagamento Completato!",
+            "message": "Il tuo abbonamento è stato attivato con successo.",
+            "goToDashboard": "Vai alla Dashboard"
+        },
+        "canceled": {
+            "title": "Pagamento Annullato",
+            "message": "Il pagamento è stato annullato. Puoi riprovare quando vuoi.",
+            "retry": "Riprova",
+            "goBack": "Torna Indietro"
+        }
+    },
+    "notFound": {
+        "title": "Pagina Non Trovata",
+        "message": "La pagina che stai cercando non esiste.",
+        "goHome": "Torna alla Home"
+    },
+    "dialogs": {
+        "logout": {
+            "title": "Conferma Logout",
+            "message": "Sei sicuro di voler uscire?",
+            "cancel": "Annulla",
+            "confirm": "Esci"
+        },
+        "sessionWarning": {
+            "title": "Sessione in Scadenza",
+            "message": "La tua sessione sta per scadere. Vuoi rimanere connesso?",
+            "stayLoggedIn": "Rimani Connesso",
+            "logout": "Esci"
+        },
+        "confirm": {
+            "title": "Conferma",
+            "message": "Sei sicuro di voler procedere?",
+            "cancel": "Annulla",
+            "confirm": "Conferma",
+            "continue": "Continuare?",
+            "remove": "Rimuovi"
+        }
+    }
+}

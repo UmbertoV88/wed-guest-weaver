@@ -17,21 +17,23 @@ import {
   Zap,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import CommonHeader from "@/components/CommonHeader";
 
 const Landing = () => {
   const [email, setEmail] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = "Sistema Gestione Invitati Matrimonio - Organizza il Tuo Giorno Perfetto";
+    document.title = t('landing.meta.title');
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
         "content",
-        "Sistema completo per gestire invitati matrimonio in 7 giorni. Trasforma il caos in eleganza con il nostro sistema intelligente.",
+        t('landing.meta.description'),
       );
     }
-  }, []);
+  }, [t]);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,16 +71,16 @@ const Landing = () => {
             <Heart className="w-16 h-16 mx-auto mb-6 text-gold animate-heartbeat" fill="currentColor" />
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              TRASFORMA IL CAOS
+              {t('landing.hero.title')}
               <br />
-              <span className="text-gold">IN ELEGANZA</span>
+              <span className="text-gold">{t('landing.hero.titleHighlight')}</span>
             </h1>
 
             <p className="text-xl md:text-2xl mb-8 text-white/90">
-              Organizza il matrimonio perfetto e gestisci tutti gli invitati in soli 7 giorni
+              {t('landing.hero.subtitle')}
             </p>
 
-            <p className="text-lg mb-8 text-white/80">(anche se finora hai usato solo liste Excel caotiche)</p>
+            <p className="text-lg mb-8 text-white/80">{t('landing.hero.description')}</p>
 
             <Link to="/auth">
               <Button
@@ -86,13 +88,13 @@ const Landing = () => {
                 className="bg-gold hover:bg-gold/90 text-primary-deep text-xl px-12 py-7 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
               >
                 <span className="flex items-center gap-3">
-                  PROVA GRATIS 48 ORE
+                  {t('landing.hero.cta')}
                   <Sparkles className="w-5 h-5" />
                 </span>
               </Button>
             </Link>
 
-            <p className="mt-6 text-white/70 text-sm">✨ Poi solo €19.90/mese · Nessuna carta richiesta per il trial</p>
+            <p className="mt-6 text-white/70 text-sm">{t('landing.hero.pricing')}</p>
           </div>
         </div>
 
@@ -107,12 +109,12 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
-              Il Tuo Matrimonio Perfetto
+              {t('landing.howItWorks.title')}
               <br />
-              <span className="text-primary">In 3 Semplici Step</span>
+              <span className="text-primary">{t('landing.howItWorks.titleHighlight')}</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Dimentica Excel e liste caotiche. Il nostro sistema ti guida passo dopo passo.
+              {t('landing.howItWorks.subtitle')}
             </p>
           </div>
 
@@ -125,9 +127,9 @@ const Landing = () => {
                   1
                 </div>
                 <Users className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-center mb-4">Aggiungi Invitati</h3>
+                <h3 className="text-xl font-bold text-center mb-4">{t('landing.howItWorks.step1.title')}</h3>
                 <p className="text-muted-foreground text-center">
-                  Inserisci rapidamente tutti i tuoi invitati con il wizard guidato
+                  {t('landing.howItWorks.step1.description')}
                 </p>
               </div>
             </div>
@@ -140,9 +142,9 @@ const Landing = () => {
                   2
                 </div>
                 <CheckCircle className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-center mb-4">Traccia Conferme</h3>
+                <h3 className="text-xl font-bold text-center mb-4">{t('landing.howItWorks.step2.title')}</h3>
                 <p className="text-muted-foreground text-center">
-                  Monitora in tempo reale chi ha confermato, chi è in attesa
+                  {t('landing.howItWorks.step2.description')}
                 </p>
               </div>
             </div>
@@ -155,9 +157,9 @@ const Landing = () => {
                   3
                 </div>
                 <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-center mb-4">Giorno Perfetto</h3>
+                <h3 className="text-xl font-bold text-center mb-4">{t('landing.howItWorks.step3.title')}</h3>
                 <p className="text-muted-foreground text-center">
-                  Goditi il tuo matrimonio senza preoccupazioni organizzative
+                  {t('landing.howItWorks.step3.description')}
                 </p>
               </div>
             </div>
@@ -170,9 +172,9 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
-              Tutto Quello Che Ti Serve
+              {t('landing.features.title')}
               <br />
-              <span className="text-primary">In Un Solo Sistema</span>
+              <span className="text-primary">{t('landing.features.titleHighlight')}</span>
             </h2>
           </div>
 
@@ -184,8 +186,8 @@ const Landing = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Users className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Gestione Invitati</h3>
-                <p className="text-sm text-muted-foreground">Organizza invitati e accompagnatori senza sforzo</p>
+                <h3 className="text-lg font-bold mb-2">{t('landing.features.guestManagement.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('landing.features.guestManagement.description')}</p>
               </CardContent>
             </Card>
 
@@ -196,8 +198,8 @@ const Landing = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Statistiche Real-Time</h3>
-                <p className="text-sm text-muted-foreground">Monitora conferme e presenze in tempo reale</p>
+                <h3 className="text-lg font-bold mb-2">{t('landing.features.statistics.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('landing.features.statistics.description')}</p>
               </CardContent>
             </Card>
 
@@ -208,8 +210,8 @@ const Landing = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Shield className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Allergie & Intolleranze</h3>
-                <p className="text-sm text-muted-foreground">Traccia tutte le esigenze alimentari speciali</p>
+                <h3 className="text-lg font-bold mb-2">{t('landing.features.allergies.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('landing.features.allergies.description')}</p>
               </CardContent>
             </Card>
 
@@ -220,8 +222,8 @@ const Landing = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Calendar className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Categorie Custom</h3>
-                <p className="text-sm text-muted-foreground">Organizza per famiglia, amici, colleghi e altro</p>
+                <h3 className="text-lg font-bold mb-2">{t('landing.features.categories.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('landing.features.categories.description')}</p>
               </CardContent>
             </Card>
           </div>
@@ -234,19 +236,19 @@ const Landing = () => {
           <div className="max-w-5xl mx-auto grid md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-5xl font-bold mb-2 text-gold">500+</div>
-              <div className="text-white/80">Matrimoni Organizzati</div>
+              <div className="text-white/80">{t('landing.stats.weddings')}</div>
             </div>
             <div>
               <div className="text-5xl font-bold mb-2 text-gold">15K+</div>
-              <div className="text-white/80">Invitati Gestiti</div>
+              <div className="text-white/80">{t('landing.stats.guests')}</div>
             </div>
             <div>
               <div className="text-5xl font-bold mb-2 text-gold">98%</div>
-              <div className="text-white/80">Soddisfazione Clienti</div>
+              <div className="text-white/80">{t('landing.stats.satisfaction')}</div>
             </div>
             <div>
-              <div className="text-5xl font-bold mb-2 text-gold">7 Giorni</div>
-              <div className="text-white/80">Setup Completo</div>
+              <div className="text-5xl font-bold mb-2 text-gold">7 {t('landing.stats.setup')}</div>
+              <div className="text-white/80">{t('landing.stats.setup')}</div>
             </div>
           </div>
         </div>
@@ -257,9 +259,9 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary-deep">
-              Cosa Dicono
+              {t('landing.testimonials.title')}
               <br />
-              <span className="text-primary">Le Coppie Felici</span>
+              <span className="text-primary">{t('landing.testimonials.titleHighlight')}</span>
             </h2>
           </div>
 
@@ -275,16 +277,15 @@ const Landing = () => {
                 ))}
               </div>
               <p className="text-muted-foreground italic mb-6">
-                "Incredibile! In una settimana abbiamo organizzato tutto. Non più notti insonni preoccupandoci di chi ha
-                confermato. Il sistema è semplicemente perfetto!"
+                {t('landing.testimonials.testimonial1.text')}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                   <Users className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm">Sofia & Marco</div>
-                  <div className="text-xs text-muted-foreground">Sposati a Giugno 2024</div>
+                  <div className="font-semibold text-sm">{t('landing.testimonials.testimonial1.author')}</div>
+                  <div className="text-xs text-muted-foreground">{t('landing.testimonials.testimonial1.date')}</div>
                 </div>
               </div>
             </Card>
@@ -300,16 +301,15 @@ const Landing = () => {
                 ))}
               </div>
               <p className="text-muted-foreground italic mb-6">
-                "Dopo mesi di caos con Excel, questo sistema ci ha salvato. Tutte le allergie tracciate, statistiche in
-                tempo reale. Consigliato a tutti!"
+                {t('landing.testimonials.testimonial2.text')}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                   <Users className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm">Laura & Andrea</div>
-                  <div className="text-xs text-muted-foreground">Sposati a Settembre 2024</div>
+                  <div className="font-semibold text-sm">{t('landing.testimonials.testimonial2.author')}</div>
+                  <div className="text-xs text-muted-foreground">{t('landing.testimonials.testimonial2.date')}</div>
                 </div>
               </div>
             </Card>
@@ -325,16 +325,15 @@ const Landing = () => {
                 ))}
               </div>
               <p className="text-muted-foreground italic mb-6">
-                "Come wedding planner, lo consiglio a tutte le mie coppie. Risparmia ore di lavoro e stress. Il miglior
-                investimento per un matrimonio sereno."
+                {t('landing.testimonials.testimonial3.text')}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                   <Award className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm">Francesca R.</div>
-                  <div className="text-xs text-muted-foreground">Wedding Planner Professionale</div>
+                  <div className="font-semibold text-sm">{t('landing.testimonials.testimonial3.author')}</div>
+                  <div className="text-xs text-muted-foreground">{t('landing.testimonials.testimonial3.role')}</div>
                 </div>
               </div>
             </Card>
@@ -352,31 +351,31 @@ const Landing = () => {
 
         <div className="relative container mx-auto px-4 text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            Pronto Per Il Tuo
+            {t('landing.finalCta.title')}
             <br />
-            <span className="text-gold">Matrimonio Perfetto?</span>
+            <span className="text-gold">{t('landing.finalCta.titleHighlight')}</span>
           </h2>
 
           <p className="text-xl mb-12 text-white/90">
-            Inizia con 48 ore di prova gratuita. Poi scegli il piano più adatto a te.
+            {t('landing.finalCta.subtitle')}
           </p>
 
           <div className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl mb-8">
             <div className="text-2xl font-bold mb-4 text-gold">
-              ✨ PROVA GRATUITA 48 ORE
+              {t('landing.finalCta.trialTitle')}
             </div>
-            <div className="text-white/80 mb-8">Nessuna carta di credito richiesta per iniziare</div>
+            <div className="text-white/80 mb-8">{t('landing.finalCta.trialSubtitle')}</div>
 
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="bg-white/5 p-6 rounded-xl">
-                <div className="text-sm text-white/60 mb-2">Piano Mensile</div>
-                <div className="text-4xl font-bold text-gold mb-2">€19.90</div>
-                <div className="text-white/70 text-sm">al mese</div>
+                <div className="text-sm text-white/60 mb-2">{t('landing.finalCta.monthlyPlan')}</div>
+                <div className="text-4xl font-bold text-gold mb-2">{t('landing.finalCta.monthlyPrice')}</div>
+                <div className="text-white/70 text-sm">{t('landing.finalCta.monthlyPeriod')}</div>
               </div>
               <div className="bg-white/5 p-6 rounded-xl border-2 border-gold/30">
-                <div className="text-sm text-gold mb-2">🔥 Più Popolare</div>
-                <div className="text-4xl font-bold text-gold mb-2">€179.90</div>
-                <div className="text-white/70 text-sm">all'anno · Risparmi €58.90</div>
+                <div className="text-sm text-gold mb-2">{t('landing.finalCta.annualPlan')}</div>
+                <div className="text-4xl font-bold text-gold mb-2">{t('landing.finalCta.annualPrice')}</div>
+                <div className="text-white/70 text-sm">{t('landing.finalCta.annualPeriod')}</div>
               </div>
             </div>
 
@@ -385,7 +384,7 @@ const Landing = () => {
                 size="lg"
                 className="bg-gold hover:bg-gold/90 text-primary-deep text-2xl px-16 py-8 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full md:w-auto"
               >
-                INIZIA PROVA GRATUITA
+                {t('landing.finalCta.cta')}
               </Button>
             </Link>
           </div>
@@ -393,15 +392,15 @@ const Landing = () => {
           <div className="flex flex-wrap justify-center gap-8 text-sm text-white/70 mb-12">
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5" />
-              Pagamento Sicuro
+              {t('landing.finalCta.securePayment')}
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              48 Ore Gratis
+              {t('landing.finalCta.freeTrial')}
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5" />
-              Cancella Quando Vuoi
+              {t('landing.finalCta.cancelAnytime')}
             </div>
           </div>
         </div>
@@ -410,10 +409,10 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-8 bg-primary-deep text-white/60 text-center text-sm">
         <div className="container mx-auto px-4">
-          <p className="mb-4">© 2024 Sistema Matrimonio Perfetto. Tutti i diritti riservati.</p>
+          <p className="mb-4">{t('landing.footer.copyright')}</p>
           {/* Footer links hidden as per user request */}
           <p className="mt-4 text-xs">
-            I risultati possono variare. Il sistema è uno strumento di supporto all'organizzazione del matrimonio.
+            {t('landing.footer.disclaimer')}
           </p>
         </div>
       </footer>

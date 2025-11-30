@@ -38,7 +38,8 @@ import {
   Users
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { it } from 'date-fns/locale';
+import { it, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 //import { useBudget } from '@/hooks/useBudget';
@@ -51,6 +52,8 @@ interface VendorManagerProps {
 }
 
 const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'it' ? it : enUS;
   const { vendors, addVendor, updateVendor, deleteVendor, addVendorPayment, loading } = useBudgetQuery();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVendor, setEditingVendor] = useState<any>(null);
@@ -274,13 +277,13 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Pagato</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">{t('budget.vendors.status.paid')}</Badge>;
       case 'partial':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Parziale</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">{t('budget.vendors.status.partial')}</Badge>;
       case 'pending':
-        return <Badge variant="destructive">In sospeso</Badge>;
+        return <Badge variant="destructive">{t('budget.vendors.status.pending')}</Badge>;
       default:
-        return <Badge variant="secondary">Sconosciuto</Badge>;
+        return <Badge variant="secondary">{t('budget.vendors.status.unknown')}</Badge>;
     }
   };
 
@@ -290,14 +293,14 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('it-IT', {
+    return new Intl.NumberFormat(i18n.language === 'it' ? 'it-IT' : 'en-US', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('it-IT', {
+    return new Date(dateString).toLocaleDateString(i18n.language === 'it' ? 'it-IT' : 'en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
@@ -312,29 +315,29 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     const errors: Record<string, string> = {};
 
     if (!newVendor.name.trim()) {
-      errors.name = "Nome fornitore è obbligatorio";
+      errors.name = t('budget.vendors.errors.nameRequired');
     } else if (newVendor.name.trim().length < 2) {
-      errors.name = "Il nome deve avere almeno 2 caratteri";
+      errors.name = t('budget.vendors.errors.nameLength');
     }
 
     if (!newVendor.category_id) {
-      errors.category_id = "Seleziona una categoria";
+      errors.category_id = t('budget.vendors.errors.categoryRequired');
     }
 
     if (!newVendor.default_cost.trim()) {
-      errors.default_cost = "Costo è obbligatorio";
+      errors.default_cost = t('budget.vendors.errors.costRequired');
     } else {
       const cost = parseFloat(newVendor.default_cost);
       if (isNaN(cost) || cost <= 0) {
-        errors.default_cost = "Inserisci un costo valido maggiore di 0";
+        errors.default_cost = t('budget.vendors.errors.costInvalid');
       } else if (cost > 100000) {
-        errors.default_cost = "Il costo sembra eccessivo (max €100.000)";
+        errors.default_cost = t('budget.vendors.errors.costExcessive');
       }
     }
 
     // Validazione email opzionale
     if (newVendor.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newVendor.contact_email)) {
-      errors.contact_email = "Formato email non valido";
+      errors.contact_email = t('budget.vendors.errors.emailInvalid');
     }
 
     // ✅ SE CI SONO ERRORI, MOSTRALI SUI CAMPI (NON CHIUDERE LA FINESTRA)
@@ -413,29 +416,29 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     const errors: Record<string, string> = {};
 
     if (!editForm.name.trim()) {
-      errors.name = "Nome fornitore è obbligatorio";
+      errors.name = t('budget.vendors.errors.nameRequired');
     } else if (editForm.name.trim().length < 2) {
-      errors.name = "Il nome deve avere almeno 2 caratteri";
+      errors.name = t('budget.vendors.errors.nameLength');
     }
 
     if (!editForm.category_id) {
-      errors.category_id = "Seleziona una categoria";
+      errors.category_id = t('budget.vendors.errors.categoryRequired');
     }
 
     if (!editForm.default_cost.trim()) {
-      errors.default_cost = "Costo è obbligatorio";
+      errors.default_cost = t('budget.vendors.errors.costRequired');
     } else {
       const cost = parseFloat(editForm.default_cost);
       if (isNaN(cost) || cost <= 0) {
-        errors.default_cost = "Inserisci un costo valido maggiore di 0";
+        errors.default_cost = t('budget.vendors.errors.costInvalid');
       } else if (cost > 100000) {
-        errors.default_cost = "Il costo sembra eccessivo (max €100.000)";
+        errors.default_cost = t('budget.vendors.errors.costExcessive');
       }
     }
 
     // Validazione email opzionale
     if (editForm.contact_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.contact_email)) {
-      errors.contact_email = "Formato email non valido";
+      errors.contact_email = t('budget.vendors.errors.emailInvalid');
     }
 
     // Se ci sono errori, mostrali sui campi
@@ -505,8 +508,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
       console.error("Toast removed:", {
-        title: 'Errore',
-        description: 'Inserisci un importo valido',
+        title: t('common.status.error'),
+        description: t('budget.vendors.errors.amountInvalid'),
         variant: 'destructive'
       });
       return;
@@ -540,15 +543,15 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestione Fornitori</h2>
-          <p className="text-gray-600">Gestisci i tuoi fornitori e traccia i pagamenti</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('budget.vendors.title')}</h2>
+          <p className="text-gray-600">{t('budget.vendors.subtitle')}</p>
         </div>
         <Button
           onClick={() => setShowAddForm(true)}
           className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Aggiungi Fornitore
+          {t('budget.vendors.add')}
         </Button>
       </div>
 
@@ -556,7 +559,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         <Input
-          placeholder="Cerca fornitori..."
+          placeholder={t('budget.vendors.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -569,13 +572,13 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       {showAddForm && (
         <Card ref={formRef} className="border-2 border-pink-200">
           <CardHeader>
-            <CardTitle className="text-pink-700">Aggiungi Nuovo Fornitore</CardTitle>
+            <CardTitle className="text-pink-700">{t('budget.vendors.newTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nome Fornitore */}
               <div>
-                <Label htmlFor="vendor-name">Nome Fornitore *</Label>
+                <Label htmlFor="vendor-name">{t('budget.vendors.nameLabel')} *</Label>
                 <Input
                   id="vendor-name"
                   value={newVendor.name}
@@ -596,7 +599,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
               {/* Categoria */}
               <div>
-                <Label>Categoria *</Label>
+                <Label>{t('budget.vendors.categoryLabel')} *</Label>
                 <Select
                   value={newVendor.category_id}
                   onValueChange={(value) => {
@@ -608,7 +611,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   }}
                 >
                   <SelectTrigger className={formErrors.category_id ? 'border-red-500 focus:border-red-500' : ''}>
-                    <SelectValue placeholder="Seleziona categoria" />
+                    <SelectValue placeholder={t('budget.vendors.selectPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
@@ -629,8 +632,8 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   {(() => {
                     const categoryName = categories.find(c => c.id === newVendor.category_id)?.name.toLowerCase() || '';
                     return (categoryName.includes('bomboniere') || (categoryName.includes('sala') && categoryName.includes('ricevimento')))
-                      ? 'Costo unitario *'
-                      : 'Costo *';
+                      ? t('budget.vendors.unitCostLabel')
+                      : t('budget.vendors.costLabel');
                   })()}
                 </Label>
                 <Input
@@ -656,7 +659,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
               {/* Data Scadenza */}
               <div>
-                <Label htmlFor="vendor-due-date">Data Scadenza</Label>
+                <Label htmlFor="vendor-due-date">{t('budget.vendors.dueDateLabel')}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -669,9 +672,9 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {newVendor.payment_due_date ? (
-                        format(newVendor.payment_due_date, "PPP", { locale: it })
+                        format(newVendor.payment_due_date, "PPP", { locale: dateLocale })
                       ) : (
-                        <span>Seleziona data</span>
+                        <span>{t('budget.vendors.selectDate')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -682,6 +685,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                       onSelect={(date) => setNewVendor(prev => ({ ...prev, payment_due_date: date }))}
                       initialFocus
                       className="pointer-events-auto"
+                      locale={dateLocale}
                     />
                   </PopoverContent>
                 </Popover>
@@ -689,7 +693,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
 
               {/* Email */}
               <div>
-                <Label htmlFor="vendor-email">Email</Label>
+                <Label htmlFor="vendor-email">{t('budget.vendors.emailLabel')}</Label>
                 <Input
                   id="vendor-email"
                   type="email"
@@ -708,7 +712,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 )}
               </div>
               <div>
-                <Label htmlFor="vendor-phone">Telefono</Label>
+                <Label htmlFor="vendor-phone">{t('budget.vendors.phoneLabel')}</Label>
                 <Input
                   id="vendor-phone"
                   value={newVendor.contact_phone}
@@ -717,7 +721,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 />
               </div>
               <div>
-                <Label htmlFor="vendor-website">Sito Web</Label>
+                <Label htmlFor="vendor-website">{t('budget.vendors.websiteLabel')}</Label>
                 <Input
                   id="vendor-website"
                   value={newVendor.website}
@@ -733,11 +737,11 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 {formErrors.website && (
                   <p className="text-sm text-red-500 mt-1">{formErrors.website}</p>
                 )}
-                <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('budget.vendors.urlHelper')}</p>
               </div>
             </div>
             <div>
-              <Label htmlFor="vendor-address">Indirizzo</Label>
+              <Label htmlFor="vendor-address">{t('budget.vendors.addressLabel')}</Label>
               <Input
                 id="vendor-address"
                 value={newVendor.address}
@@ -746,26 +750,26 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
               />
             </div>
             <div>
-              <Label htmlFor="vendor-notes">Note</Label>
+              <Label htmlFor="vendor-notes">{t('budget.vendors.notesLabel')}</Label>
               <Textarea
                 id="vendor-notes"
                 value={newVendor.notes}
                 onChange={(e) => setNewVendor(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Note aggiuntive..."
+                placeholder={t('budget.vendors.notesPlaceholder')}
                 rows={2}
               />
             </div>
             <div className="flex gap-2">
               <Button onClick={handleAddVendor} className="flex-1 bg-green-600 hover:bg-green-700">
                 <Plus className="w-4 h-4 mr-2" />
-                Aggiungi Fornitore
+                {t('budget.vendors.add')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setShowAddForm(false)}
                 className="flex-1"
               >
-                Annulla
+                {t('common.actions.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -777,14 +781,14 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
         <Card ref={editFormRef} className="border-blue-200 bg-blue-50">
           <CardHeader>
             <CardTitle className="text-blue-800">
-              Modifica Fornitore: {editingVendor.name}
+              {t('budget.vendors.editTitle', { name: editingVendor.name })}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nome Fornitore */}
               <div>
-                <Label htmlFor="edit-vendor-name">Nome Fornitore *</Label>
+                <Label htmlFor="edit-vendor-name">{t('budget.vendors.nameLabel')} *</Label>
                 <Input
                   id="edit-vendor-name"
                   value={editForm.name}
@@ -961,21 +965,17 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-2 mt-6">
-              <Button
-                onClick={handleUpdateVendor}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
-              >
-                <Edit3 className="w-4 h-4 mr-2" />
-                Salva Modifiche
+            <div className="flex gap-2">
+              <Button onClick={handleUpdateVendor} className="flex-1 bg-green-600 hover:bg-green-700">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {t('budget.vendors.actions.save')}
               </Button>
               <Button
-                type="button"
                 variant="outline"
                 onClick={handleCancelEdit}
                 className="flex-1"
               >
-                Annulla
+                {t('common.actions.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -983,16 +983,13 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
       )}
 
       {/* Vendors List */}
-      {loading ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <p className="text-muted-foreground">Caricamento fornitori...</p>
-          </CardContent>
-        </Card>
-      ) : (
-        /* COMPACT LIST VIEW */
-        <div className="space-y-2">
-          {filteredVendors.map((vendor) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredVendors.length === 0 ? (
+          <div className="col-span-full text-center py-12 text-gray-500">
+            <p>{t('budget.vendors.noVendors')}</p>
+          </div>
+        ) : (
+          filteredVendors.map((vendor) => {
             const payments = getVendorPayments(vendor);
             return (
               <Card
@@ -1016,13 +1013,13 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                   {/* Badge Stato */}
                   <div className="flex-shrink-0">
                     {payments.status === 'paid' && (
-                      <Badge className="bg-green-100 text-green-800">Pagato</Badge>
+                      <Badge className="bg-green-100 text-green-800">{t('budget.vendors.status.paid')}</Badge>
                     )}
                     {payments.status === 'partial' && (
-                      <Badge className="bg-yellow-100 text-yellow-800">Parziale</Badge>
+                      <Badge className="bg-yellow-100 text-yellow-800">{t('budget.vendors.status.partial')}</Badge>
                     )}
                     {payments.status === 'pending' && (
-                      <Badge className="bg-red-100 text-red-800">In sospeso</Badge>
+                      <Badge className="bg-red-100 text-red-800">{t('budget.vendors.status.pending')}</Badge>
                     )}
                   </div>
 
@@ -1039,108 +1036,73 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                 </div>
               </Card>
             );
-          })}
-        </div>
-      )
-      }
-
-      {
-        filteredVendors.length === 0 && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">Nessun fornitore trovato</p>
-              <p className="text-gray-400">Aggiungi il tuo primo fornitore per iniziare</p>
-            </CardContent>
-          </Card>
-        )
-      }
+          })
+        )}
+      </div>
 
       {/* Payment Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Registra Pagamento</DialogTitle>
+            <DialogTitle>{t('budget.vendors.paymentTitle')}</DialogTitle>
             <DialogDescription>
-              Fornitore: {selectedVendor?.name}
-              {selectedVendor && (
-                <div className="mt-2 space-y-1 text-sm">
-                  <p>Costo totale: <strong>{formatCurrency(selectedVendor.default_cost || 0)}</strong></p>
-                  <p>Già pagato: <strong className="text-green-600">{formatCurrency(selectedVendor.amount_paid || 0)}</strong></p>
-                  <p>Rimanente: <strong className="text-red-600">{formatCurrency((selectedVendor.default_cost || 0) - (selectedVendor.amount_paid || 0))}</strong></p>
-                </div>
-              )}
+              {t('budget.vendors.paymentTitle')} {selectedVendor?.name}
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="payment-amount">Importo Pagamento *</Label>
-              <Input
-                id="payment-amount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-                placeholder="0.00"
-              />
+              <Label htmlFor="payment-amount">{t('budget.vendors.paymentAmount')}</Label>
+              <div className="relative">
+                <Euro className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  id="payment-amount"
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="pl-10"
+                />
+              </div>
             </div>
-
             <div>
-              <Label htmlFor="payment-notes">Note (opzionale)</Label>
-              <Textarea
+              <Label htmlFor="payment-notes">{t('budget.vendors.paymentNotes')}</Label>
+              <Input
                 id="payment-notes"
                 value={paymentNotes}
                 onChange={(e) => setPaymentNotes(e.target.value)}
-                placeholder="Es: Acconto del 30%, Saldo finale, ecc."
-                rows={2}
+                placeholder={t('budget.vendors.notesPlaceholder')}
               />
             </div>
           </div>
-
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowPaymentDialog(false)}
-            >
-              Annulla
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              {t('common.actions.cancel')}
             </Button>
-            <Button
-              onClick={handleSubmitPayment}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Euro className="w-4 h-4 mr-2" />
-              Registra
+            <Button onClick={handleSubmitPayment} className="bg-green-600 hover:bg-green-700">
+              {t('budget.vendors.paymentAdd')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title="Elimina Fornitore"
-        description={
-          <>
-            <p>Sei sicuro di voler eliminare questo fornitore?</p>
-            <p className="mt-2 font-semibold text-destructive">
-              Questa azione non può essere annullata.
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Tutti i dati associati (pagamenti, note, ecc.) saranno eliminati definitivamente.
-            </p>
-          </>
-        }
-        confirmText="Elimina"
-        cancelText="Annulla"
+        title={t('budget.vendors.deleteTitle')}
+        description={t('budget.vendors.deleteConfirm')}
+        confirmText={t('budget.vendors.actions.delete')}
+        cancelText={t('common.actions.cancel')}
         onConfirm={handleConfirmDeleteVendor}
         variant="destructive"
       />
 
       {/* Vendor Details Sheet */}
       <Sheet open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t('budget.vendors.detailsTitle')}</SheetTitle>
+          </SheetHeader>
           {selectedVendorForDetails && (() => {
             const vendor = selectedVendorForDetails;
             const payments = getVendorPayments(vendor);
@@ -1191,21 +1153,21 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                     <div className="space-y-3 pt-4 border-t">
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         <div className="text-left">
-                          <p className="text-muted-foreground">Costo Totale</p>
+                          <p className="text-muted-foreground">{t('budget.vendors.totalCost')}</p>
                           <p className="font-semibold text-foreground">{formatCurrency(payments.totalCost)}</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-muted-foreground">Pagato</p>
+                          <p className="text-muted-foreground">{t('budget.vendors.status.paid')}</p>
                           <p className="font-semibold text-green-600">{formatCurrency(payments.paid)}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-muted-foreground">Rimanente</p>
+                          <p className="text-muted-foreground">{t('budget.categories.remaining')}</p>
                           <p className="font-semibold text-red-600">{formatCurrency(payments.remaining)}</p>
                         </div>
                       </div>
                       <div className="space-y-1">
                         <Progress value={payments.percentage} className="h-2" />
-                        <p className="text-xs text-muted-foreground text-right">{payments.percentage.toFixed(0)}% completato</p>
+                        <p className="text-xs text-muted-foreground text-right">{payments.percentage.toFixed(0)}% {t('budget.categories.completed')}</p>
                       </div>
                     </div>
                   )}
@@ -1224,37 +1186,37 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                     return (
                       <div className="mt-3 p-3 bg-pink-50 rounded-lg border border-pink-200 space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium text-gray-700">🎁 Bomboniere totali:</span>
+                          <span className="font-medium text-gray-700">🎁 {t('budget.categories.bomboniereBadge', { count: bombonieraCount })}:</span>
                           <span className="font-bold text-gray-900">{bombonieraCount}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Costo unitario:</span>
+                          <span className="text-gray-600">{t('budget.vendors.unitCostLabel')}:</span>
                           <span className="font-medium text-gray-900">{formatCurrency(unitCost)}</span>
                         </div>
                         <div className="h-px bg-pink-300" />
                         <div className="space-y-1.5 text-sm">
                           {groomGuests > 0 && (
                             <div className="flex items-center justify-between pl-2">
-                              <span className="text-gray-600">├─ Sposo: {groomGuests} ospiti</span>
+                              <span className="text-gray-600">├─ {t('guests.categories.family-his')}: {groomGuests} {t('budget.categories.guestsSuffix')}</span>
                               <span className="font-medium text-gray-900">{formatCurrency(groomCost)}</span>
                             </div>
                           )}
                           {brideGuests > 0 && (
                             <div className="flex items-center justify-between pl-2">
-                              <span className="text-gray-600">├─ Sposa: {brideGuests} ospiti</span>
+                              <span className="text-gray-600">├─ {t('guests.categories.family-hers')}: {brideGuests} {t('budget.categories.guestsSuffix')}</span>
                               <span className="font-medium text-gray-900">{formatCurrency(brideCost)}</span>
                             </div>
                           )}
                           {sharedGuests > 0 && (
                             <div className="flex items-center justify-between pl-2">
-                              <span className="text-gray-600">└─ Condivisi: {sharedGuests} ospiti</span>
+                              <span className="text-gray-600">└─ {t('budget.overview.distribution')}: {sharedGuests} {t('budget.categories.guestsSuffix')}</span>
                               <span className="font-medium text-gray-900">{formatCurrency(sharedCost)}</span>
                             </div>
                           )}
                         </div>
                         <div className="h-px bg-pink-300" />
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-700">Totale calcolato:</span>
+                          <span className="text-sm font-semibold text-gray-700">{t('budget.overview.totalBudget')}:</span>
                           <span className="text-lg font-bold text-pink-600">{formatCurrency(totalCost)}</span>
                         </div>
                       </div>
@@ -1275,37 +1237,37 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                     return (
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium text-gray-700">👥 Ospiti confermati:</span>
+                          <span className="font-medium text-gray-700">👥 {t('budget.categories.guestsBadge', { count: confirmedGuestsCount })}:</span>
                           <span className="font-bold text-gray-900">{confirmedGuestsCount}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Costo unitario:</span>
+                          <span className="text-gray-600">{t('budget.vendors.unitCostLabel')}:</span>
                           <span className="font-medium text-gray-900">{formatCurrency(unitCost)}</span>
                         </div>
                         <div className="h-px bg-blue-300" />
                         <div className="space-y-1.5 text-sm">
                           {groomGuests > 0 && (
                             <div className="flex items-center justify-between pl-2">
-                              <span className="text-gray-600">├─ Sposo: {groomGuests} ospiti</span>
+                              <span className="text-gray-600">├─ {t('guests.categories.family-his')}: {groomGuests} {t('budget.categories.guestsSuffix')}</span>
                               <span className="font-medium text-gray-900">{formatCurrency(groomCost)}</span>
                             </div>
                           )}
                           {brideGuests > 0 && (
                             <div className="flex items-center justify-between pl-2">
-                              <span className="text-gray-600">├─ Sposa: {brideGuests} ospiti</span>
+                              <span className="text-gray-600">├─ {t('guests.categories.family-hers')}: {brideGuests} {t('budget.categories.guestsSuffix')}</span>
                               <span className="font-medium text-gray-900">{formatCurrency(brideCost)}</span>
                             </div>
                           )}
                           {sharedGuests > 0 && (
                             <div className="flex items-center justify-between pl-2">
-                              <span className="text-gray-600">└─ Condivisi: {sharedGuests} ospiti</span>
+                              <span className="text-gray-600">└─ {t('budget.overview.distribution')}: {sharedGuests} {t('budget.categories.guestsSuffix')}</span>
                               <span className="font-medium text-gray-900">{formatCurrency(sharedCost)}</span>
                             </div>
                           )}
                         </div>
                         <div className="h-px bg-blue-300" />
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-700">Totale calcolato:</span>
+                          <span className="text-sm font-semibold text-gray-700">{t('budget.overview.totalBudget')}:</span>
                           <span className="text-lg font-bold text-blue-600">{formatCurrency(totalCost)}</span>
                         </div>
                       </div>
@@ -1335,7 +1297,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                           className="flex-1 bg-green-600 hover:bg-green-700"
                         >
                           <Euro className="w-4 h-4 mr-2" />
-                          Registra Pagamento
+                          {t('budget.vendors.paymentAdd')}
                         </Button>
                       )}
 
@@ -1359,7 +1321,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                         className="flex-1"
                       >
                         <Edit3 className="w-4 h-4 mr-2" />
-                        Modifica
+                        {t('common.actions.edit')}
                       </Button>
 
                       <Button
@@ -1375,7 +1337,7 @@ const VendorManager: React.FC<VendorManagerProps> = ({ categories }) => {
                         className="flex-1"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Elimina
+                        {t('common.actions.delete')}
                       </Button>
                     </div>
                   </div>

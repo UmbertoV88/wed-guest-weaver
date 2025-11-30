@@ -9,10 +9,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Plus, X, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { it } from 'date-fns/locale';
+import { it, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useBudgetQuery } from '@/hooks/useBudgetQuery';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 
 const vendorSchema = z.object({
   name: z.string()
@@ -57,10 +58,15 @@ const vendorSchema = z.object({
   payment_due_date: z.date().optional()
 });
 
+type Category = {
+  id: string;
+  name: string;
+};
+
 interface AddVendorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  categories: any[];
+  categories: Category[];
   preselectedCategoryId?: string;
 }
 
@@ -71,7 +77,9 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
   preselectedCategoryId
 }) => {
   const { addVendor } = useBudgetQuery();
-  
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'it' ? it : enUS;
+
   // Normalizza URL aggiungendo https:// se manca il protocollo
   const normalizeUrl = (url: string): string => {
     if (!url.trim()) return '';
@@ -125,13 +133,13 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Reset errori precedenti
     setFormErrors({});
-    
+
     // Validazione con zod
     const result = vendorSchema.safeParse(formData);
-    
+
     if (!result.success) {
       const errors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
@@ -142,9 +150,9 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
       setFormErrors(errors);
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const cost = parseFloat(formData.default_cost);
       const vendorData = {
@@ -160,7 +168,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
       };
 
       await addVendor(vendorData);
-      
+
       // Chiudi il dialog solo dopo il successo
       onOpenChange(false);
     } catch (error) {
@@ -188,7 +196,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            Aggiungi Nuovo Fornitore
+            {t('budget.vendors.addTitle')}
           </DialogTitle>
           <DialogDescription>
             {preselectedCategoryId && (
@@ -198,12 +206,12 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
             )}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Nome Fornitore */}
             <div>
-              <Label htmlFor="vendor-name">Nome Fornitore *</Label>
+              <Label htmlFor="vendor-name">{t('budget.vendors.nameLabel')} *</Label>
               <Input
                 id="vendor-name"
                 value={formData.name}
@@ -219,14 +227,14 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
             {/* Categoria */}
             <div>
-              <Label>Categoria *</Label>
-              <Select 
-                value={formData.category_id} 
+              <Label>{t('budget.vendors.categoryLabel')} *</Label>
+              <Select
+                value={formData.category_id}
                 onValueChange={(value) => handleInputChange('category_id', value)}
                 disabled={isSubmitting}
               >
                 <SelectTrigger className={formErrors.category_id ? 'border-red-500 focus:border-red-500' : ''}>
-                  <SelectValue placeholder="Seleziona categoria" />
+                  <SelectValue placeholder={t('budget.vendors.selectPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -244,9 +252,9 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
             {/* Costo */}
             <div>
               <Label htmlFor="vendor-cost">
-                {categories.find(c => c.id === formData.category_id)?.name.toLowerCase().includes('bomboniere') 
-                  ? 'Costo unitario *' 
-                  : 'Costo *'}
+                {categories.find(c => c.id === formData.category_id)?.name.toLowerCase().includes('bomboniere')
+                  ? t('budget.vendors.unitCostLabel')
+                  : t('budget.vendors.costLabel')}
               </Label>
               <Input
                 id="vendor-cost"
@@ -266,7 +274,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
             {/* Data Scadenza */}
             <div>
-              <Label>Data Scadenza</Label>
+              <Label>{t('budget.vendors.dueDateLabel')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -279,9 +287,9 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.payment_due_date ? (
-                      format(formData.payment_due_date, "PPP", { locale: it })
+                      format(formData.payment_due_date, "PPP", { locale: dateLocale })
                     ) : (
-                      <span>Seleziona data</span>
+                      <span>{t('budget.vendors.selectDate')}</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -295,12 +303,12 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
                   />
                 </PopoverContent>
               </Popover>
-              <p className="text-xs text-muted-foreground mt-1">Opzionale: data entro cui pagare il fornitore</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('budget.vendors.optionalDueDate')}</p>
             </div>
 
             {/* Email */}
             <div>
-              <Label htmlFor="vendor-email">Email</Label>
+              <Label htmlFor="vendor-email">{t('budget.vendors.emailLabel')}</Label>
               <Input
                 id="vendor-email"
                 type="email"
@@ -317,7 +325,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
             {/* Telefono */}
             <div>
-              <Label htmlFor="vendor-phone">Telefono</Label>
+              <Label htmlFor="vendor-phone">{t('budget.vendors.phoneLabel')}</Label>
               <Input
                 id="vendor-phone"
                 value={formData.contact_phone}
@@ -333,7 +341,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
             {/* Sito Web */}
             <div>
-              <Label htmlFor="vendor-website">Sito Web</Label>
+              <Label htmlFor="vendor-website">{t('budget.vendors.websiteLabel')}</Label>
               <Input
                 id="vendor-website"
                 value={formData.website}
@@ -345,13 +353,13 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
               {formErrors.website && (
                 <p className="text-sm text-red-500 mt-1">{formErrors.website}</p>
               )}
-              <p className="text-xs text-muted-foreground mt-1">https:// verrà aggiunto automaticamente</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('budget.vendors.urlHelper')}</p>
             </div>
           </div>
 
           {/* Indirizzo */}
           <div>
-            <Label htmlFor="vendor-address">Indirizzo</Label>
+            <Label htmlFor="vendor-address">{t('budget.vendors.addressLabel')}</Label>
             <Input
               id="vendor-address"
               value={formData.address}
@@ -367,7 +375,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
           {/* Note */}
           <div>
-            <Label htmlFor="vendor-notes">Note</Label>
+            <Label htmlFor="vendor-notes">{t('budget.vendors.notesLabel')}</Label>
             <Textarea
               id="vendor-notes"
               value={formData.notes}
@@ -384,7 +392,7 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
 
           {/* Buttons */}
           <div className="flex gap-2 pt-4">
-            <Button 
+            <Button
               type="submit"
               className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
               disabled={isSubmitting}
@@ -392,24 +400,24 @@ const AddVendorDialog: React.FC<AddVendorDialogProps> = ({
               {isSubmitting ? (
                 <>
                   <span className="animate-spin mr-2">⏳</span>
-                  Salvataggio...
+                  {t('common.status.saving')}
                 </>
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Aggiungi Fornitore
+                  {t('budget.vendors.add')}
                 </>
               )}
             </Button>
-            <Button 
+            <Button
               type="button"
-              variant="outline" 
+              variant="outline"
               onClick={() => onOpenChange(false)}
               className="flex-1"
               disabled={isSubmitting}
             >
               <X className="w-4 h-4 mr-2" />
-              Annulla
+              {t('common.button.cancel')}
             </Button>
           </div>
         </form>

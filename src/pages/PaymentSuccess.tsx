@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useTranslation } from 'react-i18next';
 
 
 const PaymentSuccess: React.FC = () => {
@@ -13,6 +14,7 @@ const PaymentSuccess: React.FC = () => {
     const { subscription, loading, refetch } = useSubscription();
     const [checkingStatus, setCheckingStatus] = useState(true);
     const [retryCount, setRetryCount] = useState(0);
+    const { t } = useTranslation();
 
     // Check subscription status and retry if webhook hasn't updated yet
     useEffect(() => {
@@ -52,9 +54,9 @@ const PaymentSuccess: React.FC = () => {
                     <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                         <CheckCircle className="w-10 h-10 text-green-600" />
                     </div>
-                    <CardTitle className="text-2xl text-green-900">Pagamento Riuscito!</CardTitle>
+                    <CardTitle className="text-2xl text-green-900">{t('payment.success.title')}</CardTitle>
                     <CardDescription className="text-base">
-                        Benvenuto in Wed Guest Weaver Premium
+                        {t('payment.success.message')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">

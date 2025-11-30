@@ -20,6 +20,7 @@ import {
 import { Guest, CATEGORY_LABELS, AGE_GROUP_LABELS } from "@/types/guest";
 
 import { guestFormSchema, GuestFormInput } from "@/schemas/guestSchema";
+import { useTranslation } from "react-i18next";
 
 interface EditGuestFormProps {
   guest: Guest;
@@ -27,6 +28,7 @@ interface EditGuestFormProps {
 }
 
 const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -147,16 +149,16 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <User className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Nome dell'invitato</h3>
-              <p className="text-muted-foreground">Modifica i dettagli dell'invitato</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step1.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step1.editSubtitle')}</p>
             </div>
 
             <div>
-              <Label htmlFor="name">Nome completo *</Label>
+              <Label htmlFor="name">{t('guests.form.nameLabel')}</Label>
               <Input
                 id="name"
                 {...register("name")}
-                placeholder="Es: Mario Rossi"
+                placeholder={t('guests.form.namePlaceholder')}
                 className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && (
@@ -165,16 +167,16 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
             </div>
 
             <div>
-              <Label htmlFor="ageGroup">Fascia d'età *</Label>
+              <Label htmlFor="ageGroup">{t('guests.form.ageGroupLabel')}</Label>
               <select
                 id="ageGroup"
                 value={ageGroup}
-                onChange={(e) => setValue("ageGroup", e.target.value as any)}
+                onChange={(e) => setValue("ageGroup", e.target.value as "Adulto" | "Ragazzo" | "Bambino")}
                 className={`w-full px-3 py-2 border rounded-md bg-background ${errors.ageGroup ? 'border-destructive' : 'border-border'}`}
               >
-                <option value="">Seleziona fascia d'età</option>
+                <option value="">{t('guests.form.ageGroupPlaceholder')}</option>
                 {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>{t(`guests.ageGroups.${key === 'Adulto' ? 'adult' : key === 'Ragazzo' ? 'teen' : key === 'Bambino' ? 'child' : 'baby'}`)}</option>
                 ))}
               </select>
               {errors.ageGroup && (
@@ -189,8 +191,8 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <Users className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Categoria invitato</h3>
-              <p className="text-muted-foreground">Come classifichi questo invitato?</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step2.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step2.subtitle')}</p>
             </div>
 
             <div className="grid gap-3">
@@ -198,13 +200,13 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setValue("category", key as any)}
+                  onClick={() => setValue("category", key as "family-his" | "family-hers" | "friends" | "colleagues")}
                   className={`p-4 rounded-lg border-2 text-left transition-romantic ${category === key
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'border-border hover:border-primary/50'
                     }`}
                 >
-                  <span className="font-medium">{label}</span>
+                  <span className="font-medium">{t(`guests.categories.${key}`)}</span>
                 </button>
               ))}
               {errors.category && (
@@ -219,12 +221,12 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <Users className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Accompagnatori</h3>
-              <p className="text-muted-foreground">Modifica gli accompagnatori di {watch("name")}</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step3.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step3.editSubtitle', { name: watch("name") })}</p>
             </div>
 
             <div>
-              <Label htmlFor="companionCount">Numero di accompagnatori</Label>
+              <Label htmlFor="companionCount">{t('guests.form.companionCountLabel')}</Label>
               <select
                 id="companionCount"
                 value={companionCount}
@@ -239,11 +241,11 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
 
             {companionCount > 0 && (
               <div className="space-y-3">
-                <h4 className="font-medium">Nome e fascia d'età accompagnatori:</h4>
+                <h4 className="font-medium">{t('guests.form.companionsDetailsLabel')}</h4>
                 {fields.map((field, index) => (
                   <div key={field.id} className="space-y-3 p-3 border rounded-lg relative">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium">Accompagnatore {index + 1}</Label>
+                      <Label className="text-sm font-medium">{t('guests.form.companionLabel', { index: index + 1 })}</Label>
                       <Button
                         type="button"
                         variant="ghost"
@@ -258,11 +260,11 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
                       </Button>
                     </div>
                     <div>
-                      <Label htmlFor={`companion-name-${index}`}>Nome completo *</Label>
+                      <Label htmlFor={`companion-name-${index}`}>{t('guests.form.nameLabel')}</Label>
                       <Input
                         id={`companion-name-${index}`}
                         {...register(`companions.${index}.name`)}
-                        placeholder="Nome completo"
+                        placeholder={t('guests.form.namePlaceholder')}
                         className={errors.companions?.[index]?.name ? 'border-destructive' : ''}
                       />
                       {errors.companions?.[index]?.name && (
@@ -272,15 +274,15 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
                       )}
                     </div>
                     <div>
-                      <Label htmlFor={`companion-age-${index}`}>Fascia d'età *</Label>
+                      <Label htmlFor={`companion-age-${index}`}>{t('guests.form.ageGroupLabel')}</Label>
                       <select
                         id={`companion-age-${index}`}
                         {...register(`companions.${index}.ageGroup`)}
                         className={`w-full px-3 py-2 border rounded-md bg-background ${errors.companions?.[index]?.ageGroup ? 'border-destructive' : 'border-border'}`}
                       >
-                        <option value="">Seleziona fascia d'età</option>
+                        <option value="">{t('guests.form.ageGroupPlaceholder')}</option>
                         {Object.entries(AGE_GROUP_LABELS).map(([key, label]) => (
-                          <option key={key} value={key}>{label}</option>
+                          <option key={key} value={key}>{t(`guests.ageGroups.${key === 'Adulto' ? 'adult' : key === 'Ragazzo' ? 'teen' : key === 'Bambino' ? 'child' : 'baby'}`)}</option>
                         ))}
                       </select>
                       {errors.companions?.[index]?.ageGroup && (
@@ -301,16 +303,16 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
           <div className="space-y-4">
             <div className="text-center mb-6">
               <AlertTriangle className="w-12 h-12 text-warning mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Allergeni e intolleranze</h3>
-              <p className="text-muted-foreground">Informazioni importanti per il catering</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step4.title')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step4.subtitle')}</p>
             </div>
 
             <div>
-              <Label htmlFor="allergies">Allergeni/intolleranze di {watch("name")}</Label>
+              <Label htmlFor="allergies">{t('guests.form.allergiesLabel', { name: watch("name") })}</Label>
               <Textarea
                 id="allergies"
                 {...register("allergies")}
-                placeholder="Es: glutine, lattosio, frutta secca, crostacei..."
+                placeholder={t('guests.form.allergiesPlaceholder')}
                 maxLength={200}
                 className="min-h-[100px]"
               />
@@ -318,18 +320,18 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
                 <p className="text-destructive text-sm mt-1">{errors.allergies.message}</p>
               )}
               <p className="text-xs text-muted-foreground mt-1">
-                Caratteri rimasti: {200 - (watch("allergies")?.length || 0)}
+                {t('guests.form.charsRemaining', { count: 200 - (watch("allergies")?.length || 0) })}
               </p>
             </div>
 
             {fields.map((field, index) => {
-              const companionName = watch(`companions.${index}.name`) || `Accompagnatore ${index + 1}`;
+              const companionName = watch(`companions.${index}.name`) || t('guests.form.companionLabel', { index: index + 1 });
               return (
                 <div key={field.id}>
-                  <Label>Allergeni/intolleranze di {companionName}</Label>
+                  <Label>{t('guests.form.allergiesLabel', { name: companionName })}</Label>
                   <Textarea
                     {...register(`companions.${index}.allergies`)}
-                    placeholder="Es: glutine, lattosio, frutta secca, crostacei..."
+                    placeholder={t('guests.form.allergiesPlaceholder')}
                     maxLength={200}
                     className="min-h-[80px]"
                   />
@@ -344,34 +346,34 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
           </div>
         );
 
-      case 5:
+      case 5: {
         const formValues = watch();
         return (
           <div className="space-y-4">
             <div className="text-center mb-6">
               <Check className="w-12 h-12 text-success mx-auto mb-3" />
-              <h3 className="text-xl font-semibold">Riepilogo modifiche</h3>
-              <p className="text-muted-foreground">Controlla le modifiche prima di salvare</p>
+              <h3 className="text-xl font-semibold">{t('guests.form.step5.editTitle')}</h3>
+              <p className="text-muted-foreground">{t('guests.form.step5.editSubtitle')}</p>
             </div>
 
             <Card className="p-4 bg-muted/30 border-primary/20">
               <div className="space-y-3">
                 <div>
-                  <strong>Nome:</strong> {formValues.name}
+                  <strong>{t('guests.form.summary.name')}</strong> {formValues.name}
                 </div>
                 <div>
-                  <strong>Fascia d'età:</strong> {formValues.ageGroup ? AGE_GROUP_LABELS[formValues.ageGroup] : 'Non specificata'}
+                  <strong>{t('guests.form.summary.ageGroup')}</strong> {formValues.ageGroup ? t(`guests.ageGroups.${formValues.ageGroup === 'Adulto' ? 'adult' : formValues.ageGroup === 'Ragazzo' ? 'teen' : formValues.ageGroup === 'Bambino' ? 'child' : 'baby'}`) : t('guests.form.notSpecified')}
                 </div>
                 <div>
-                  <strong>Categoria:</strong> {CATEGORY_LABELS[formValues.category]}
+                  <strong>{t('guests.form.summary.category')}</strong> {t(`guests.categories.${formValues.category}`)}
                 </div>
                 <div>
-                  <strong>Accompagnatori:</strong> {formValues.companionCount}
+                  <strong>{t('guests.form.summary.companions')}</strong> {formValues.companionCount}
                   {formValues.companions && formValues.companions.length > 0 && (
                     <div className="ml-4 text-sm text-muted-foreground space-y-1">
                       {formValues.companions.map((companion, idx) => (
                         <div key={idx}>
-                          {companion.name || `Accompagnatore ${idx + 1}`} ({companion.ageGroup ? AGE_GROUP_LABELS[companion.ageGroup] : 'Fascia d\'età non specificata'})
+                          {companion.name || t('guests.form.companionLabel', { index: idx + 1 })} ({companion.ageGroup ? t(`guests.ageGroups.${companion.ageGroup === 'Adulto' ? 'adult' : companion.ageGroup === 'Ragazzo' ? 'teen' : companion.ageGroup === 'Bambino' ? 'child' : 'baby'}`) : t('guests.form.notSpecified')})
                         </div>
                       ))}
                     </div>
@@ -379,16 +381,16 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
                 </div>
                 {formValues.allergies && (
                   <div>
-                    <strong>Allergeni {formValues.name}:</strong> {formValues.allergies}
+                    <strong>{t('guests.form.summary.allergies', { name: formValues.name })}</strong> {formValues.allergies}
                   </div>
                 )}
                 {formValues.companions && formValues.companions.some(c => c.allergies) && (
                   <div>
-                    <strong>Allergeni accompagnatori:</strong>
+                    <strong>{t('guests.form.summary.companionAllergies')}</strong>
                     <div className="ml-4 text-sm">
                       {formValues.companions
                         .filter(c => c.allergies)
-                        .map((c, idx) => `${c.name || `Accompagnatore ${idx + 1}`}: ${c.allergies}`)
+                        .map((c, idx) => `${c.name || t('guests.form.companionLabel', { index: idx + 1 })}: ${c.allergies}`)
                         .join(', ')
                       }
                     </div>
@@ -398,6 +400,7 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
             </Card>
           </div>
         );
+      }
 
       default:
         return null;
@@ -413,20 +416,20 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
         className="h-8 w-8 lg:w-auto lg:px-3 p-0 lg:p-2 text-xs text-primary hover:bg-primary/10"
       >
         <Edit className="w-4 h-4" />
-        <span className="hidden lg:inline lg:ml-1">Modifica</span>
+        <span className="hidden lg:inline lg:ml-1">{t('common.actions.edit')}</span>
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifica Invitato</DialogTitle>
+            <DialogTitle>{t('common.actions.edit')}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6">
             {/* Progress bar */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">Passo {currentStep} di {totalSteps}</span>
+                <span className="text-sm font-medium">{t('guests.form.steps', { current: currentStep, total: totalSteps })}</span>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
                 <div
@@ -449,18 +452,18 @@ const EditGuestForm = ({ guest, updateGuest }: EditGuestFormProps) => {
                 variant="outline"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
-                Indietro
+                {t('common.actions.back')}
               </Button>
 
               {currentStep < totalSteps ? (
                 <Button onClick={nextStep}>
-                  Avanti
+                  {t('common.actions.next')}
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               ) : (
                 <Button onClick={onSubmit} className="bg-success hover:bg-success/90 text-white">
                   <Check className="w-4 h-4 mr-1" />
-                  Salva modifiche
+                  {t('guests.form.buttons.saveChanges')}
                 </Button>
               )}
             </div>

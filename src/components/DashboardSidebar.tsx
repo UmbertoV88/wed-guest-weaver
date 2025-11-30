@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { Calendar, ChevronDown, LogOut, Crown, Camera, DollarSign, Users, MapPin, Heart, Utensils, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
-import { it } from "date-fns/locale";
+import { it, enUS } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -61,6 +62,10 @@ const DashboardSidebar = ({
   const collapsed = state === "collapsed";
   const [countdown, setCountdown] = useState<string>("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  // Get current locale for date-fns
+  const dateLocale = i18n.language === 'it' ? it : enUS;
 
   // Use profile from props if provided (for compatibility), otherwise from AuthContext
   const currentProfile = profile || authProfile;
@@ -83,11 +88,11 @@ const DashboardSidebar = ({
       const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
       if (days < 0) {
-        setCountdown("Matrimonio celebrato! 💕");
+        setCountdown(t('dashboard.sidebar.countdown.married'));
       } else if (days === 0) {
-        setCountdown("Oggi sposi! 💍");
+        setCountdown(t('dashboard.sidebar.countdown.today'));
       } else {
-        setCountdown(`${days} ${days === 1 ? 'giorno' : 'giorni'}`);
+        setCountdown(t('dashboard.sidebar.countdown.days', { count: days }));
       }
     };
 
@@ -96,7 +101,7 @@ const DashboardSidebar = ({
     const interval = setInterval(updateCountdown, 60000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [weddingDate]);
+  }, [weddingDate, t]);
 
   const handleDateSelect = async (date: Date | undefined) => {
     if (!date || !currentUser?.id) return;
@@ -124,9 +129,9 @@ const DashboardSidebar = ({
   };
 
   const menuItems = [
-    { icon: Users, label: "Invitati", href: "/dashboard", isActive: window.location.pathname === "/dashboard" },
-    { icon: Utensils, label: "Tavoli", href: "/dashboard/seating", isActive: window.location.pathname === "/dashboard/seating" },
-    { icon: DollarSign, label: "Budget", href: "/finanza", isActive: false },
+    { icon: Users, label: t('dashboard.sidebar.menu.guests'), href: "/dashboard", isActive: window.location.pathname === "/dashboard" },
+    { icon: Utensils, label: t('dashboard.sidebar.menu.tables'), href: "/dashboard/seating", isActive: window.location.pathname === "/dashboard/seating" },
+    { icon: DollarSign, label: t('dashboard.sidebar.menu.budget'), href: "/finanza", isActive: false },
     // { icon: Camera, label: "Fotografo", href: "/fotografo", isActive: false },
     // { icon: MapPin, label: "Location", href: "/location", isActive: false },
   ];
@@ -140,7 +145,7 @@ const DashboardSidebar = ({
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <Heart className="w-4 h-4 text-primary" />
-                {!collapsed && "Data Matrimonio"}
+                {!collapsed && t('dashboard.sidebar.weddingDate')}
               </div>
 
               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -152,8 +157,8 @@ const DashboardSidebar = ({
                   >
                     <Calendar className="w-4 h-4 text-primary" />
                     {weddingDate
-                      ? format(weddingDate, "dd MMM yyyy", { locale: it })
-                      : "Scegli data"
+                      ? format(weddingDate, "dd MMM yyyy", { locale: dateLocale })
+                      : t('dashboard.sidebar.chooseDate')
                     }
                     {!collapsed && <ChevronDown className="w-4 h-4 ml-auto" />}
                   </Button>
@@ -164,7 +169,7 @@ const DashboardSidebar = ({
                     selected={weddingDate}
                     onSelect={handleDateSelect}
                     disabled={(date) => date < new Date()}
-                    locale={it}
+                    locale={dateLocale}
                     initialFocus
                   />
                 </PopoverContent>
@@ -179,7 +184,7 @@ const DashboardSidebar = ({
                     </div>
                     {!countdown.includes('💕') && !countdown.includes('💍') && (
                       <div className="text-xs text-muted-foreground">
-                        al grande giorno
+                        {t('dashboard.sidebar.countdown.toTheBigDay')}
                       </div>
                     )}
                   </div>
@@ -196,7 +201,7 @@ const DashboardSidebar = ({
         <div className="px-2">
           {!collapsed && (
             <div className="text-xs font-semibold text-muted-foreground mb-2 px-2">
-              Sezioni
+              {t('dashboard.sidebar.sections')}
             </div>
           )}
           <SidebarMenu>

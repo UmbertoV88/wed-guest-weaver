@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface CommonHeaderProps {
   showAuthButtons?: boolean;
@@ -12,7 +14,8 @@ interface CommonHeaderProps {
 
 const CommonHeader = ({ showAuthButtons = false, className = "", showSidebarTrigger = false }: CommonHeaderProps) => {
   const { user } = useAuth();
-  
+  const { t } = useTranslation();
+
   // Smart navigation logic
   const logoHref = user ? "/dashboard" : "/";
 
@@ -28,21 +31,25 @@ const CommonHeader = ({ showAuthButtons = false, className = "", showSidebarTrig
             <span className="text-xl font-bold text-primary-deep">Wedding Planner</span>
           </Link>
         </div>
-        
-        {showAuthButtons && !user && (
-          <div className="flex items-center gap-3">
-            <Link to="/auth?tab=signin">
-              <Button variant="ghost" className="text-primary-deep hover:text-primary">
-                Accedi
-              </Button>
-            </Link>
-            <Link to="/auth?tab=signup">
-              <Button className="bg-primary hover:bg-primary/90 text-white">
-                Registrati
-              </Button>
-            </Link>
-          </div>
-        )}
+
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+
+          {showAuthButtons && !user && (
+            <>
+              <Link to="/auth?tab=signin">
+                <Button variant="ghost" className="text-primary-deep hover:text-primary">
+                  {t('header.login')}
+                </Button>
+              </Link>
+              <Link to="/auth?tab=signup">
+                <Button className="bg-primary hover:bg-primary/90 text-white">
+                  {t('header.signup')}
+                </Button>
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

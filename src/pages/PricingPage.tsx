@@ -9,12 +9,14 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { stripeService } from '@/services/stripeService';
 import { STRIPE_PRICES } from '@/types/subscription';
 import { Check, Sparkles, Crown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PricingPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { subscription, loading: subscriptionLoading } = useSubscription();
     const [loadingPlan, setLoadingPlan] = useState<'monthly' | 'yearly' | null>(null);
+    const { t } = useTranslation();
 
     // Determine if user has already used trial (trial date is in the past)
     // Determine if user has already used trial (if trial_ends_at exists, trial was used)
@@ -22,7 +24,7 @@ const PricingPage: React.FC = () => {
         user &&
         subscription?.trial_ends_at
     );
-    const buttonText = hasUsedTrial ? 'Attiva Piano' : 'Inizia 48 Ore Gratis';
+    const buttonText = hasUsedTrial ? t('pricing.subscribe') : t('pricing.startTrial');
 
     const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
         try {
@@ -84,17 +86,17 @@ const PricingPage: React.FC = () => {
                     {!hasUsedTrial && (
                         <Badge className="mb-4 bg-primary/10 text-primary-deep hover:bg-primary/20">
                             <Sparkles className="w-3 h-3 mr-1" />
-                            Prova Gratuita 48 Ore
+                            {t('pricing.freeTrial')}
                         </Badge>
                     )}
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        Scegli il tuo piano
+                        {t('pricing.title')}
                     </h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Organizza il tuo matrimonio perfetto con Wed Guest Weaver.
+                        {t('pricing.subtitle')}
                         {hasUsedTrial
-                            ? " Attiva il tuo piano per continuare a gestire il tuo evento."
-                            : " Attiva ora il tuo piano: le prime 48 ore sono gratis, puoi cancellare quando vuoi."
+                            ? " " + t('pricing.trialUsed')
+                            : " " + t('pricing.subtitle')
                         }
                     </p>
                 </div>
@@ -104,14 +106,14 @@ const PricingPage: React.FC = () => {
                     {/* Monthly Plan */}
                     <Card className="relative border-2 border-gray-200 hover:border-primary/30 transition-all flex flex-col">
                         <CardHeader>
-                            <CardTitle className="text-2xl">Piano Mensile</CardTitle>
+                            <CardTitle className="text-2xl">{t('pricing.monthly')}</CardTitle>
                             <CardDescription>Flessibilità massima, cancella quando vuoi</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 flex-1">
                             <div>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-bold text-gray-900">€{monthlyPrice?.amount.toFixed(2)}</span>
-                                    <span className="text-gray-500">/mese</span>
+                                    <span className="text-gray-500">/{t('pricing.perMonth')}</span>
                                 </div>
                                 {!hasUsedTrial && (
                                     <p className="text-xs text-muted-foreground mt-1">
@@ -123,23 +125,23 @@ const PricingPage: React.FC = () => {
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-2">
                                     <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">Gestione illimitata invitati</span>
+                                    <span className="text-gray-700">{t('pricing.features.unlimitedGuests')}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">Disposizione tavoli interattiva</span>
+                                    <span className="text-gray-700">{t('pricing.features.tableManagement')}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">Gestione budget e fornitori</span>
+                                    <span className="text-gray-700">{t('pricing.features.budgetTracking')}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">Export Excel e stampa</span>
+                                    <span className="text-gray-700">{t('pricing.features.export')}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                    <span className="text-gray-700">Supporto prioritario</span>
+                                    <span className="text-gray-700">{t('pricing.features.support')}</span>
                                 </li>
                             </ul>
                         </CardContent>
@@ -150,7 +152,7 @@ const PricingPage: React.FC = () => {
                                 className="w-full bg-primary hover:bg-primary-deep"
                                 size="lg"
                             >
-                                {loadingPlan === 'monthly' ? 'Caricamento...' : buttonText}
+                                {loadingPlan === 'monthly' ? t('common.status.loading') : buttonText}
                             </Button>
                             {!hasUsedTrial && (
                                 <p className="text-xs text-center text-muted-foreground w-full mt-2">
@@ -165,22 +167,22 @@ const PricingPage: React.FC = () => {
                         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                             <Badge className="bg-primary text-white px-4 py-1">
                                 <Crown className="w-3 h-3 mr-1" />
-                                Più Popolare
+                                {t('landing.finalCta.annualPlan').replace('🔥 ', '')}
                             </Badge>
                         </div>
 
                         <CardHeader>
-                            <CardTitle className="text-2xl">Piano Annuale</CardTitle>
+                            <CardTitle className="text-2xl">{t('pricing.annual')}</CardTitle>
                             <CardDescription>Risparmia il 25% con il piano annuale</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 flex-1">
                             <div>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-bold text-primary">€{yearlyPrice && (yearlyPrice.amount / 12).toFixed(2)}</span>
-                                    <span className="text-gray-500">/mese</span>
+                                    <span className="text-gray-500">/{t('pricing.perMonth')}</span>
                                 </div>
                                 <p className="text-sm text-gray-500 mt-1">
-                                    Fatturato annualmente (€{yearlyPrice?.amount.toFixed(2)}/anno)
+                                    Fatturato annualmente (€{yearlyPrice?.amount.toFixed(2)}/{t('pricing.perYear')})
                                 </p>
                                 {!hasUsedTrial && (
                                     <p className="text-xs text-muted-foreground mt-1">
@@ -224,7 +226,7 @@ const PricingPage: React.FC = () => {
                                 className="w-full bg-primary hover:bg-primary-deep"
                                 size="lg"
                             >
-                                {loadingPlan === 'yearly' ? 'Caricamento...' : buttonText}
+                                {loadingPlan === 'yearly' ? t('common.status.loading') : buttonText}
                             </Button>
                             {!hasUsedTrial && (
                                 <p className="text-xs text-center text-muted-foreground w-full mt-2">

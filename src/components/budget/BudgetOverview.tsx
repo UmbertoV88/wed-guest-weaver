@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from 'react-i18next';
 import {
   Calculator,
   PieChart,
@@ -37,16 +38,19 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   vendorsTotal = 12,
   onBudgetChange
 }) => {
+  const { t, i18n } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [tempBudget, setTempBudget] = useState(totalBudget);
 
   const handleSaveBudget = () => {
-    onBudgetChange && onBudgetChange(tempBudget);
+    if (onBudgetChange) {
+      onBudgetChange(tempBudget);
+    }
     setIsEditing(false);
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('it-IT', {
+    return new Intl.NumberFormat(i18n.language === 'it' ? 'it-IT' : 'en-US', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
@@ -59,7 +63,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Calculator className="w-4 h-4 text-pink-500" />
-            Budget Totale
+            {t('budget.overview.totalBudget')}
           </CardTitle>
           {!isEditing ? (
             <Button
@@ -98,7 +102,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
             </div>
           )}
           <p className="text-xs text-muted-foreground mt-1">
-            Clicca per modificare
+            {t('budget.overview.clickToEdit')}
           </p>
         </CardContent>
       </Card>
@@ -108,7 +112,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Euro className="w-4 h-4 text-orange-500" />
-            Speso Finora
+            {t('budget.overview.spentSoFar')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -116,7 +120,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
             {formatCurrency(totalSpent)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {percentageSpent.toFixed(1)}% del budget
+            {t('budget.overview.percentOfBudget', { percent: percentageSpent.toFixed(1) })}
           </p>
           <Progress value={percentageSpent} className="mt-2" />
         </CardContent>
@@ -127,18 +131,18 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-500" />
-            Budget Rimanente
+            {t('budget.overview.remainingBudget')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCurrency(remainingBudget)}
           </div>
-          <Badge 
+          <Badge
             variant={remainingBudget > 0 ? "default" : "destructive"}
             className="mt-2"
           >
-            {remainingBudget > 0 ? "Nei limiti" : "Budget superato"}
+            {remainingBudget > 0 ? t('budget.overview.withinLimits') : t('budget.overview.budgetExceeded')}
           </Badge>
         </CardContent>
       </Card>
@@ -148,18 +152,18 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Calendar className="w-4 h-4 text-purple-500" />
-            Giorni al Matrimonio
+            {t('budget.overview.daysToWedding')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-purple-600">
             {daysToWedding}
           </div>
-            {vendorsTotal > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {vendorsPaid}/{vendorsTotal} fornitori pagati
-              </p>
-            )}
+          {vendorsTotal > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {t('budget.overview.vendorsPaid', { paid: vendorsPaid, total: vendorsTotal })}
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -26,11 +27,14 @@ export const ConfirmDialog = ({
   onOpenChange,
   title,
   description,
-  confirmText = "Conferma",
-  cancelText = "Annulla",
+  confirmText,
+  cancelText,
   onConfirm,
   variant = "default"
 }: ConfirmDialogProps) => {
+  const { t } = useTranslation();
+  const defaultConfirm = confirmText || t('dialogs.confirm.confirm');
+  const defaultCancel = cancelText || t('dialogs.confirm.cancel');
   const handleConfirm = () => {
     onConfirm();
     onOpenChange(false);
@@ -44,12 +48,12 @@ export const ConfirmDialog = ({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel>{defaultCancel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             className={variant === "destructive" ? "bg-destructive hover:bg-destructive/90" : ""}
           >
-            {confirmText}
+            {defaultConfirm}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -38,20 +38,23 @@ interface PaymentTrackerProps {
   onMarkAsPaid?: (vendorId: string, amount: number, categoryId: string, notes?: string) => void;
 }
 
+import { useTranslation } from "react-i18next";
+
 const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsPaid }) => {
+  const { t, i18n } = useTranslation();
   const [paymentFilter, setPaymentFilter] = useState<"tutti" | "pagati" | "da_pagare" | "scaduti" | "urgenti">("tutti");
   const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
   const [selectedVendorForReminder, setSelectedVendorForReminder] = useState<any>(null);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("it-IT", {
+    return new Intl.NumberFormat(i18n.language === 'it' ? 'it-IT' : 'en-US', {
       style: "currency",
       currency: "EUR",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("it-IT", {
+    return new Date(dateString).toLocaleDateString(i18n.language === 'it' ? 'it-IT' : 'en-US', {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -72,7 +75,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
       return (
         <Badge variant="secondary" className="flex items-center gap-1">
           <Calendar className="w-3 h-3" />
-          Nessuna Scadenza
+          {t('budget.payments.filters.noDeadline')}
         </Badge>
       );
     }
@@ -81,28 +84,28 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
       return (
         <Badge variant="destructive" className="flex items-center gap-1">
           <AlertTriangle className="w-3 h-3" />
-          Scaduto
+          {t('budget.payments.filters.overdue')}
         </Badge>
       );
     } else if (daysUntilDue <= 7) {
       return (
         <Badge className="bg-orange-100 text-orange-800 flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          Urgente
+          {t('budget.payments.filters.urgent')}
         </Badge>
       );
     } else if (daysUntilDue <= 30) {
       return (
         <Badge className="bg-yellow-100 text-yellow-800 flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          Prossimo
+          {t('budget.payments.filters.upcoming')}
         </Badge>
       );
     } else {
       return (
         <Badge variant="secondary" className="flex items-center gap-1">
           <Calendar className="w-3 h-3" />
-          Pianificato
+          {t('budget.payments.filters.planned')}
         </Badge>
       );
     }
@@ -111,8 +114,8 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
   const handleMarkAsPaid = (payment: any) => {
     if (!onMarkAsPaid) {
       console.error("Toast removed:", {
-        title: "Errore",
-        description: "Funzione di pagamento non disponibile",
+        title: t('common.status.error'),
+        description: t('budget.payments.errors.paymentUnavailable'),
         variant: "destructive",
       });
       return;
@@ -121,8 +124,8 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
     const vendor = vendors.find((v) => v.id === payment.id);
     if (!vendor) {
       console.error("Toast removed:", {
-        title: "Errore",
-        description: "Fornitore non trovato",
+        title: t('common.status.error'),
+        description: t('budget.payments.errors.vendorNotFound'),
         variant: "destructive",
       });
       return;
@@ -231,223 +234,222 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ vendors = [], onMarkAsP
 
   return (
     <>
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Pagamenti in Scadenza</h2>
-        <p className="text-gray-600">Monitora e gestisci i tuoi pagamenti programmati</p>
-      </div>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{t('budget.payments.title')}</h2>
+          <p className="text-gray-600">{t('budget.payments.subtitle')}</p>
+        </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-l-4 border-l-blue-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-blue-700">Totale da Pagare</CardTitle>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-blue-700">{t('budget.payments.totalToPay')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-900">{formatCurrency(totalRemainingFromVendors)}</div>
+              <p className="text-sm text-blue-600 mt-1">
+                {t('budget.payments.remainingPayments', { count: pendingVendorsCount })}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-red-500">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-red-700">{t('budget.payments.overduePayments')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-900">{overdueCount}</div>
+              <p className="text-sm text-red-600 mt-1">
+                {overdueCount > 0 ? t('budget.payments.totalOverdue', { amount: formatCurrency(overdueAmount) }) : t('budget.payments.noOverdue')}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-orange-500">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-orange-700">{t('budget.payments.urgentPayments')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-orange-900">{urgentCount}</div>
+              <p className="text-sm text-orange-600 mt-1">
+                {urgentCount > 0 ? t('budget.payments.totalUrgent', { amount: formatCurrency(urgentAmount) }) : t('budget.payments.noUrgent')}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Payments Timeline */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                {t('budget.payments.historyTitle')}
+              </CardTitle>
+
+              <Select value={paymentFilter} onValueChange={(value) => setPaymentFilter(value as any)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={t('budget.payments.filterPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tutti">{t('budget.payments.filters.all')}</SelectItem>
+                  <SelectItem value="da_pagare">{t('budget.payments.filters.toPay')}</SelectItem>
+                  <SelectItem value="pagati">{t('budget.payments.filters.paid')}</SelectItem>
+                  <SelectItem value="scaduti">{t('budget.payments.filters.overdue')}</SelectItem>
+                  <SelectItem value="urgenti">{t('budget.payments.filters.urgent')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-900">{formatCurrency(totalRemainingFromVendors)}</div>
-            <p className="text-sm text-blue-600 mt-1">
-              {pendingVendorsCount} {pendingVendorsCount === 1 ? "pagamento rimanente" : "pagamenti rimanenti"}
-            </p>
-          </CardContent>
-        </Card>
+            <ScrollArea className="max-h-[1080px] pr-4">
+              <div className="space-y-4">
+                {sortedFilteredPayments.map((payment) => {
+                  const daysUntilDue = payment.daysUntilDue;
+                  const isOverdue = payment.isOverdue;
+                  const isUrgent = payment.isUrgent;
 
-        <Card className="border-l-4 border-l-red-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-red-700">Pagamenti Scaduti</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-900">{overdueCount}</div>
-            <p className="text-sm text-red-600 mt-1">
-              {overdueCount > 0 ? `${formatCurrency(overdueAmount)} totali` : "Nessun pagamento scaduto"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-orange-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-orange-700">Urgenti (7 giorni)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-900">{urgentCount}</div>
-            <p className="text-sm text-orange-600 mt-1">
-              {urgentCount > 0 ? `${formatCurrency(urgentAmount)} totali` : "Nessun pagamento urgente"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Payments Timeline */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Cronologia Pagamenti
-            </CardTitle>
-
-            <Select value={paymentFilter} onValueChange={(value) => setPaymentFilter(value as any)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filtra pagamenti" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tutti">Tutti</SelectItem>
-                <SelectItem value="da_pagare">Da pagare</SelectItem>
-                <SelectItem value="pagati">Pagati</SelectItem>
-                <SelectItem value="scaduti">Scaduti</SelectItem>
-                <SelectItem value="urgenti">Urgenti</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="max-h-[1080px] pr-4">
-            <div className="space-y-4">
-              {sortedFilteredPayments.map((payment) => {
-                const daysUntilDue = payment.daysUntilDue;
-                const isOverdue = payment.isOverdue;
-                const isUrgent = payment.isUrgent;
-
-                return (
-                  <div
-                    key={payment.id}
-                    className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                      payment.isPaid
+                  return (
+                    <div
+                      key={payment.id}
+                      className={`p-4 rounded-lg border-2 transition-all duration-300 ${payment.isPaid
                         ? "bg-green-50 border-green-200"
                         : isOverdue
                           ? "bg-red-50 border-red-200"
                           : isUrgent
                             ? "bg-orange-50 border-orange-200"
                             : "bg-white border-gray-200 hover:shadow-md"
-                    }`}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                      {/* COLONNA SINISTRA */}
-                      <div className="flex-1 space-y-3">
-                        {/* Nome e Badge */}
-                        <div className="flex items-center gap-3">
-                          <h4
-                            className={`font-semibold text-lg ${payment.isPaid ? "text-green-700" : "text-gray-900"}`}
-                          >
-                            {payment.vendor}
-                          </h4>
-
-                          {payment.isPaid && (
-                            <Badge className="bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />
-                              Pagato
-                            </Badge>
-                          )}
-
-                          {!payment.isPaid && getUrgencyBadge(daysUntilDue)}
-                        </div>
-
-                        {/* Sezione Date e Info Pagamento */}
-                        <div className="flex items-center gap-4 text-sm">
-                          {payment.isPaid && payment.paymentDate && (
-                            <div className="flex items-center gap-1 text-green-600 font-medium">
-                              <CheckCircle2 className="w-4 h-4" />
-                              <span>Pagato il {formatDate(payment.paymentDate)}</span>
-                            </div>
-                          )}
-
-                          {!payment.isPaid && payment.dueDate && (
-                            <div className="flex items-center gap-1 text-gray-600">
-                              <Calendar className="w-4 h-4" />
-                              <span>Scadenza: {formatDate(payment.dueDate)}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Importo Totale Pagato per Fornitori Completati */}
-                        {payment.isPaid && (
-                          <div className="bg-green-100 border border-green-200 rounded-md p-2">
-                            <p className="text-sm text-green-700 font-medium">
-                              💰 Importo totale pagato: {formatCurrency(payment.amountPaid || payment.amount)}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Messaggi di scadenza solo per fornitori NON pagati */}
-                        {!payment.isPaid && daysUntilDue !== null && daysUntilDue >= 0 && (
-                          <p className="text-xs text-gray-500">
-                            {daysUntilDue === 0
-                              ? "Scade oggi"
-                              : daysUntilDue === 1
-                                ? "Scade domani"
-                                : `Scade tra ${daysUntilDue} giorni`}
-                          </p>
-                        )}
-
-                        {!payment.isPaid && daysUntilDue !== null && isOverdue && (
-                          <p className="text-xs text-red-500 font-medium">Scaduto da {Math.abs(daysUntilDue)} giorni</p>
-                        )}
-
-                        {!payment.isPaid && daysUntilDue === null && (
-                          <p className="text-xs text-gray-500">Nessuna data di scadenza impostata</p>
-                        )}
-
-                        {/* Messaggio "Completamente Pagato" */}
-                        {payment.isPaid && (
-                          <div className="flex items-center gap-2 text-sm text-green-600">
-                            <CheckCircle2 className="w-5 h-5" />
-                            <span className="font-medium">Fornitore completamente pagato ✓</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* COLONNA DESTRA */}
-                      <div className="flex flex-col items-end gap-2 min-w-[200px]">
-                        {/* Importo */}
-                        <p className={`text-xl font-bold ${payment.isPaid ? "text-green-600" : "text-gray-900"}`}>
-                          {formatCurrency(payment.amount)}
-                        </p>
-
-                        {/* Bottoni Azione */}
-                        {!payment.isPaid && (
-                          <div className="flex flex-col lg:flex-row gap-2 w-full">
-                            <Button variant="outline" onClick={() => handleSetReminder(payment)} className="flex-1">
-                              <Clock className="w-4 h-4 mr-1" />
-                              Promemoria
-                            </Button>
-                            <Button
-                              onClick={() => handleMarkAsPaid(payment)}
-                              className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                        }`}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        {/* COLONNA SINISTRA */}
+                        <div className="flex-1 space-y-3">
+                          {/* Nome e Badge */}
+                          <div className="flex items-center gap-3">
+                            <h4
+                              className={`font-semibold text-lg ${payment.isPaid ? "text-green-700" : "text-gray-900"}`}
                             >
-                              <CheckCircle2 className="w-4 h-4 mr-1" />
-                              Segna Come Pagato
-                            </Button>
+                              {payment.vendor}
+                            </h4>
+
+                            {payment.isPaid && (
+                              <Badge className="bg-green-100 text-green-800 border border-green-300 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                {t('budget.vendors.status.paid')}
+                              </Badge>
+                            )}
+
+                            {!payment.isPaid && getUrgencyBadge(daysUntilDue)}
                           </div>
-                        )}
+
+                          {/* Sezione Date e Info Pagamento */}
+                          <div className="flex items-center gap-4 text-sm">
+                            {payment.isPaid && payment.paymentDate && (
+                              <div className="flex items-center gap-1 text-green-600 font-medium">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>{t('budget.payments.paidOn', { date: formatDate(payment.paymentDate) })}</span>
+                              </div>
+                            )}
+
+                            {!payment.isPaid && payment.dueDate && (
+                              <div className="flex items-center gap-1 text-gray-600">
+                                <Calendar className="w-4 h-4" />
+                                <span>{t('budget.payments.dueOn', { date: formatDate(payment.dueDate) })}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Importo Totale Pagato per Fornitori Completati */}
+                          {payment.isPaid && (
+                            <div className="bg-green-100 border border-green-200 rounded-md p-2">
+                              <p className="text-sm text-green-700 font-medium">
+                                {t('budget.payments.totalPaidAmount', { amount: formatCurrency(payment.amountPaid || payment.amount) })}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Messaggi di scadenza solo per fornitori NON pagati */}
+                          {!payment.isPaid && daysUntilDue !== null && daysUntilDue >= 0 && (
+                            <p className="text-xs text-gray-500">
+                              {daysUntilDue === 0
+                                ? t('budget.payments.expiresToday')
+                                : daysUntilDue === 1
+                                  ? t('budget.payments.expiresTomorrow')
+                                  : t('budget.payments.expiresInDays', { days: daysUntilDue })}
+                            </p>
+                          )}
+
+                          {!payment.isPaid && daysUntilDue !== null && isOverdue && (
+                            <p className="text-xs text-red-500 font-medium">{t('budget.payments.overdueByDays', { days: Math.abs(daysUntilDue) })}</p>
+                          )}
+
+                          {!payment.isPaid && daysUntilDue === null && (
+                            <p className="text-xs text-gray-500">{t('budget.payments.noDueDate')}</p>
+                          )}
+
+                          {/* Messaggio "Completamente Pagato" */}
+                          {payment.isPaid && (
+                            <div className="flex items-center gap-2 text-sm text-green-600">
+                              <CheckCircle2 className="w-5 h-5" />
+                              <span className="font-medium">{t('budget.payments.fullyPaid')}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* COLONNA DESTRA */}
+                        <div className="flex flex-col items-end gap-2 min-w-[200px]">
+                          {/* Importo */}
+                          <p className={`text-xl font-bold ${payment.isPaid ? "text-green-600" : "text-gray-900"}`}>
+                            {formatCurrency(payment.amount)}
+                          </p>
+
+                          {/* Bottoni Azione */}
+                          {!payment.isPaid && (
+                            <div className="flex flex-col lg:flex-row gap-2 w-full">
+                              <Button variant="outline" onClick={() => handleSetReminder(payment)} className="flex-1">
+                                <Clock className="w-4 h-4 mr-1" />
+                                {t('budget.payments.reminderButton')}
+                              </Button>
+                              <Button
+                                onClick={() => handleMarkAsPaid(payment)}
+                                className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-1" />
+                                {t('budget.payments.markAsPaidButton')}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
+                  );
+                })}
+              </div>
+            </ScrollArea>
 
-          {sortedFilteredPayments.length === 0 && (
-            <div className="text-center py-8">
-              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">Nessun pagamento programmato</p>
-              <p className="text-gray-400">I tuoi pagamenti futuri appariranno qui</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            {sortedFilteredPayments.length === 0 && (
+              <div className="text-center py-8">
+                <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">{t('budget.payments.noPayments')}</p>
+                <p className="text-gray-400">{t('budget.payments.noPaymentsSubtitle')}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-    <ReminderDialog
-      open={reminderDialogOpen}
-      onOpenChange={setReminderDialogOpen}
-      vendor={selectedVendorForReminder}
-      onReminderCreated={() => {
-        console.error("Toast removed:", {
-          title: "✅ Promemoria Impostato",
-          description: "Riceverai una notifica alla data selezionata"
-        });
-      }}
-    />
+      <ReminderDialog
+        open={reminderDialogOpen}
+        onOpenChange={setReminderDialogOpen}
+        vendor={selectedVendorForReminder}
+        onReminderCreated={() => {
+          console.error("Toast removed:", {
+            title: t('budget.reminders.success'),
+            description: t('budget.reminders.successDescription', { date: selectedVendorForReminder?.payment_due_date ? formatDate(selectedVendorForReminder.payment_due_date) : '' })
+          });
+        }}
+      />
     </>
   );
 };
